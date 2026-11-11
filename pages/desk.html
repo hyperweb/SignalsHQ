@@ -1,0 +1,1505 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Hyperweb Signals Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: masthead with workspace + audience switch, a tab rail, then one working surface per tab; a side drawer for a lead. Signal strength reads as a 3-bar meter. */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --sunk:#e6eaf0; --line:#d3d9e2; --fg:#141b26; --muted:#5a6475;
+  --accent:#1d4ed8; --accent-soft:#dde6fb; --accent-fg:#ffffff;
+  --signal:#c26a00; --signal-soft:#fbeacd;
+  --good:#17733a; --good-soft:#d9efe0; --warn:#946200; --warn-soft:#f6eac6; --bad:#b0321e; --bad-soft:#f7ddd7;
+  --shadow:0 14px 44px rgba(14,24,44,.18);
+  --f-display:"Familjen Grotesk","Avenir Next",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
+  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
+  --signal:#f0a640; --signal-soft:#3a2a10;
+  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
+  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
+  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
+  --signal:#f0a640; --signal-soft:#3a2a10;
+  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
+  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 56px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font:700 clamp(24px,3.2vw,32px)/1.1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 19px/1.25 var(--f-display);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f-display);margin:0}
+.muted{color:var(--muted)}
+.mast{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+.mast .who{display:flex;flex-direction:column;gap:4px;min-width:0}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--signal)}
+.meta{color:var(--muted);font-size:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:600}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.55;cursor:default}
+.sel{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);max-width:100%}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:9px 14px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button b{font:500 11px var(--f-mono);background:var(--sunk);border-radius:999px;padding:1px 7px;margin-left:4px;color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs button:focus-visible{outline:2px solid var(--accent)}
+.panel{display:flex;flex-direction:column;gap:14px}
+.strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;gap:8px;align-items:baseline;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px}
+.chip b{font:500 12px var(--f-mono)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.tile span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile b{font:600 28px/1.05 var(--f-display);font-variant-numeric:tabular-nums}
+.tile small{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface);min-width:0}
+.card.dim{opacity:.68}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.card header>div{min-width:0}
+.card header{flex-wrap:wrap}.card header>div:first-child{flex:1 1 180px}
+.dom{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.dom a{color:inherit}
+.sigline{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:13px}
+.sigline small{grid-column:2;color:var(--muted);font-size:12px}
+.stype{font:500 10.5px var(--f-mono);text-transform:uppercase;letter-spacing:.04em;background:var(--signal-soft);color:var(--signal);border-radius:4px;padding:2px 6px;white-space:nowrap;align-self:start}
+.why{border-left:3px solid var(--accent);padding-left:10px;margin:0;font-size:13.5px}
+.why.dis{border-color:var(--line);color:var(--muted)}
+.firmo{font-size:12px;color:var(--muted);margin:0}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.t-Promote,.p-good{background:var(--good-soft);color:var(--good)}
+.t-Review,.p-warn{background:var(--warn-soft);color:var(--warn)}
+.t-Dismiss{background:var(--sunk);color:var(--muted)}
+.p-info{background:var(--accent-soft);color:var(--accent)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.meter{display:inline-flex;align-items:end;gap:2px;height:16px;vertical-align:middle}
+.meter i{display:block;width:5px;border-radius:1px;background:var(--sunk)}
+.meter i:nth-child(1){height:6px}.meter i:nth-child(2){height:11px}.meter i:nth-child(3){height:16px}
+.meter i.on{background:var(--signal)}
+.score{display:inline-flex;gap:6px;align-items:center;font:500 13px var(--f-mono);font-variant-numeric:tabular-nums}
+.qrow{display:flex;flex-wrap:wrap;gap:6px 14px}
+.qm{display:flex;flex-direction:column;gap:3px;min-width:110px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.qm span{display:flex;justify-content:space-between}.qm b{font:500 12px var(--f-mono);color:var(--fg)}
+.qm i{display:block;height:5px;border-radius:3px;background:var(--sunk);overflow:hidden}.qm i em{display:block;height:100%;background:var(--accent)}
+details.more>summary{cursor:pointer;font:600 12px var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.teasers{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:8px;margin-top:8px}
+.tz{border:1px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:4px;background:var(--bg);font-size:13px}
+.tz .k{font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:2px 6px;align-self:flex-start}
+.tz small{color:var(--muted);font-size:11px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px dashed var(--line);padding-top:10px}
+.toast{font-size:13px;color:var(--muted)}
+.empty{padding:44px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px}
+.empty h2{color:var(--fg);margin-bottom:6px}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:820px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk);white-space:nowrap}
+tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--sunk)}
+td.n{font:500 13px var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.name{font-weight:600}
+form.f,.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f .full{grid-column:1/-1}
+.f label,.fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+.f label small{font-weight:400}
+.f input,.f select,.f textarea{padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:14px;width:100%;min-width:0}
+.f textarea{min-height:84px;resize:vertical;line-height:1.45}
+.f fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0;display:flex;flex-wrap:wrap;gap:8px 16px;min-width:0}
+.f legend{font-size:12px;color:var(--muted);font-weight:600;padding:0 4px}
+.f fieldset label{flex-direction:row;align-items:center;gap:6px;color:var(--fg);font-size:13px;font-weight:400}
+.f fieldset input[type=checkbox],.f fieldset input[type=radio]{width:auto}
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.sect>header{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:baseline}
+.sect>header p{margin:2px 0 0;color:var(--muted);font-size:13px;max-width:70ch}
+.audlist{display:flex;flex-wrap:wrap;gap:8px}
+.audbtn{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--surface);display:flex;flex-direction:column;gap:2px;max-width:280px}
+.audbtn small{color:var(--muted);font-size:12px}
+.audbtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.audbtn:focus-visible{outline:2px solid var(--accent)}
+.sigrows{display:flex;flex-direction:column;gap:6px}
+.sigrow{display:grid;grid-template-columns:auto minmax(110px,180px) minmax(0,1fr) auto;gap:8px;align-items:center}
+.sigrow input[type=text]{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);min-width:0;width:100%}
+.ok{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.scrim{position:fixed;inset:0;background:rgba(8,14,26,.4)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--surface);box-shadow:var(--shadow);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 18px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 28px) 20px;display:flex;flex-direction:column;gap:16px}
+.dhead{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.contacts{display:flex;flex-direction:column;gap:8px}
+.person{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font:600 14px var(--f-display)}
+.person small{color:var(--muted);display:block}
+.script{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.script header{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.script textarea{width:100%;min-height:90px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:13.5px;line-height:1.5;resize:vertical}
+.chars{font:500 11px var(--f-mono);color:var(--muted)}.chars.over{color:var(--bad)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.flow span{background:var(--sunk);border-radius:999px;padding:3px 10px}
+.flow span.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.runs li{margin-bottom:4px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:90px;border-bottom:1px solid var(--line)}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;min-width:0}
+.bars i{display:block;width:70%;max-width:34px;background:var(--accent);border-radius:3px 3px 0 0}
+.bars i.k{background:var(--signal)}
+.bars b{font:500 10px var(--f-mono)}
+.blabs{display:flex;gap:3px}.blabs span{flex:1;text-align:center;font-size:10px;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.cbtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;background:#0a3d91;color:#fff;border-radius:4px;padding:2px 6px;white-space:nowrap;align-self:start}
+:root[data-theme="dark"] .cbtag{background:#7aa2ff;color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cbtag{background:#7aa2ff;color:#0b1220}}
+.lic{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;font-size:13px;margin:0}
+.cbsrc{border:1px dashed var(--accent);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cbsrc>.full{grid-column:1/-1}
+.cbsrc h3{margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.comp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;border-bottom:1px solid var(--line);padding:8px 0;font-size:13px}
+.comp:last-child{border-bottom:0}
+.comp small{color:var(--muted);grid-column:1/-1}
+@media (max-width:640px){.cbsrc{grid-template-columns:1fr}}
+/* client tease */
+.pin{all:unset;cursor:pointer;font-size:12px;padding:3px 9px;border-radius:999px;border:1px dashed var(--line);color:var(--muted);white-space:nowrap}
+.pin:focus-visible{outline:2px solid var(--accent)}
+.pin[aria-pressed="true"]{border-style:solid;border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pin.hide[aria-pressed="true"]{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.tpill{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.tlist{display:flex;flex-direction:column;gap:10px}
+.trow{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface);min-width:0}
+.trow header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline}
+.trow textarea{width:100%;min-height:56px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.45;resize:vertical}
+.tfacts{display:flex;flex-wrap:wrap;gap:6px}
+.tfacts span{font-size:12px;background:var(--sunk);border-radius:999px;padding:2px 9px;color:var(--fg)}
+.stage{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto;overflow-x:hidden;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 40px) max(16px,env(safe-area-inset-left,0px))}
+body.staged{overflow:hidden}
+.cv{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.cvbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px}
+.cv h2{font:700 clamp(24px,4.2vw,38px)/1.12 var(--f-display);margin:0;text-wrap:balance}
+.cv .sub{margin:0;color:var(--muted);max-width:62ch;font-size:15px}
+.ocard{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.ocard .oline{font:600 18px/1.35 var(--f-display);margin:0;overflow-wrap:anywhere}
+.ocard .num{font:500 12px var(--f-mono);color:var(--muted)}
+.locks{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 14px}
+.lk{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center;font-size:13px;color:var(--muted);min-width:0}
+.lk .bar{height:10px;border-radius:5px;background:repeating-linear-gradient(90deg,var(--sunk) 0 14px,var(--line) 14px 18px);grid-column:2}
+.lk .lab{grid-column:2;font-size:12px}
+.lk svg{grid-row:span 2;width:16px;height:16px;color:var(--muted)}
+.lk.open{color:var(--fg)}.lk.open .val{grid-column:2;overflow-wrap:anywhere}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--accent-soft);border-radius:12px;padding:16px}
+.cta p{margin:0;max-width:52ch}
+a.btn{text-decoration:none;display:inline-block}
+.cvfoot{color:var(--muted);font-size:12px;margin:0}
+.ocard.open{border:2px solid var(--good);box-shadow:0 8px 28px rgba(23,115,58,.12)}
+.unl{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 7px;background:var(--good-soft);color:var(--good);white-space:nowrap}
+.ocard.locked .oline{color:var(--fg)}
+.opengrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px;align-items:start}
+.opengrid .locks{grid-template-columns:minmax(0,1fr)}
+.clip{position:relative;max-height:92px;overflow:hidden}
+.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:44px;background:linear-gradient(rgba(255,255,255,0),var(--surface));pointer-events:none}
+.clip.x{max-height:none}.clip.x::after{display:none}
+.exp{align-self:flex-start;color:var(--accent);font-weight:600;padding-left:0;border-color:transparent}
+.cvhead{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.cvhead>div{flex:1 1 420px;min-width:0}
+.pbcta{display:inline-flex;align-items:center;gap:10px;font:600 17px var(--f-display);padding:14px 24px;border-radius:10px;box-shadow:0 6px 20px rgba(29,78,216,.28)}
+.pbcta svg{width:20px;height:20px}
+.pbcta:hover{filter:brightness(1.08)}
+.pbmodal{position:fixed;inset:0;z-index:60;background:rgba(8,14,26,.5);display:grid;place-items:center;padding:16px}
+.pbmbox{background:var(--surface);border-radius:14px;max-width:720px;width:100%;max-height:calc(100vh - 32px);overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.pbmbox h2{font:700 clamp(20px,3vw,26px)/1.2 var(--f-display)}
+.pbmtabs{display:flex;flex-wrap:wrap;gap:6px}
+.pbmtabs button{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.pbmtabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.pbmtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:0 0 16px;position:relative}
+.tl li::before{content:"";position:absolute;left:31px;top:28px;bottom:0;width:2px;background:var(--line)}
+.tl li:last-child::before{display:none}
+.tl .day{height:28px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font:600 12px var(--f-mono);display:grid;place-items:center;position:relative;z-index:1}
+.tl .what{display:flex;flex-direction:column;gap:3px;padding-top:3px}
+.tl .what small{color:var(--muted);font-size:12px}
+.pbmfeat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px}
+.pbmfeat div{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px}
+.pbmfeat b{display:block;font:600 14px var(--f-display);margin-bottom:2px}
+.waiting{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 14px;border-top:1px dashed var(--line);padding-top:14px}
+.waiting h3{font:700 clamp(18px,2.6vw,24px)/1.2 var(--f-display);margin:0}
+.waiting p{margin:0;color:var(--muted);font-size:14px;max-width:60ch}
+.pin.reveal[aria-pressed="true"]{border-style:solid;border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:600}
+@media (max-width:640px){.locks{grid-template-columns:minmax(0,1fr)}.ocard .oline{font-size:16px}}
+@media (max-width:640px){.f,form.f{grid-template-columns:1fr}.sigrow{grid-template-columns:auto minmax(0,1fr)}.sigrow input[name=why]{grid-column:1/-1}.sigrow .btn{grid-column:1/-1;justify-self:start}}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:sl .18s ease-out}@keyframes sl{from{transform:translateX(24px);opacity:.6}}}
+/* long signal types */
+.sigline{grid-template-columns:minmax(0,1fr)}
+.sigline small{grid-column:1}
+.stype{white-space:normal;max-width:100%;justify-self:start;overflow-wrap:anywhere;line-height:1.35}
+/* audience tags and filters */
+.atag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;white-space:nowrap;background:hsl(var(--h) 70% 92%);color:hsl(var(--h) 55% 30%)}
+.atag::before{content:"";width:7px;height:7px;border-radius:50%;background:hsl(var(--h) 60% 45%)}
+:root[data-theme="dark"] .atag{background:hsl(var(--h) 35% 20%);color:hsl(var(--h) 70% 78%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .atag{background:hsl(var(--h) 35% 20%);color:hsl(var(--h) 70% 78%)}}
+.chip .atag{padding:0 6px;background:none}
+.fbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.fbar .sel{font-size:13px}
+.lastsweep{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:0}
+.lastsweep b{color:var(--fg);font-weight:600}
+.newtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;background:var(--signal-soft);color:var(--signal);white-space:nowrap}
+/* client-view */
+body.client [data-hx],body.client [data-team]{display:none!important}
+.viewas{display:none}body.team .viewas{display:inline-block}
+.howto{display:flex;flex-direction:column;gap:6px;max-width:80ch;color:var(--muted)}
+.howto p{margin:0}.howto ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.howto li{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:baseline;color:var(--fg)}
+.howto li .pill{justify-self:start}
+/* playbook */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:4px 10px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent)}
+.pbprog{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
+.pbprog i{display:block;height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}.pbprog i em{display:block;height:100%;background:var(--good)}
+.pbprog b{font:500 12px var(--f-mono)}
+.pbsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pbstep{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
+.pbstep.next{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.pbstep.done{opacity:.75}.pbstep.done b{text-decoration:line-through;text-decoration-color:var(--muted)}
+.pbstep.skip{opacity:.6}
+.other{background:var(--warn-soft);color:var(--fg);border-radius:8px;padding:9px 11px;font-size:13px}
+.other b{color:var(--warn)}
+.pbchoose{border:2px solid var(--accent);border-radius:12px;padding:14px;background:var(--accent-soft);display:flex;flex-direction:column;gap:10px}
+.pbchoose h3{font:700 18px/1.25 var(--f-display)}
+.pbcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:8px}
+.pbcard{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;font-size:13px}
+.pbcard:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(29,78,216,.15)}
+.pbcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pbcard.sug{border:2px solid var(--accent)}
+.pbcard .go{color:var(--accent);font-weight:600;margin-top:2px}
+.pbchk input{width:18px;height:18px;margin-top:2px;accent-color:var(--good)}
+.pbbody{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pbparts{display:flex;flex-direction:column;min-width:0}
+.pbtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.pbtabs button{all:unset;cursor:pointer;padding:6px 11px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.pbtabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.pbtabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.pbpanel{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 6px 6px;padding:10px 12px;white-space:pre-wrap;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.pbparts.one .pbpanel{border-top:1px solid var(--line);border-radius:6px}
+.pbhint{font-size:12px;color:var(--muted);margin:0 0 4px}
+.pbnote{flex:1 1 160px;min-width:0;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:13px}
+.ask{margin:0;background:var(--good-soft);color:var(--good);border-radius:6px;padding:6px 10px;font-size:13px;font-weight:600}
+.ch{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.ch-linkedin{background:var(--accent-soft);color:var(--accent)}.ch-call{background:var(--good-soft);color:var(--good)}.ch-email{background:var(--signal-soft);color:var(--signal)}
+.teamrows{display:flex;flex-direction:column;gap:6px}
+.teamrow{display:grid;grid-template-columns:minmax(0,1.1fr) repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:center}
+.teamrow input{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);min-width:0}
+.playlist{display:flex;flex-direction:column;gap:6px}
+.playcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--bg)}
+.playcard summary{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between;cursor:pointer}
+.playsteps{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+@media (max-width:640px){.teamrow{grid-template-columns:1fr 1fr}.teamrow input{grid-column:1/-1}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="who">
+      <span class="eyebrow" id="wsType">Signals Desk</span>
+      <h1 id="wsName">Signals Desk</h1>
+      <span class="meta" id="wsMeta">Loading the workspace…</span>
+    </div>
+    <div class="ctl">
+      <label class="meta" for="meSel">Working as <select class="sel" id="meSel"><option value="">Pick your name</option></select></label>
+      <label class="meta" for="audSel">Audience <select class="sel" id="audSel"><option value="">All audiences</option></select></label>
+      <button class="btn viewas" type="button" id="viewAs" title="Only Hyperweb editors see this switch">See client view</button>
+      <button class="btn" type="button" id="sweepBtn" title="Claude searches for new buying signals for the chosen audience now">Run a sweep now</button>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <nav class="tabs" role="tablist" aria-label="Desk sections">
+    <button role="tab" type="button" data-tab="today" aria-selected="false">Today <b id="cToday">0</b></button>
+    <button role="tab" type="button" data-tab="inbox" aria-selected="true">Signals <b id="cInbox">0</b></button>
+    <button role="tab" type="button" data-tab="leads" aria-selected="false">Leads <b id="cLeads">0</b></button>
+    <button role="tab" type="button" data-tab="audiences" aria-selected="false">Audiences</button>
+    <button role="tab" type="button" data-tab="market" aria-selected="false">Market watch</button>
+    <button role="tab" type="button" data-tab="tease" aria-selected="false">Client tease</button>
+    <button role="tab" type="button" data-tab="setup" aria-selected="false">Messaging and delivery</button>
+    <button role="tab" type="button" data-tab="runs" aria-selected="false">Runs</button>
+  </nav>
+  <main id="main" class="panel"></main>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
+<div class="stage" id="stage" hidden role="dialog" aria-modal="true" aria-label="Client view"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https:\/\//i.test(u||"")?u:"";
+const nowIso=()=>new Date().toISOString();
+const lines=t=>String(t||"").split("\n").map(s=>s.trim()).filter(Boolean);
+const slug=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60)||("x"+Date.now());
+const cleanDomain=d=>String(d||"").toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/.*$/,"");
+const dShort=s=>{if(!s)return "";const d=new Date(String(s).length<=10?s+"T12:00:00":s);return isNaN(d)?String(s):d.toLocaleDateString("en-CA",{month:"short",day:"numeric"});};
+const saveErr=e=>(e&&(e.code==="invalid_argument"||e.code==="permission_denied"))?"Your access lets you view this desk but not change it.":"Couldn't save. Check your connection and try again.";
+const CCR="Claude Code Remote";
+const SIZES=["1 - 10","11 - 50","51 - 200","201 - 500","501 - 1000","1001 - 5000"];
+const RADII=[25,50,100,250];
+const SIGNAL_LIB=[["Hiring marketing","A new marketing hire needs a website, content and tools to work with."],["Hiring sales","A new rep needs credible proof and a pipeline from day one."],["Expansion","Growth outpaces the website and the sales process."],["Investment","Funding or a grant means budget and a deadline to show results."],["New facility","A new site or plant means recruiting and new markets to reach."],["Leadership change","A new leader reviews vendors and wants early wins."],["Acquisition","Two brands to merge and a story to retell."],["Partnership","A new partner opens a market they need to reach."],["Product launch","A launch needs a page, a campaign and a sales story."],["Website gap","Thin proof or a stale site gives an opening for the conversation."],["Building permit","A permit means a funded project with a deadline, new space to fit out and new people to reach."],["Government grant","Grant money comes with a plan to spend it and results to show."],["Started advertising","New ad spend means they want growth now, and the site and follow-up have to convert it."],["Stopped advertising","Ads switched off often means they didn't pay back, an opening to fix what sits behind them."],["Review shift","A run of new reviews, or a drop in rating, shows a business in motion or under pressure."]];
+const DISMISS=["Not a real trigger","Too big","Too small","Outside territory","Wrong industry","Already a client or lead","Competitor, not a buyer","Quebec, excluded by policy","Other"];
+const STAGES=["New","Delivered","Working","Engaged","Meeting","Won","Lost","Parked"];
+const CB_TYPES=[["grants","Grants","Government grants, e.g. FedDev, NGen, OMAFA. Strong for SMB, industrial, agri and nonprofit buyers."],["early","Seed and Series A","Venture money with a growth target. Strong for buyers selling to startups."],["later","Series B and later","Bigger rounds, bigger teams, new vendors."],["acq","Acquisitions","Two brands to merge and a story to retell."],["leaders","Leadership hires","A new executive reviews vendors and wants early wins."],["investors","Investor portfolio plays","Work through one investor's portfolio as a cluster, with warm intros through the investor."]];
+const CB_CADENCE=["Weekly","Every two weeks","Monthly"];
+const isCB=s=>/crunchbase/i.test([s?.source,s?.sourceTool,s?.via].filter(Boolean).join(" "));
+const growthHigh=g=>g&&/high|p100/i.test([g.tier,g.label].join(" "));
+const LIC={hyperweb:"Hyperweb's Crunchbase account (managed). Clients and partners see derived insight only: the reason to reach out, the message and talking points, never exported Crunchbase records. Confirm lead-list use with Crunchbase sales before selling it.",partner:"The partner's own Crunchbase connection. Data stays under their licence; the desk supplies the targeting, scoring and messaging."};
+const TEASE_LIC="The tease shows Hyperweb's own summaries of public buying signals, written for this view. Locked opportunities never show Crunchbase or Seamless.AI records, company names, people or source links. In Sample mode, the one or two opportunities you show in full do reveal the company, website, decision maker and talking points, so pick ones that came from public news, permits or job posts rather than Crunchbase.";
+const CITY_REGION={"brampton":"Peel Region","mississauga":"Peel Region","caledon":"Peel Region","bolton":"Peel Region","oakville":"Halton Region","burlington":"Halton Region","milton":"Halton Region","halton hills":"Halton Region","georgetown":"Halton Region","acton":"Halton Region","toronto":"Toronto","etobicoke":"Toronto","scarborough":"Toronto","north york":"Toronto","vaughan":"York Region","concord":"York Region","woodbridge":"York Region","maple":"York Region","markham":"York Region","richmond hill":"York Region","newmarket":"York Region","aurora":"York Region","stouffville":"York Region","bradford":"Simcoe County","pickering":"Durham Region","ajax":"Durham Region","whitby":"Durham Region","oshawa":"Durham Region","bowmanville":"Durham Region","hamilton":"Hamilton area","stoney creek":"Hamilton area","ancaster":"Hamilton area","dundas":"Hamilton area","grimsby":"Niagara Region","st. catharines":"Niagara Region","st catharines":"Niagara Region","niagara falls":"Niagara Region","welland":"Niagara Region","fort erie":"Niagara Region","guelph":"Guelph and Wellington","fergus":"Guelph and Wellington","kitchener":"Waterloo Region","waterloo":"Waterloo Region","cambridge":"Waterloo Region","brantford":"Brant area","london":"Southwestern Ontario","woodstock":"Southwestern Ontario","windsor":"Southwestern Ontario","sarnia":"Southwestern Ontario","barrie":"Simcoe County","orillia":"Simcoe County","collingwood":"Simcoe County","peterborough":"Central Ontario","kingston":"Eastern Ontario","belleville":"Eastern Ontario","ottawa":"Ottawa area","sudbury":"Northern Ontario","thunder bay":"Northern Ontario","montreal":"Montreal area","laval":"Montreal area","quebec city":"Quebec City area"};
+const BIG_CITY=new Set(["toronto","ottawa","hamilton","montreal"]);
+const GENERIC=new Set("the and of for inc ltd limited corp corporation co company group holdings canada canadian international global steel metal metals electric electrical construction building buildings tools tool products industries industrial solutions systems services service supply supplies automation packaging bearings controls engineering manufacturing technologies technology tech energy health care clinic law llp partners consulting design homes home care foods food group".split(" "));
+const TRIG={investment:"received new funding",funding:"received new funding",grant:"received a government grant",expansion:"announced an expansion",hiring:"is hiring","hiring marketing":"is hiring for marketing","hiring sales":"is hiring for sales","new facility":"is opening a new facility","leadership change":"has new leadership",acquisition:"was part of an acquisition",partnership:"announced a new partnership","product launch":"launched a new product","website gap":"has a website that no longer matches the business",approval:"received a key approval"};
+/* ---------- prospect guard: competitors and the Quebec policy ---------- */
+const COMP_TAG="Competitor, never a prospect: ";
+const QC_TAG="Anything based in Quebec (desk policy: Quebec excluded)";
+const QC_CITIES=new Set(["montreal","montréal","laval","quebec city","québec","quebec","gatineau","longueuil","sherbrooke","saguenay","levis","lévis","trois-rivieres","trois-rivières","terrebonne","saint-jean-sur-richelieu","brossard","repentigny","drummondville","saint-jerome","saint-jérôme","granby","blainville","mirabel","dorval","pointe-claire","boucherville","saint-laurent","st-laurent","st-nicolas","rimouski","shawinigan","victoriaville","saint-hyacinthe","boisbriand","vaudreuil-dorion","beloeil","chicoutimi","rouyn-noranda"]);
+const quebecPolicy=()=>ws.knowledge?.quebec==="bilingual"?"bilingual":"exclude";
+function inQuebec(x){const raw=String(x?.city||""), c=raw.toLowerCase();
+  if(/\b(qc|québec|quebec|que\.)\b/.test(c)&&!/quebec street|rue/.test(c))return true;
+  const k=c.replace(/\(.*?\)/g,"").split(",")[0].trim();
+  return QC_CITIES.has(k)||/\.qc\.ca$/.test(cleanDomain(x?.domain));}
+function parseRivals(t){return String(t||"").split(/\n|;/).map(s=>s.trim()).filter(Boolean).map(s=>{
+  const m=s.match(/^(.*?)\s*(?:[(|]\s*([^)|]*?)\s*\)?)?\s*$/)||[];const name=String(m[1]||s).replace(/[,\s]+$/,"").trim(), dom=cleanDomain(m[2]||"");
+  return {name,domain:/\./.test(dom)?dom:""};}).filter(x=>x.name);}
+const rivalLine=c=>COMP_TAG+c.name+(c.domain?" ("+c.domain+")":"");
+function competitors(){
+  if(Array.isArray(ws.competitors))return ws.competitors.filter(x=>x&&x.name);
+  const out=[],seen=new Set();
+  Object.values(auds).forEach(a=>(a.notFit||[]).forEach(l=>{if(String(l).startsWith(COMP_TAG))parseRivals(String(l).slice(COMP_TAG.length)).forEach(c=>{const k=c.name.toLowerCase();if(!seen.has(k)){seen.add(k);out.push(c);}});}));
+  return out;}
+const normName=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").split(" ").filter(w=>w&&!GENERIC.has(w)).join(" ");
+function compMatch(x){const d=cleanDomain(x?.domain), n=normName(x?.company);
+  return competitors().find(c=>(c.domain&&d&&(d===c.domain||d.endsWith("."+c.domain)))||(n&&normName(c.name)&&n===normName(c.name)))||null;}
+function guardFlag(x){
+  const c=compMatch(x); if(c)return {reason:"Competitor, not a buyer",why:`${c.name} is on this desk's competitor list, so it's never a prospect.`};
+  if(quebecPolicy()==="exclude"&&inQuebec(x))return {reason:"Quebec, excluded by policy",why:"Based in Quebec. This desk doesn't prospect in Quebec."};
+  return null;}
+function emailBadge(c){
+  if(!c?.email)return "";
+  const s=String(c.emailStatus||c.emailVerification||c.email_status||"").toLowerCase();
+  const [k,l]=/invalid|bounce|undeliverable|bad/.test(s)?["p-bad","Bad email, don't send"]:/catch/.test(s)?["p-warn","Catch-all, may bounce"]:/risky|unknown|accept/.test(s)?["p-warn","Unverified"]:/valid|verified|deliverable|ok/.test(s)?["p-good","Verified"]:["","Not checked"];
+  return `<span class="pill ${k}" title="${esc(c.emailCheckedVia?"Checked: "+c.emailCheckedVia:"Email check status")}">${l}</span>`;}
+const ENRICH_NOTE="Find the decision maker and one more contact. For every email you record, set emailStatus to verified, catch-all, risky or invalid, and emailCheckedVia to how it was checked. Leave an email out rather than guess one.";
+const TEASE_LOCKS=["Company","Website","Decision maker","Why now, in detail","Talking points","Outreach drafts"];
+const LOCK_SVG=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>`;
+const KIND={news:"Their news",site:"Their website",industry:"Industry",market:"Market",data:"Data"};
+let db=null, canWrite=true, ws={}, auds={}, sigs=[], leads={}, runs=[], reqs=[], tab="inbox", audF="", sigF="New", leadF="open", curAud=null, curLead=null, audDraft=null, sigSort="best", leadSort="accepted", showRmAud=false, audRmAsk=null, loaded={ws:false};
+try{const v=JSON.parse(localStorage.getItem("sd-view")||"{}");if(v.tab)tab=v.tab;if(v.aud!=null)audF=v.aud;}catch(e){}
+function remember(){try{localStorage.setItem("sd-view",JSON.stringify({tab,aud:audF}))}catch(e){}}
+
+/* scoring */
+function weights(a){const w=a?.weights||{};const n=+w.need||35,ab=+w.ability||40,t=+w.timing||25,s=n+ab+t||100;return {n:n/s,ab:ab/s,t:t/s};}
+function qScore(p,a,adj){if(!p||p.need==null)return null;const w=weights(a);return Math.round((p.need*w.n+p.ability*w.ab+p.timing*w.t)*10)+(adj||0);}
+const qTier=p=>!p||p.need==null?"":p.need<5?"Watch":p.ability<=4?"Insight only":(p.ability>=7&&p.need>=6&&p.timing>=6)?"Strong fit":"Good fit";
+function meter(sc){const n=sc==null?0:sc>=70?3:sc>=55?2:1;return `<span class="meter" aria-hidden="true"><i class="${n>=1?"on":""}"></i><i class="${n>=2?"on":""}"></i><i class="${n>=3?"on":""}"></i></span>`;}
+const qm=(l,v)=>`<div class="qm"><span>${l}<b>${v??"–"}</b></span><i><em style="width:${(v||0)*10}%"></em></i></div>`;
+const audName=id=>auds[id]?.name||"No audience";
+
+/* tabs */
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;remember();draw();});
+$("audSel").onchange=()=>{audF=$("audSel").value;remember();draw();};
+function draw(){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===tab)));
+  const nNew=sigs.filter(s=>(s.status||"New")==="New"&&s.triage!=="Dismiss"&&inAud(s)).length;
+  $("cInbox").textContent=nNew; $("cLeads").textContent=Object.values(leads).filter(l=>!["Won","Lost","Parked"].includes(l.stage)&&inAud(l)).length;
+  $("cToday").textContent=dueCount(); drawMe();
+  if(tab==="today")drawToday();else if(tab==="inbox")drawInbox();else if(tab==="leads")drawLeads();else if(tab==="audiences")drawAudiences();else if(tab==="setup")drawSetup();else if(tab==="market")drawMarket();else if(tab==="tease")drawTease();else drawRuns();
+}
+const inAud=x=>!audF||x.audienceId===audF;
+function drawHead(){
+  $("wsName").textContent=ws.name?`${ws.name}`:"Signals Desk";
+  $("wsType").textContent=[ws.type||"Workspace",ws.status].filter(Boolean).join(" · ");
+  const act=Object.values(auds).filter(a=>a.active!==false).length;
+  const last=[...runs].sort((a,b)=>String(b.at).localeCompare(String(a.at)))[0];
+  $("wsMeta").textContent=db?`${act} active audience${act===1?"":"s"} · sweeps every ${ws.sweepDay||"Monday"}${last?" · last run "+dShort(last.at):""}`:"Not connected";
+  const cur=audF;$("audSel").innerHTML='<option value="">All audiences</option>'+Object.values(auds).filter(a=>!a.removed||a._id===cur).sort((a,b)=>String(a.name).localeCompare(b.name)).map(a=>`<option value="${esc(a._id)}" ${a._id===cur?"selected":""}>${esc(a.name)}${a.active===false?" (paused)":""}</option>`).join("");
+  if(cur&&!auds[cur]){audF="";}
+}
+
+/* ---------- audience tags, filter chips, last sweep ---------- */
+const liveAuds=()=>Object.values(auds).filter(a=>!a.removed).sort((a,b)=>String(a.name).localeCompare(b.name));
+const multiAud=()=>Object.keys(auds).length>1;
+function audHue(id){const ids=Object.keys(auds).sort();const i=ids.indexOf(id);return i<0?210:(i*67+200)%360;}
+function audTag(id){if(!id||!auds[id])return `<span class="atag" style="--h:220">No audience</span>`;return `<span class="atag" style="--h:${audHue(id)}" title="Audience (ICP)">${esc(auds[id].name)}${auds[id].removed?" (removed)":""}</span>`;}
+function audChips(count){
+  if(!multiAud())return "";
+  const list=liveAuds(); if(audF&&auds[audF]&&!list.some(a=>a._id===audF))list.push(auds[audF]);
+  return `<div class="strip" role="group" aria-label="Filter by audience"><button class="chip" type="button" data-af="" aria-pressed="${!audF}">All audiences <b>${count("")}</b></button>${list.map(a=>`<button class="chip" type="button" data-af="${esc(a._id)}" aria-pressed="${audF===a._id}">${audTag(a._id)} <b>${count(a._id)}</b></button>`).join("")}</div>`;
+}
+function wireAudChips(m){m.querySelectorAll("[data-af]").forEach(b=>b.onclick=()=>{audF=b.dataset.af;remember();drawHead();draw();});}
+const ts=x=>{const t=Date.parse(x||"");return isNaN(t)?0:t;};
+function lastRun(audId){return runs.filter(r=>(r.by||"").includes("sweep")&&(r.audienceId||"")===audId&&(r.sources||[]).length!==0).sort((a,b)=>ts(b.at)-ts(a.at))[0];}
+function isNewSig(s){const r=lastRun(s.audienceId||"");if(!r)return false;const f=ts(s.foundAt),a=ts(r.at);return f&&f>=a-4*36e5&&f<=a+36e5;}
+const dTime=x=>{const d=new Date(x);return isNaN(d)?"":d.toLocaleString("en-CA",{timeZone:"America/Toronto",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+function lastSweepLine(){
+  const ids=audF?[audF]:liveAuds().map(a=>a._id);
+  const parts=ids.map(id=>{const r=lastRun(id);if(!r)return multiAud()?`<span>${audTag(id)} no sweep yet</span>`:"";const nNew=sigs.filter(x=>x.audienceId===id&&isNewSig(x)&&(x.status||"New")==="New"&&x.triage!=="Dismiss").length;
+    return `<span>${multiAud()?audTag(id)+" ":""}last sweep <b>${esc(dTime(r.at))}</b>: found ${+r.found||0}, kept ${+r.kept||0}${nNew?`, <b>${nNew} still waiting</b>`:""}</span>`;}).filter(Boolean);
+  return parts.length?`<p class="lastsweep">${parts.join("")}</p>`:"";
+}
+
+/* ---------- Signals inbox ---------- */
+function drawInbox(){
+  const m=$("main"), base=sigs.filter(inAud);
+  const cnt=s=>base.filter(x=>(x.status||"New")===s).length;
+  const ord={Promote:0,Review:1,Dismiss:2};
+  const best=(a,b)=>(ord[a.triage]??1)-(ord[b.triage]??1)||(qScore(b.prelim,auds[b.audienceId],b.climateAdj)??0)-(qScore(a.prelim,auds[a.audienceId],a.climateAdj)??0)||String(b.date||"").localeCompare(String(a.date||""));
+  const SORTS={best,found:(a,b)=>ts(b.foundAt)-ts(a.foundAt)||best(a,b),date:(a,b)=>String(b.date||"").localeCompare(String(a.date||""))||best(a,b),aud:(a,b)=>String(audName(a.audienceId)).localeCompare(String(audName(b.audienceId)))||best(a,b)};
+  const list=base.filter(s=>sigF==="All"||(sigF==="Fresh"?isNewSig(s)&&(s.status||"New")==="New":(s.status||"New")===sigF)).sort(SORTS[sigSort]||best);
+  const pend=reqs.filter(r=>r.kind==="sweep"&&["Queued","Running"].includes(r.status));
+  const flagged=base.filter(s=>(s.status||"New")==="New"&&guardFlag(s));
+  const nComp=flagged.filter(s=>guardFlag(s).reason.startsWith("Competitor")).length, nQc=flagged.length-nComp;
+  m.innerHTML=`
+  ${flagged.length?`<div class="note ctl" style="justify-content:space-between"><span><b>${flagged.length} new signal${flagged.length===1?"":"s"} shouldn't be prospected:</b> ${[nComp?`${nComp} on your competitor list`:"",nQc?`${nQc} in Quebec, which this desk excludes`:""].filter(Boolean).join(", ")}. They're marked below.</span><span class="ctl"><button class="btn sm" type="button" id="gDisAll" ${canWrite?"":"disabled"}>Dismiss ${flagged.length===1?"it":"all "+flagged.length}</button><span class="toast" id="gT"></span></span></div>`:""}
+  ${pend.length?`<p class="note">A sweep is ${pend.some(r=>r.status==="Running")?"running now":"queued"}${pend[0].audienceId?" for "+esc(audName(pend[0].audienceId)):""}. New signals appear here as Claude finds them.</p>`:""}
+  <div class="howto"><p>Every week the desk looks for companies that fit your audiences and have a reason to buy right now, checks each one, and sorts it into one of three piles:</p>
+  <ul><li><span class="pill t-Promote">Promote</span><span>A strong fit with a real, recent reason to buy. Act on these first.</span></li>
+  <li><span class="pill t-Review">Review</span><span>Could be a fit, but something needs a human look, such as size, location or how strong the reason is.</span></li>
+  <li><span class="pill t-Dismiss">Dismiss</span><span>Noise, kept out of the way so you don't have to read it.</span></li></ul>
+  <p>Accept the good ones to turn them into leads. Dismiss the rest with a reason. Every accept and dismiss teaches the next sweep what you want.</p></div>
+  ${audChips(id=>sigs.filter(x=>(!id||x.audienceId===id)&&(x.status||"New")==="New"&&x.triage!=="Dismiss").length)}
+  ${lastSweepLine()}
+  <div class="fbar"><div class="strip">${["New","Fresh","Accepted","Dismissed","All"].map(s=>`<button class="chip" type="button" data-sf="${s}" aria-pressed="${sigF===s}">${s==="Fresh"?"From the last sweep":s} <b>${s==="All"?base.length:s==="Fresh"?base.filter(x=>isNewSig(x)&&(x.status||"New")==="New").length:cnt(s)}</b></button>`).join("")}</div>
+  <label class="meta">Sort <select class="sel" id="sigSort">${[["best","Best fit first"],["found","Newest found"],["date","Newest signal date"],["aud","By audience"]].map(([k,l])=>`<option value="${k}" ${sigSort===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
+  ${list.length?`<div class="grid">${list.map(sigCard).join("")}</div>`:`<div class="empty"><h2>${base.length?"Nothing in this view":"No signals yet"}</h2><p>${base.length?"Try another filter.":Object.keys(auds).length?"The first sweep fills this inbox. Use Run a sweep now, or wait for "+esc(ws.sweepDay||"Monday")+" morning.":"Set up an audience first, then run a sweep."}</p></div>`}`;
+  wireAudChips(m); $("sigSort").onchange=e=>{sigSort=e.target.value;drawInbox();};
+  m.querySelectorAll("[data-sf]").forEach(b=>b.onclick=()=>{sigF=b.dataset.sf;drawInbox();});
+  m.querySelectorAll("article[data-sid]").forEach(wireSig);
+  const ga=$("gDisAll"); if(ga)ga.onclick=async()=>{ga.disabled=true;const gt=$("gT");let n=0;
+    for(const s of flagged){try{await db.collection("signals").doc(s._id).update({status:"Dismissed",dismissReason:guardFlag(s).reason,decidedAt:nowIso(),decidedBy:"Desk"});n++;}catch(e){gt.textContent=saveErr(e);break;}}
+    if(n)banner(`Dismissed ${n} signal${n===1?"":"s"}. The next sweep learns from it.`,"ok");};
+}
+function sigCard(s){
+  const st=s.status||"New", a=auds[s.audienceId], sc=qScore(s.prelim,a,s.climateAdj), p=s.prelim||{}, gf=st==="New"?guardFlag(s):null;
+  return `<article class="card ${st!=="New"?"dim":""}" data-sid="${esc(s._id)}"${gf?' style="border-color:var(--bad)"':""}>
+    ${gf?`<p class="err ctl" style="justify-content:space-between"><span><b>Don't prospect.</b> ${esc(gf.why)}</span><button class="btn sm" type="button" data-gdis ${canWrite?"":"disabled"}>Dismiss: ${esc(gf.reason)}</button></p>`:""}
+    <header><div><h3>${esc(s.company)}</h3><span class="dom">${safeUrl("https://"+cleanDomain(s.domain))&&s.domain?`<a href="https://${esc(cleanDomain(s.domain))}" target="_blank" rel="noopener">${esc(cleanDomain(s.domain))}</a> · `:""}${esc([s.city,s.industry].filter(Boolean).join(" · "))}</span></div>
+    <div class="ctl" style="flex-wrap:nowrap"><span class="pill t-${esc(s.triage||"Review")}">${esc(s.triage||"Review")}</span>${sc!=null?`<span class="score" title="Fit score from need, ability to pay and timing">${meter(sc)}${sc}</span>`:""}</div></header>
+    <div class="sigline"><span class="stype">${esc(s.type||"Signal")}</span><span>${esc(s.detail||"")}</span><small>${esc(dShort(s.date))}${s.source?" · "+(safeUrl(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)}</a>`:esc(s.source)):""}</small></div>
+    ${isCB(s)?`<div class="ctl"><span class="cbtag" title="Found through Crunchbase. Shown as derived insight, not a copied record.">Crunchbase</span>${a?.crunchbase?.growthHighOnly!==false&&growthHigh(s.growth)?`<span class="pill p-good" title="${esc(s.growth.label||"")}">Higher-confidence growth outlook</span>`:""}</div>`:""}
+    ${[s.size&&"Staff "+s.size,s.founded&&"Since "+s.founded,s.revenue&&"Revenue "+s.revenue].filter(Boolean).length?`<p class="firmo">${esc([s.size&&"Staff "+s.size,s.founded&&"Since "+s.founded,s.revenue&&"Revenue "+s.revenue].filter(Boolean).join(" · "))}</p>`:""}
+    ${s.triageNote?`<p class="why ${s.triage==="Dismiss"?"dis":""}">${esc(s.triageNote)}</p>`:""}
+    ${p.need!=null?`<div class="qrow">${qm("Need",p.need)}${qm("Can pay",p.ability)}${qm("Timing",p.timing)}<span class="pill p-info">${esc(qTier(p))}</span></div>`:""}
+    ${(s.teasers||[]).length||s.insight?`<details class="more"><summary>Conversation starters</summary><div class="teasers">${s.insight?`<div class="tz"><span class="k">Give first</span>${esc(s.insight)}</div>`:""}${(s.teasers||[]).map(t=>`<div class="tz"><span class="k">${esc(KIND[t.kind]||t.kind)}</span>${esc(t.hook)}<small>${t.source?(safeUrl(t.url)?`<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.source)}</a>`:esc(t.source)):""}</small></div>`).join("")}</div></details>`:""}
+    <div class="ctl">${multiAud()?audTag(s.audienceId):""}${isNewSig(s)?'<span class="newtag">From the last sweep</span>':""}${s.foundAt?`<span class="firmo">Found ${esc(dShort(s.foundAt))}</span>`:""}</div>
+    ${st!=="Dismissed"?`<div class="ctl">${teasePicks().some(x=>x._id===s._id)?'<span class="tpill">In the tease</span>':""}<button class="pin" type="button" data-pin="show" aria-pressed="${s.teasePin===true}" ${canWrite?"":"disabled"}>Show in tease</button><button class="pin hide" type="button" data-pin="hide" aria-pressed="${s.teasePin===false}" ${canWrite?"":"disabled"}>Hide from tease</button></div>`:""}
+    <div class="acts">${st==="New"?`<button class="btn primary sm" type="button" data-acc ${canWrite?"":"disabled"}>Accept as lead</button><label class="toast"><input type="checkbox" data-enrich ${ws.enrichOnAccept?"checked":""}> Find contacts</label><select class="sel" data-dr aria-label="Reason to dismiss">${DISMISS.map(r=>`<option ${r===(gf?.reason||s.suggestedReason)?"selected":""}>${r}</option>`).join("")}</select><button class="btn sm" type="button" data-dis ${canWrite?"":"disabled"}>Dismiss</button>`
+      :st==="Accepted"?`<span class="toast">Accepted ${esc(dShort(s.decidedAt))}</span><button class="btn sm" type="button" data-open>Open lead</button>`
+      :`<span class="toast">Dismissed${s.dismissReason?": "+esc(s.dismissReason):""}</span><button class="btn sm" type="button" data-res ${canWrite?"":"disabled"}>Restore</button>`}<span class="toast" data-t></span></div>
+  </article>`;
+}
+function wireSig(art){
+  const s=sigs.find(x=>x._id===art.dataset.sid), t=art.querySelector("[data-t]");
+  const acc=art.querySelector("[data-acc]");
+  if(acc)acc.onclick=async()=>{acc.disabled=true;t.textContent="Adding…";try{await acceptSignal(s,art.querySelector("[data-enrich]")?.checked);t.textContent="";}catch(e){acc.disabled=false;t.textContent=saveErr(e);}};
+  const dis=art.querySelector("[data-dis]");
+  if(dis)dis.onclick=async()=>{try{await db.collection("signals").doc(s._id).update({status:"Dismissed",dismissReason:art.querySelector("[data-dr]").value,decidedAt:nowIso(),decidedBy:"Desk"});}catch(e){t.textContent=saveErr(e);}};
+  const gd=art.querySelector("[data-gdis]");
+  if(gd)gd.onclick=async()=>{gd.disabled=true;try{await db.collection("signals").doc(s._id).update({status:"Dismissed",dismissReason:guardFlag(s)?.reason||"Other",decidedAt:nowIso(),decidedBy:"Desk"});}catch(e){gd.disabled=false;t.textContent=saveErr(e);}};
+  const res=art.querySelector("[data-res]");
+  if(res)res.onclick=async()=>{try{await db.collection("signals").doc(s._id).update({status:"New",decidedAt:"",dismissReason:""});}catch(e){t.textContent=saveErr(e);}};
+  const op=art.querySelector("[data-open]"); if(op)op.onclick=()=>openLead(s.leadId||s._id);
+  art.querySelectorAll("[data-pin]").forEach(b=>b.onclick=async()=>{const want=b.dataset.pin==="show";const v=s.teasePin===want?null:want;
+    try{await db.collection("signals").doc(s._id).update({teasePin:v});}catch(e){t.textContent=saveErr(e);}});
+}
+async function acceptSignal(s,enrich){
+  const id=s._id;
+  if(!leads[id]){
+    await db.collection("leads").doc(id).set({company:s.company,domain:cleanDomain(s.domain),city:s.city||"",industry:s.industry||"",size:s.size||"",audienceId:s.audienceId||"",signalId:id,
+      signals:[{type:s.type||"",detail:s.detail||"",date:s.date||"",source:s.source||"",url:s.url||"",via:s.sourceTool||s.via||""}],whyNow:s.triageNote||s.detail||"",prelim:s.prelim||null,climateAdj:s.climateAdj??0,
+      teasers:s.teasers||[],insight:s.insight||"",warmPath:s.warmPath||"",firstContact:s.firstContact||"",contacts:[],scripts:{},stage:"New",history:[{s:"New",at:nowIso()}],
+      delivery:{status:ws.ghlLocationId?"Queued":"Not set up",target:ws.ghlLocationId?"Go High Level":""},acceptedAt:nowIso(),updatedAt:nowIso()});
+  }
+  await db.collection("signals").doc(id).update({status:"Accepted",leadId:id,decidedAt:nowIso(),decidedBy:"Desk"});
+  if(enrich)await queueReq({kind:"enrich",leadId:id,note:ENRICH_NOTE});
+  else if(ws.ghlLocationId)await queueReq({kind:"deliver",leadId:id},true);
+}
+async function queueReq(r,quiet){
+  const id="r"+Date.now()+Math.random().toString(36).slice(2,6);
+  await db.collection("requests").doc(id).set({...r,status:"Queued",requestedAt:nowIso(),fired:false});
+  if(!quiet)fireRunner(id,r.kind);
+  return id;
+}
+let mcpP=null; const getMcp=()=>mcpP||(mcpP=Promise.resolve(window.claude?.use?.("mcp")).catch(()=>null));
+async function fireRunner(rid,kind){
+  if(!ws.runnerId)return;
+  try{const mcp=await getMcp(); if(!mcp)return;
+    await mcp.callTool(CCR,"fire_trigger",{trigger_id:ws.runnerId,text:`Request from the ${ws.name||"Signals"} desk: process requests/${rid} (${kind}) on ${ws.deskUrl||"this desk"} first.`},{cache:false});
+    try{await db.collection("requests").doc(rid).update({fired:true});}catch(e){}
+  }catch(e){/* runner picks it up on its next hourly pass */}
+}
+$("sweepBtn").onclick=async()=>{
+  if(!db||!canWrite)return;
+  const b=$("sweepBtn");b.disabled=true;
+  try{await queueReq({kind:"sweep",audienceId:audF||"",count:+ws.sweepCount||8});b.textContent="Sweep queued";setTimeout(()=>{b.textContent="Run a sweep now";b.disabled=false;},4000);}
+  catch(e){b.disabled=false;banner(saveErr(e),"err");}
+};
+
+/* ---------- Leads ---------- */
+function drawLeads(){
+  const m=$("main"), all=Object.values(leads).filter(inAud);
+  const open=l=>!["Won","Lost","Parked"].includes(l.stage);
+  const byAcc=(a,b)=>String(b.acceptedAt||"").localeCompare(String(a.acceptedAt||""));
+  const LS={accepted:byAcc,fit:(a,b)=>(qScore(b.prelim,auds[b.audienceId],b.climateAdj)??0)-(qScore(a.prelim,auds[a.audienceId],a.climateAdj)??0)||byAcc(a,b),aud:(a,b)=>String(audName(a.audienceId)).localeCompare(String(audName(b.audienceId)))||byAcc(a,b),company:(a,b)=>String(a.company).localeCompare(String(b.company))};
+  const list=all.filter(l=>leadF==="all"||(leadF==="due"?open(l)&&isDue(l):leadF==="open"?open(l):l.stage===leadF)).sort(LS[leadSort]||byAcc);
+  const d=all.filter(l=>l.delivery?.status==="Delivered").length;
+  m.innerHTML=`<div class="tiles">
+    <div class="tile"><span>Open leads</span><b>${all.filter(open).length}</b><small>Accepted, not closed</small></div>
+    <div class="tile"><span>Delivered</span><b>${d}</b><small>${ws.ghlLocationId?"Into Go High Level":"No CRM set up"}</small></div>
+    <div class="tile"><span>Engaged</span><b>${all.filter(l=>["Engaged","Meeting","Won"].includes(l.stage)).length}</b><small>Replied, accepted or met</small></div>
+    <div class="tile"><span>Won</span><b>${all.filter(l=>l.stage==="Won").length}</b><small>New clients</small></div></div>
+  ${audChips(id=>Object.values(leads).filter(x=>(!id||x.audienceId===id)&&open(x)).length)}
+  <div class="fbar"><div class="strip">${[["open","Open"],["due","Steps due"],...STAGES.map(s=>[s,s]),["all","All"]].map(([k,l])=>`<button class="chip" type="button" data-lf="${k}" aria-pressed="${leadF===k}">${l}</button>`).join("")}</div>
+  <label class="meta">Sort <select class="sel" id="leadSort">${[["accepted","Newest accepted"],["fit","Best fit first"],["aud","By audience"],["company","Company A to Z"]].map(([k,l])=>`<option value="${k}" ${leadSort===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
+  ${list.length?`<div class="tablebox"><table><thead><tr><th>Company</th>${multiAud()?"<th>Audience</th>":""}<th>Signal</th><th>Fit</th><th>Contacts</th><th>Delivery</th><th>Next step</th><th>Stage</th><th>Accepted</th></tr></thead><tbody>${list.map(l=>{const sc=qScore(l.prelim,auds[l.audienceId],l.climateAdj);const dv=l.delivery||{};return `<tr class="click" data-lid="${esc(l._id)}" tabindex="0"><td><span class="name">${esc(l.company)}</span><span class="dom">${esc(l.domain)}</span></td>${multiAud()?`<td>${audTag(l.audienceId)}</td>`:""}<td><span class="stype">${esc(l.signals?.[0]?.type||"")}</span></td><td>${sc!=null?`<span class="score">${meter(sc)}${sc}</span>`:"–"}</td><td class="n">${(l.contacts||[]).length}</td><td><span class="pill ${dv.status==="Delivered"?"p-good":dv.status==="Failed"?"p-bad":dv.status==="Queued"?"p-warn":""}">${esc(dv.status||"Not set up")}</span></td><td style="min-width:200px">${nextStepCell(l)}</td><td><span class="pill ${["Won"].includes(l.stage)?"p-good":["Engaged","Meeting"].includes(l.stage)?"p-info":l.stage==="Lost"?"p-bad":""}">${esc(l.stage||"New")}</span></td><td class="meta">${esc(dShort(l.acceptedAt))}</td></tr>`}).join("")}</tbody></table></div>`
+  :`<div class="empty"><h2>No leads here yet</h2><p>Accept a signal in the Signals tab and it becomes a lead with its conversation starters, contacts and outreach.</p></div>`}`;
+  wireAudChips(m); $("leadSort").onchange=e=>{leadSort=e.target.value;drawLeads();};
+  m.querySelectorAll("[data-lf]").forEach(b=>b.onclick=()=>{leadF=b.dataset.lf;drawLeads();});
+  m.querySelectorAll("tr[data-lid]").forEach(r=>{r.onclick=()=>openLead(r.dataset.lid);r.onkeydown=e=>{if(e.key==="Enter")openLead(r.dataset.lid);};});
+}
+function openLead(id){curLead=id;$("scrim").hidden=false;$("drawer").hidden=false;drawLead();}
+function closeDrawer(){curLead=null;$("scrim").hidden=true;$("drawer").hidden=true;}
+$("scrim").onclick=closeDrawer; document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("drawer").hidden)closeDrawer();});
+const SCRIPT_KEYS=[["connect","LinkedIn connection note",280],["afterAccept","When they accept",0],["giveFirst","Give-first message",0],["emailSubject","Email subject",90],["email","Follow-up email",0]];
+function drawLead(){
+  const l=leads[curLead]; if(!l){closeDrawer();return;}
+  const dv=l.delivery||{}, sc=qScore(l.prelim,auds[l.audienceId],l.climateAdj), enr=reqs.find(r=>r.kind==="enrich"&&r.leadId===l._id&&["Queued","Running"].includes(r.status));
+  const d=$("drawer");
+  d.innerHTML=`<div class="dhead"><div>${multiAud()?audTag(l.audienceId):`<span class="eyebrow">${esc(audName(l.audienceId))}</span>`}<h2 id="dTitle">${esc(l.company)}</h2><span class="dom">${l.domain?`<a href="https://${esc(cleanDomain(l.domain))}" target="_blank" rel="noopener">${esc(cleanDomain(l.domain))}</a> · `:""}${esc([l.city,l.industry,l.size&&("Staff "+l.size)].filter(Boolean).join(" · "))}</span></div><button class="btn" type="button" id="dClose">Close</button></div>
+  ${l.play?.id?"":pbChooser(l)}
+  <div class="flow">${STAGES.map(s=>`<span class="${s===l.stage?"on":""}">${s}</span>`).join("")}</div>
+  <div class="f"><label>Stage<select id="lStage" ${canWrite?"":"disabled"}>${STAGES.map(s=>`<option ${s===l.stage?"selected":""}>${s}</option>`).join("")}</select></label>
+   <label>Fit<input readonly value="${sc!=null?sc+" · "+esc(qTier(l.prelim)):"Not scored"}"></label></div>
+  ${pbSection(l)}
+  <section class="panel" style="gap:8px"><h3>Why now ${(l.signals||[]).some(isCB)?'<span class="cbtag">Crunchbase</span>':""}</h3><p class="why" style="margin:0">${esc(l.whyNow)}</p>
+   ${(l.signals||[]).map(s=>`<div class="sigline"><span class="stype">${esc(s.type)}</span><span>${esc(s.detail)}</span><small>${esc(dShort(s.date))}${s.source?" · "+(safeUrl(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)}</a>`:esc(s.source)):""}</small></div>`).join("")}</section>
+  <section class="panel" style="gap:8px"><h3>Who to talk to</h3>
+   ${(l.contacts||[]).length?`<div class="contacts">${l.contacts.map(c=>`<div class="person"><span class="av">${esc((c.name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase())}</span><div><b>${esc(c.name)}</b><small>${esc(c.title||"")}</small><small>${[c.email&&(esc(c.email)+" "+emailBadge(c)),safeUrl(c.linkedin)?`<a href="${esc(c.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`:"",c.phone&&esc(c.phone)].filter(Boolean).join(" · ")}</small>${c.source?`<small>${esc(c.source)}</small>`:""}</div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">Start with ${esc(l.firstContact||"the owner or general manager")}. ${l.warmPath?"Warm path: "+esc(l.warmPath):""}</p>`}
+   <div class="ctl">${enr?`<span class="pill p-warn">Finding contacts (${esc(enr.status)})</span>`:`<button class="btn sm" type="button" id="lEnrich" ${canWrite?"":"disabled"}>Find contacts</button>`}<span class="toast" id="lEnT"></span></div></section>
+  ${(l.teasers||[]).length||l.insight?`<section class="panel" style="gap:8px"><h3>Conversation starters</h3><div class="teasers" style="margin:0">${l.insight?`<div class="tz"><span class="k">Give first</span>${esc(l.insight)}</div>`:""}${(l.teasers||[]).map(t=>`<div class="tz"><span class="k">${esc(KIND[t.kind]||t.kind)}</span>${esc(t.hook)}<small>${t.source?(safeUrl(t.url)?`<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.source)}</a>`:esc(t.source)):""}</small></div>`).join("")}</div></section>`:""}
+  <section class="panel" style="gap:8px"><header class="ctl" style="justify-content:space-between"><h3>Outreach</h3><div class="ctl"><button class="btn sm" type="button" id="lWrite" ${canWrite?"":"disabled"}>${Object.keys(l.scripts||{}).length?"Rewrite with Claude":"Write with Claude"}</button><button class="btn sm primary" type="button" id="lSaveS" ${canWrite?"":"disabled"}>Save edits</button></div></header>
+   <p class="muted" style="margin:0;font-size:13px">Written in ${esc(ws.knowledge?.senderName||"the sender")}'s voice from the messaging pack, using the starters above. These messages feed the playbook steps above. Every email carries the sender ID, mailing address and an opt-out for CASL.</p>
+   ${inQuebec(l)?(quebecPolicy()==="bilingual"?`<p class="lic" style="margin:0"><b>Quebec lead:</b> drafts are written French first, with the English underneath. Have a French reader check them before anything is sent.</p>`:`<p class="err" style="margin:0"><b>Quebec lead.</b> This desk excludes Quebec, so don't send outreach. Change the Quebec setting under Messaging and delivery if this client can work in French.</p>`):""}
+   ${compMatch(l)?`<p class="err" style="margin:0"><b>${esc(compMatch(l).name)} is on the competitor list.</b> Don't prospect it.</p>`:""}
+   ${SCRIPT_KEYS.map(([k,lab,max])=>{const v=(l.scripts||{})[k]||"";return `<div class="script"><header><b>${lab}</b><span class="ctl">${max?`<span class="chars ${v.length>max?"over":""}" data-cc="${k}">${v.length}/${max}</span>`:""}<button class="btn sm ghost" type="button" data-copy="${k}">Copy</button></span></header><textarea id="s_${k}" data-sk="${k}" ${k==="emailSubject"||k==="connect"?'style="min-height:56px"':""} ${canWrite?"":"readonly"}>${esc(v)}</textarea></div>`;}).join("")}
+   <span class="toast" id="lST"></span></section>
+  <section class="panel" style="gap:8px"><h3>Delivery</h3>
+   <p class="${dv.status==="Delivered"?"ok":dv.status==="Failed"?"err":"note"}">${dv.status==="Delivered"?`In ${esc(dv.target||"the CRM")} since ${esc(dShort(dv.at))}${dv.contactId?" · contact "+esc(dv.contactId):""}${dv.oppId?" · opportunity "+esc(dv.oppId):""}.`:dv.status==="Failed"?`Delivery failed: ${esc(dv.note||"see the runs tab")}`:dv.status==="Queued"?"Queued for delivery to Go High Level on the next runner pass.":ws.ghlLocationId?"Not delivered yet.":"No CRM is set up for this desk. Add a Go High Level location under Messaging and delivery."}</p>
+   ${ws.ghlLocationId&&dv.status!=="Delivered"?`<div class="ctl"><button class="btn sm" type="button" id="lDeliver" ${canWrite?"":"disabled"}>Deliver now</button></div>`:""}</section>
+  <div class="f"><label class="full">Notes<textarea id="lNotes" ${canWrite?"":"readonly"}>${esc(l.notes||"")}</textarea></label></div>
+  <div class="ctl"><button class="btn" type="button" id="lSaveN" ${canWrite?"":"disabled"}>Save notes</button><span class="toast" id="lNT"></span></div>`;
+  $("dClose").onclick=closeDrawer;
+  const upd=async(patch,el)=>{try{await db.collection("leads").doc(l._id).update({...patch,updatedAt:nowIso()});if(el)el.textContent="Saved";}catch(e){if(el)el.textContent=saveErr(e);}};
+  $("lStage").onchange=e=>{const s=e.target.value;upd({stage:s,history:[...(l.history||[]),{s,at:nowIso()}]});};
+  $("lSaveN").onclick=()=>upd({notes:$("lNotes").value},$("lNT"));
+  $("lSaveS").onclick=()=>{const sc={};SCRIPT_KEYS.forEach(([k])=>sc[k]=$("s_"+k).value);upd({scripts:{...sc,editedAt:nowIso(),by:"Edited on the desk"}},$("lST"));};
+  d.querySelectorAll("textarea[data-sk]").forEach(ta=>ta.oninput=()=>{const c=d.querySelector(`[data-cc="${ta.dataset.sk}"]`);if(c){const mx=+c.textContent.split("/")[1];c.textContent=ta.value.length+"/"+mx;c.classList.toggle("over",ta.value.length>mx);}});
+  d.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const ta=$("s_"+b.dataset.copy);try{await navigator.clipboard.writeText(ta.value);b.textContent="Copied";}catch(e){ta.select();b.textContent="Selected";}setTimeout(()=>b.textContent="Copy",1500);});
+  const en=$("lEnrich"); if(en)en.onclick=async()=>{en.disabled=true;try{await queueReq({kind:"enrich",leadId:l._id,note:ENRICH_NOTE});$("lEnT").textContent="Queued. Claude looks them up on the next runner pass.";}catch(e){en.disabled=false;$("lEnT").textContent=saveErr(e);}};
+  const dl=$("lDeliver"); if(dl)dl.onclick=async()=>{dl.disabled=true;try{await db.collection("leads").doc(l._id).update({delivery:{...(l.delivery||{}),status:"Queued",target:"Go High Level"}});await queueReq({kind:"deliver",leadId:l._id});}catch(e){dl.disabled=false;}};
+  $("lWrite").onclick=()=>writeScripts(l);
+  wirePb(l);
+}
+async function writeScripts(l){
+  const t=$("lST"), b=$("lWrite"); const sample=await window.claude?.use?.("sample");
+  if(!sample){t.textContent="Claude isn't available in this view, so the outreach can't be written here.";return;}
+  b.disabled=true;t.textContent="Writing…";
+  const k=ws.knowledge||{};
+  const prompt=`You write first-touch B2B outreach for an account manager. Return JSON only: {"connect":"LinkedIn connection note, 280 characters max, no pitch","afterAccept":"LinkedIn message after they accept, 3 to 4 sentences, opens with one starter","giveFirst":"message delivering the give-first insight, 3 sentences, offers the one-page note","emailSubject":"plain subject, under 60 characters","email":"day 14 email, under 140 words, refers to the earlier touches, ends with the booking link, the sender's name and role, the company name and mailing address, and the opt-out line"}.
+Rules: write as the sender, plain and frank, Canadian spelling, commas instead of dashes, no marketing words, no exclamation marks, never claim facts that are not in the data. Use the contact's first name if one is given, otherwise no name.${inQuebec(l)&&quebecPolicy()==="bilingual"?`
+LANGUAGE: this company is in Quebec. Write every message in Quebec French first, then a blank line, a line with three hyphens, a blank line, and the same message in English. The connection note is French only and stays under 280 characters. The subject line is French first, then " / ", then English. The opt-out line appears in both languages.`:""}
+SENDER AND MESSAGING PACK: ${JSON.stringify({company:k.companyName||ws.name,website:k.website,offer:k.offer,whoWeHelp:k.whoWeHelp,proof:k.proof,different:k.different,voice:k.voice,avoid:k.avoid,senderName:k.senderName,senderRole:k.senderRole,bookingLink:k.bookingLink,mailingAddress:k.mailingAddress,optOut:k.optOut})}
+LEAD: ${JSON.stringify({company:l.company,domain:l.domain,city:l.city,industry:l.industry,whyNow:l.whyNow,signals:l.signals,starters:l.teasers,giveFirst:l.insight,contact:(l.contacts||[])[0]||{role:l.firstContact}})}`;
+  try{
+    const out=await sample.json(prompt,{modelTier:"default"});
+    const sc={};SCRIPT_KEYS.forEach(([key])=>sc[key]=String(out?.[key]||""));
+    await db.collection("leads").doc(l._id).update({scripts:{...sc,builtAt:nowIso(),by:"Claude, from the desk"},updatedAt:nowIso()});
+    t.textContent="Written. Edit anything, then Save edits.";
+  }catch(e){t.textContent=e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":"Couldn't write the outreach. Try again.";}
+  finally{b.disabled=false;}
+}
+
+
+/* ---------- Playbooks: roles, plays, step checklist ---------- */
+const ROLES=[["closer","Closer","Picks up the phone and books the meeting"],["nurturer","Nurturer","Builds awareness and trust before the call"],["relationship","Relationship builder","Slow, peer-level relationships with senior leaders"]];
+const ROLE_PLAY={closer:"direct",nurturer:"nurture",relationship:"relationship"};
+const CHN={linkedin:"LinkedIn",call:"Call",email:"Email",task:"Task"};
+const OUTCOMES={call:["No answer","Left voicemail","Spoke","Booked a meeting","Not interested"],linkedin:["Sent","Accepted","Replied","Booked a meeting"],email:["Sent","Replied","Booked a meeting","Bounced"],task:["Done"]};
+const DEFAULT_PLAYS=[
+ {id:"direct",name:"Direct Dial",role:"closer",about:"Straight to the phone, with LinkedIn and email around the calls.",steps:[
+  {id:"d1",day:0,ch:"linkedin",title:"View their profile and send a connection request",msg:"connect"},
+  {id:"d2",day:1,ch:"call",title:"First call",msg:"call"},
+  {id:"d3",day:2,ch:"linkedin",title:"Follow-up message after the call or voicemail",msg:"afterAccept"},
+  {id:"d4",day:5,ch:"call",title:"Second call",msg:"call"},
+  {id:"d5",day:10,ch:"email",title:"Recap email with the booking link",msg:"email"},
+  {id:"d6",day:14,ch:"call",title:"Last call, then park it or move it to Nurture",msg:"call"}]},
+ {id:"nurture",name:"Nurture",role:"nurturer",about:"Build awareness, credibility and trust, then hand it to the closer.",steps:[
+  {id:"n1",day:0,ch:"linkedin",title:"Follow the company and send a connection request",msg:"connect"},
+  {id:"n2",day:3,ch:"linkedin",title:"Like or comment on one of their recent posts",how:"Pick something about their business, not a generic like. A one-line comment with a real point is best."},
+  {id:"n3",day:7,ch:"linkedin",title:"Message once they accept",msg:"afterAccept"},
+  {id:"n4",day:14,ch:"linkedin",title:"Share the give-first insight",msg:"giveFirst"},
+  {id:"n5",day:21,ch:"email",title:"Email with the booking link",msg:"email"},
+  {id:"n6",day:24,ch:"task",title:"Hand it to the closer for a call",handoff:true,how:"Tick this when they've engaged, or when the sequence is done. It lands in the closer's call queue with everything said so far."}]},
+ {id:"relationship",name:"Executive Relationship",role:"relationship",about:"Peer-to-peer and unhurried, for senior leaders. Value first, no selling language.",steps:[
+  {id:"r1",day:0,ch:"linkedin",title:"Personal connection note tied to their news",msg:"connect"},
+  {id:"r2",day:7,ch:"linkedin",title:"Share a point of view relevant to their role",msg:"giveFirst"},
+  {id:"r3",day:21,ch:"linkedin",title:"Invite them to a short conversation or roundtable",msg:"afterAccept"},
+  {id:"r4",day:35,ch:"task",title:"Ask a mutual connection for an introduction",how:"Check shared connections on LinkedIn. A warm word from someone they trust beats another message."},
+  {id:"r5",day:45,ch:"email",title:"Request a 20-minute call",msg:"email"},
+  {id:"r6",day:50,ch:"call",title:"Call to confirm",msg:"call"}]},
+ {id:"warm",name:"Warm Path",role:"",about:"When there's a mutual connection, partner or investor who can introduce you.",steps:[
+  {id:"w1",day:0,ch:"task",title:"Ask the mutual connection for an introduction",how:"Send them two lines they can forward: who you are and why now matters for this company."},
+  {id:"w2",day:3,ch:"linkedin",title:"Connect and mention the introduction",msg:"connect"},
+  {id:"w3",day:5,ch:"call",title:"Call",msg:"call"},
+  {id:"w4",day:10,ch:"email",title:"Recap email with the booking link",msg:"email"}]},
+ {id:"hook",name:"Quick Hook",role:"",about:"Light-touch volume: one hook message, one example, an offer to share more.",steps:[
+  {id:"h1",day:0,ch:"linkedin",title:"Send a connection request",msg:"connect"},
+  {id:"h2",day:3,ch:"linkedin",title:"Send the hook question with one example",msg:"hook"},
+  {id:"h3",day:10,ch:"email",title:"Offer to share a few more",msg:"email"}]}];
+const PB_POS=new Set(["Accepted","Replied","Spoke"]);
+let pbView="next", pbAsk={}, todayF="mine";
+try{pbView=localStorage.getItem("sd-pbview")||"next";}catch(e){}
+function allPlays(){const ov=Array.isArray(ws.plays)&&ws.plays.length?ws.plays:DEFAULT_PLAYS;return ov;}
+function plays(){const off=new Set(ws.playsOff||[]);return allPlays().filter(p=>!off.has(p.id));}
+const playById=id=>allPlays().find(p=>p.id===id);
+const team=()=>Array.isArray(ws.team)?ws.team.filter(x=>x&&x.name):[];
+function meName(){try{return localStorage.getItem("sd-me")||"";}catch(e){return "";}}
+function me(){const n=meName();return team().find(x=>x.name===n)||(n?{name:n,role:""}:null);}
+function myPlay(){const m=me();const want=m?.play||ROLE_PLAY[m?.role]||ws.defaultPlay;const ps=plays();return (ps.find(p=>p.id===want)||ps[0]||DEFAULT_PLAYS[0]).id;}
+function leadPlay(l){return playById(l.play?.id)||playById(myPlay())||DEFAULT_PLAYS[0];}
+const stepKey=(p,s)=>p.id+"."+s.id;
+const addDays=(iso,n)=>{const d=new Date(iso||Date.now());d.setDate(d.getDate()+n);return d.toISOString();};
+const dayOnly=iso=>String(iso||"").slice(0,10);
+const todayIso=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);};
+/* What each step actually does, so work done under one play counts in another.
+   person: belongs to whoever's LinkedIn sent it. lead: done once for the whole lead. Calls repeat by design. */
+const ACTS={"direct.d1":"li-connect","direct.d3":"li-message","direct.d5":"email-booking",
+ "nurture.n1":"li-connect","nurture.n2":"li-engage","nurture.n3":"li-message","nurture.n4":"li-insight","nurture.n5":"email-booking",
+ "relationship.r1":"li-connect","relationship.r2":"li-insight","relationship.r4":"intro-ask","relationship.r5":"email-booking",
+ "warm.w1":"intro-ask","warm.w2":"li-connect","warm.w4":"email-booking","hook.h1":"li-connect","hook.h2":"li-hook"};
+const ONCE={"li-connect":"person","li-message":"person","li-engage":"person","li-insight":"lead","intro-ask":"lead","email-booking":"lead","li-hook":"lead"};
+const ACT_DONE={"li-connect":"sent them a LinkedIn connection request","li-message":"messaged them on LinkedIn","li-engage":"engaged with their LinkedIn posts"};
+const stepAct=(p,s)=>s.act||ACTS[p.id+"."+s.id]||"";
+function liAs(name){const t=team().find(x=>x.name===name);return (t&&t.liAs)||name||"";}
+const worker=l=>me()?.name||l.play?.owner||"";
+function doneActs(l){const out=[];for(const [k,e] of Object.entries(l.steps||{})){if(e?.st!=="done")continue;const i=k.indexOf("."),p=playById(k.slice(0,i)),s=p?.steps.find(x=>x.id===k.slice(i+1));const a=p&&s?stepAct(p,s):"";if(a)out.push({act:a,by:e.by||"",at:e.at,outcome:e.outcome||"",play:p.name,key:k});}return out.sort((a,b)=>String(a.at).localeCompare(String(b.at)));}
+function priorFor(l,p,s){const a=stepAct(p,s), scope=ONCE[a]; if(!scope)return null;
+  const own=stepKey(p,s), prior=doneActs(l).filter(x=>x.act===a&&x.key!==own); if(!prior.length)return null;
+  if(scope==="lead")return {kind:"carry",e:prior[0]};
+  const who=liAs(worker(l)), mine=prior.find(x=>liAs(x.by)===who);
+  return mine?{kind:"carry",e:mine}:{kind:"other",e:prior[prior.length-1]};}
+function pbState(l){
+  const p=leadPlay(l), log=l.steps||{}, started=!!l.play?.id;
+  let anchor=l.play?.startedAt||l.acceptedAt||nowIso(), prevDay=0, next=null, done=0;
+  const rows=p.steps.map(s=>{let e=log[stepKey(p,s)], other=null;let due=null;
+    if(!e){const pr=priorFor(l,p,s);if(pr?.kind==="carry")e={st:"done",at:pr.e.at,by:pr.e.by,outcome:pr.e.outcome,carried:pr.e.play};else if(pr)other=pr.e;}
+    if(e&&(e.st==="done"||e.st==="skipped")){done++;prevDay=s.day;if(!e.carried||String(e.at)>String(anchor))anchor=e.at||anchor;}
+    else{due=addDays(anchor,Math.max(0,s.day-prevDay));if(!next)next={s,due};}
+    return {s,e,due,other};});
+  return {p,rows,next,done,total:p.steps.length,started,finished:!next};
+}
+function dueTag(due){if(!due)return "";const d=dayOnly(due),t=todayIso();return d<t?`<span class="pill p-bad">Overdue · ${esc(dShort(d))}</span>`:d===t?`<span class="pill p-warn">Due today</span>`:`<span class="pill">Due ${esc(dShort(d))}</span>`;}
+function callNotes(l){
+  const k=ws.knowledge||{}, c=(l.contacts||[])[0], first=c?.name?String(c.name).split(/\s+/)[0]:"";
+  return [`Opener: Hi ${first||"there"}, it's ${k.senderName||"[your name]"} with ${k.companyName||ws.name||"[company]"}. I'm calling because ${l.whyNow||"of what's been happening at "+l.company}.`,
+    (l.teasers||[])[0]?.hook?`Talking point: ${(l.teasers||[])[0].hook}`:"",
+    l.insight?`Give first: ${l.insight}`:"",
+    `Ask: is it worth 20 minutes to look at it together?${k.bookingLink?" Booking link: "+k.bookingLink:""}`,
+    `If voicemail: name, company, one line on why now, and that you'll follow up on LinkedIn.`].filter(Boolean).join("\n");
+}
+const wnLine=l=>l.whyNow?`I'm calling because of something I saw: ${String(l.whyNow).trim().replace(/\.+$/,"")}.`:`I'm calling about what's been happening at ${l.company}.`;
+function callParts(l){
+  const k=ws.knowledge||{}, c=(l.contacts||[])[0], first=c?.name?String(c.name).split(/\s+/)[0]:"";
+  return [
+   {lab:"Opener",hint:"First 15 seconds. Who you are and why you're calling now.",t:`Hi ${first||"there"}, it's ${k.senderName||"[your name]"} with ${k.companyName||ws.name||"[company]"}. ${wnLine(l)}`},
+   {lab:"Talking point",hint:"Show you know their world.",t:(l.teasers||[]).map(x=>x.hook).filter(Boolean).slice(0,3).join("\n\n")},
+   {lab:"Give first",hint:"Something useful, with nothing asked in return.",t:l.insight||""},
+   {lab:"The ask",hint:"Ask for the meeting, not the sale.",t:`Is it worth 20 minutes to look at it together?${k.bookingLink?"\n\nIf easier, book a time here: "+k.bookingLink:""}`},
+   {lab:"If voicemail",hint:"Under 30 seconds.",t:`Hi ${first||"there"}, it's ${k.senderName||"[your name]"} with ${k.companyName||ws.name||"[company]"}. ${l.whyNow?wnLine(l)+" ":""}I had a thought on it, and I'll send you a note on LinkedIn so you have my details.`}
+  ].filter(x=>x.t);
+}
+function stepParts(l,s){
+  if(!s.msg)return [];
+  if(s.msg==="call")return callParts(l);
+  const sc=l.scripts||{};
+  if(s.msg==="email")return [{lab:"Subject",t:sc.emailSubject||""},{lab:"Email",t:sc.email||""}].filter(x=>x.t);
+  const t=stepText(l,s); return t?[{lab:"Message",t}]:[];
+}
+let pbTab={};
+function hookMsg(l){const c=(l.contacts||[])[0], first=c?.name?String(c.name).split(/\s+/)[0]+", h":"H";
+  const ex=l.insight||(l.teasers||[])[0]?.hook||"";
+  return `${first}ave you ever wondered why people come to your website?${ex?" One example from ours: "+ex:""} I've got a few more like that if they'd be useful.`;}
+function stepText(l,s){const sc=l.scripts||{};
+  if(s.msg==="call")return callNotes(l);
+  if(s.msg==="hook")return hookMsg(l);
+  if(s.msg==="email")return sc.email?(sc.emailSubject?"Subject: "+sc.emailSubject+"\n\n":"")+sc.email:"";
+  return s.msg?sc[s.msg]||"":"";}
+function stepLinks(l,s){const c=(l.contacts||[])[0]||{}, out=[];
+  if(s.ch==="linkedin"&&safeUrl(c.linkedin))out.push(`<a class="btn sm" data-act href="${esc(c.linkedin)}" target="_blank" rel="noopener">Open LinkedIn</a>`);
+  if(s.ch==="call"&&c.phone)out.push(`<a class="btn sm" data-act href="tel:${esc(String(c.phone).replace(/[^\d+]/g,""))}">Call ${esc(c.phone)}</a>`);
+  if(s.ch==="email"&&c.email){const sc=l.scripts||{};out.push(`<a class="btn sm" data-act href="mailto:${esc(c.email)}?subject=${encodeURIComponent(sc.emailSubject||"")}&body=${encodeURIComponent(sc.email||"")}">Open email</a>${emailBadge(c)}`);}
+  return out.join("");}
+function pbChooser(l){
+  const ps=plays(), mine=myPlay(), m=me();
+  return `<section class="pbchoose" id="pbChoose" aria-labelledby="pbChooseT"><h3 id="pbChooseT">How do you want to work this lead?</h3>
+   <p class="meta" style="margin:0;font-size:13px;color:var(--fg)">Pick a playbook first. It sets the steps, the messages and who does what. You can switch later without losing anything.</p>
+   <div class="pbcards">${ps.map(p=>{const chs=[...new Set(p.steps.map(s=>s.ch))], sug=p.id===mine;return `<button type="button" class="pbcard ${sug?"sug":""}" data-choose="${esc(p.id)}" ${canWrite?"":"disabled"}><span class="ctl" style="justify-content:space-between;width:100%;gap:6px"><b style="font:600 15px var(--f-display)">${esc(p.name)}</b>${sug?`<span class="pill p-info">${m?.role?"Suits your role":"Suggested"}</span>`:""}</span><span class="meta">${esc(p.about||"")}</span><span class="ctl" style="gap:4px">${chs.map(c=>`<span class="ch ch-${esc(c)}">${esc(CHN[c]||c)}</span>`).join("")}</span><span class="meta">${p.steps.length} steps over ${p.steps[p.steps.length-1].day} days</span><span class="go">Use this playbook</span></button>`;}).join("")}</div>
+   <span class="toast" id="pbCT"></span></section>`;
+}
+function pbSection(l){
+  if(!l.play?.id)return "";
+  const st=pbState(l), ps=plays(), m=me(), pct=Math.round(st.done/Math.max(1,st.total)*100);
+  const view=pbView==="all"?st.rows:st.rows.filter(r=>r.s===st.next?.s);
+  const ho=l.handoff&&!l.handoff.taken;
+  return `<section class="panel pb" style="gap:10px" id="pbSec"><header class="ctl" style="justify-content:space-between"><h3>Playbook</h3>
+   <div class="ctl"><label class="meta">Play <select class="sel" id="pbPlay" ${canWrite?"":"disabled"}>${ps.map(p=>`<option value="${esc(p.id)}" ${p.id===st.p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select></label>
+   <div class="seg" role="group" aria-label="Steps shown"><button type="button" data-pbv="next" aria-pressed="${pbView!=="all"}">Next step</button><button type="button" data-pbv="all" aria-pressed="${pbView==="all"}">All steps</button></div></div></header>
+   <p class="meta" style="margin:0">${esc(st.p.about||"")}${st.started?` Started ${esc(dShort(l.play.startedAt))}${l.play.owner?" by "+esc(l.play.owner):""}.`:``}${l.play?.owner&&m&&l.play.owner!==m.name?` <button class="btn sm ghost" type="button" id="pbTake" ${canWrite?"":"disabled"}>Take it over</button>`:""}</p>
+   <div class="pbprog"><span>${st.finished?"All steps done":`Step ${st.done+1} of ${st.total}`}</span><i><em style="width:${pct}%"></em></i><b>${st.done}/${st.total}</b></div>
+   ${ho?`<p class="ok" style="margin:0">Ready for a call since ${esc(dShort(l.handoff.at))}${l.handoff.by?", handed over by "+esc(l.handoff.by):""}. <button class="btn sm" type="button" id="pbTakeCall" ${canWrite?"":"disabled"}>Take the call, start Direct Dial</button></p>`:""}
+   ${st.finished&&!ho?`<p class="note" style="margin:0">Sequence finished. Move the stage on, switch to another play, or park it.</p>`:""}
+   <ol class="pbsteps">${view.map(r=>pbStep(l,st,r)).join("")}</ol>
+   ${!ho&&canWrite?`<div class="ctl"><button class="btn sm ghost" type="button" id="pbHand">Hand to a closer now</button></div>`:""}
+   <span class="toast" id="pbT"></span></section>`;
+}
+function pbStep(l,st,r){
+  const s=r.s, k=stepKey(st.p,s), e=r.e, isNext=st.next?.s===s, done=e?.st==="done", skip=e?.st==="skipped", carried=!!e?.carried, oth=r.other, act=stepAct(st.p,s);
+  const parts=stepParts(l,s), ti=Math.min(pbTab[l._id+k]||0,Math.max(0,parts.length-1)), cur=parts[ti], open=isNext||pbView==="next";
+  return `<li class="pbstep ${done?"done":skip?"skip":isNext?"next":""}" data-k="${esc(k)}">
+   <label class="pbchk" ${carried?`title="Already done under ${esc(e.carried)}"`:""}><input type="checkbox" ${done?"checked":""} ${canWrite&&!carried?"":"disabled"} aria-label="Mark ${esc(s.title)} done"></label>
+   <div class="pbbody"><div class="ctl" style="justify-content:space-between"><span class="ctl"><span class="ch ch-${esc(s.ch)}">${esc(CHN[s.ch]||s.ch)}</span><b>${esc(s.title)}</b></span>
+    <span class="ctl">${carried?`<span class="pill p-info">Already done in ${esc(e.carried)} · ${esc(dShort(e.at))}${e.by?" · "+esc(e.by):""}</span>`:done?`<span class="pill p-good">Done ${esc(dShort(e.at))}${e.by?" · "+esc(e.by):""}${e.outcome?" · "+esc(e.outcome):""}</span>`:skip?`<span class="pill">Skipped${e.note?" · "+esc(e.note):""}</span>`:isNext?dueTag(r.due):`<span class="meta">Day ${s.day}</span>`}</span></div>
+    ${e?.note&&done?`<p class="meta" style="margin:0">${esc(e.note)}</p>`:""}
+    ${open&&!done&&!skip&&oth?`<div class="other"><b>${esc(oth.by||"A teammate")} already ${esc(ACT_DONE[act]||"did this")}</b> (${esc(dShort(oth.at))}${oth.outcome?", "+esc(oth.outcome.toLowerCase()):""}). That was from their LinkedIn, not yours${worker(l)?", "+esc(worker(l)):""}. Best move: ask ${esc(oth.by||"them")} to introduce you in their thread, then connect and mention it. Or, if their connection covers it, skip this step.
+      <div class="ctl" style="margin-top:6px"><button class="btn sm" type="button" data-copy-intro>Copy intro request for ${esc(oth.by||"them")}</button><button class="btn sm ghost" type="button" data-skip-covered ${canWrite?"":"disabled"}>Skip, ${esc(oth.by||"their")} connection covers it</button></div></div>`:""}
+    ${open&&!done&&!skip?`${s.how?`<p class="meta" style="margin:0">${esc(s.how)}</p>`:""}
+     ${s.msg?(parts.length?`<div class="pbparts ${parts.length>1?"":"one"}">${parts.length>1?`<div class="pbtabs" role="tablist" aria-label="${esc(s.title)}">${parts.map((x,i)=>`<button type="button" role="tab" data-ptab="${i}" aria-selected="${i===ti}">${esc(x.lab)}</button>`).join("")}</div>`:""}<div class="pbpanel" role="tabpanel">${cur.hint?`<p class="pbhint">${esc(cur.hint)}</p>`:""}${esc(cur.t)}</div></div>`:`<p class="meta" style="margin:0">No message drafted yet. Use ${esc("Draft outreach")} in the Outreach section below.</p>`):""}
+     <div class="ctl">${parts.length?`<button class="btn sm" type="button" data-copy-step>Copy${parts.length>1?" "+esc(cur.lab.toLowerCase()):""}</button>`:""}${parts.length>1?`<button class="btn sm ghost" type="button" data-copy-all>Copy all</button>`:""}${stepLinks(l,s)}</div>
+     ${pbAsk[l._id+k]?`<p class="ask">Done that? Tick it off so everyone knows where this stands.</p>`:""}
+     <div class="ctl"><select class="sel" data-out aria-label="Outcome">${(OUTCOMES[s.ch]||OUTCOMES.task).map(o=>`<option>${esc(o)}</option>`).join("")}</select><input class="pbnote" data-note placeholder="Note (optional)" aria-label="Note">
+     <button class="btn sm primary" type="button" data-done ${canWrite?"":"disabled"}>Mark done</button><button class="btn sm ghost" type="button" data-skip ${canWrite?"":"disabled"}>Skip</button></div>`:""}
+   </div></li>`;
+}
+async function pbWrite(l,patch,msg){
+  try{await db.collection("leads").doc(l._id).update({...patch,updatedAt:nowIso()});const t=$("pbT");if(t&&msg)t.textContent=msg;}
+  catch(e){const t=$("pbT");if(t)t.textContent=saveErr(e);}
+}
+function pbStartPatch(l,p){return l.play?.id===p.id?{}:{play:{id:p.id,startedAt:nowIso(),owner:me()?.name||"",history:[...(l.play?.history||[]),...(l.play?.id?[{id:l.play.id,startedAt:l.play.startedAt,endedAt:nowIso()}]:[])]}};}
+const STAGE_ORD=s=>STAGES.indexOf(s||"New");
+function stageFor(l,outcome,first){let s=l.stage||"New";
+  if(first&&STAGE_ORD(s)<STAGE_ORD("Working"))s="Working";
+  if(PB_POS.has(outcome)&&STAGE_ORD(s)<STAGE_ORD("Engaged"))s="Engaged";
+  if(outcome==="Booked a meeting"&&STAGE_ORD(s)<STAGE_ORD("Meeting"))s="Meeting";
+  return s;}
+async function pbMark(l,p,s,st,extra){
+  const k=stepKey(p,s), steps={...(l.steps||{})}, by=me()?.name||"Someone";
+  if(st==="undo")delete steps[k];else steps[k]={st,at:nowIso(),by,outcome:extra?.outcome||"",note:extra?.note||""};
+  const patch={steps,...pbStartPatch(l,p)};
+  if(st==="done"){const first=!Object.values(l.steps||{}).some(x=>x.st==="done");const ns=stageFor(l,extra?.outcome,first);if(ns!==(l.stage||"New")){patch.stage=ns;patch.history=[...(l.history||[]),{s:ns,at:nowIso()}];}
+    const autoHand=p.role==="nurturer"&&PB_POS.has(extra?.outcome);
+    if((s.handoff||autoHand)&&!(l.handoff&&!l.handoff.taken))patch.handoff={at:nowIso(),by,reason:s.handoff?"Sequence step":"They engaged: "+extra.outcome};}
+  delete pbAsk[l._id+k];
+  await pbWrite(l,patch,st==="undo"?"Unticked.":st==="skipped"?"Skipped.":"Ticked off.");
+}
+function wirePb(l){
+  const ch=$("pbChoose"); if(ch)ch.querySelectorAll("[data-choose]").forEach(b=>b.onclick=async()=>{const p=playById(b.dataset.choose);if(!p)return;ch.querySelectorAll("[data-choose]").forEach(x=>x.disabled=true);
+    try{await db.collection("leads").doc(l._id).update({play:{id:p.id,startedAt:nowIso(),owner:me()?.name||"",history:[]},updatedAt:nowIso()});}catch(e){ch.querySelectorAll("[data-choose]").forEach(x=>x.disabled=false);$("pbCT").textContent=saveErr(e);}});
+  const sec=$("pbSec"); if(!sec)return;
+  sec.querySelectorAll("[data-pbv]").forEach(b=>b.onclick=()=>{pbView=b.dataset.pbv;try{localStorage.setItem("sd-pbview",pbView);}catch(e){}drawLead();});
+  const sel=$("pbPlay"); if(sel)sel.onchange=()=>{const p=playById(sel.value);if(!p)return;const sim={...l,play:{...l.play,id:p.id}};const n=pbState(sim).rows.filter(r=>r.e?.carried).length, o=pbState(sim).rows.filter(r=>r.other).length;
+    pbWrite(l,{play:{...pbStartPatch(l,p).play}},`Switched to ${p.name}.${n?` ${n} step${n===1?" you've":"s you've"} already done ${n===1?"is":"are"} marked complete.`:""}${o?` ${o} LinkedIn step${o===1?" was":"s were"} done by a teammate, so check ${o===1?"it":"them"}.`:""}`);};
+  const tk=$("pbTake"); if(tk)tk.onclick=()=>pbWrite(l,{play:{...l.play,owner:me()?.name||""}},"It's yours now.");
+  const hb=$("pbHand"); if(hb)hb.onclick=()=>pbWrite(l,{handoff:{at:nowIso(),by:me()?.name||"",reason:"Handed over by hand"}},"In the call queue.");
+  const tc=$("pbTakeCall"); if(tc)tc.onclick=()=>{const p=playById("direct")||plays()[0];pbWrite(l,{handoff:{...l.handoff,taken:nowIso(),takenBy:me()?.name||""},play:{id:p.id,startedAt:nowIso(),owner:me()?.name||"",history:[...(l.play?.history||[]),...(l.play?.id?[{id:l.play.id,startedAt:l.play.startedAt,endedAt:nowIso()}]:[])]}},`Started ${p.name}.`);};
+  const p=leadPlay(l);
+  sec.querySelectorAll(".pbstep").forEach(li=>{const s=p.steps.find(x=>stepKey(p,x)===li.dataset.k); if(!s)return;
+    const cb=li.querySelector(".pbchk input"); cb.onchange=()=>pbMark(l,p,s,cb.checked?"done":"undo",{outcome:li.querySelector("[data-out]")?.value,note:li.querySelector("[data-note]")?.value});
+    const dn=li.querySelector("[data-done]"); if(dn)dn.onclick=()=>pbMark(l,p,s,"done",{outcome:li.querySelector("[data-out]").value,note:li.querySelector("[data-note]").value.trim()});
+    const sk=li.querySelector("[data-skip]"); if(sk)sk.onclick=()=>pbMark(l,p,s,"skipped",{note:li.querySelector("[data-note]").value.trim()});
+    const ask=()=>{pbAsk[l._id+li.dataset.k]=true;setTimeout(drawLead,250);};
+    const parts=stepParts(l,s), tk=l._id+li.dataset.k;
+    li.querySelectorAll("[data-ptab]").forEach(b=>{b.onclick=()=>{pbTab[tk]=+b.dataset.ptab;drawLead();$("drawer").querySelector(`.pbstep[data-k="${CSS.escape(li.dataset.k)}"] [data-ptab="${b.dataset.ptab}"]`)?.focus();};
+      b.onkeydown=e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;e.preventDefault();const n=parts.length,i=((+b.dataset.ptab)+(e.key==="ArrowRight"?1:-1)+n)%n;pbTab[tk]=i;drawLead();$("drawer").querySelector(`.pbstep[data-k="${CSS.escape(li.dataset.k)}"] [data-ptab="${i}"]`)?.focus();};});
+    const row=pbState(l).rows.find(x=>stepKey(p,x.s)===li.dataset.k), oth=row?.other;
+    const ci=li.querySelector("[data-copy-intro]"); if(ci&&oth)ci.onclick=async()=>{const c=(l.contacts||[])[0]||{}, first=c.name?String(c.name).split(/\s+/)[0]:"", mine=worker(l)||"[your name]";
+      const txt=`${oth.by}, can you introduce me to ${c.name||"them"} at ${l.company} in your LinkedIn thread? Something like:\n\n"${first||"Hi"}, I'd like to introduce ${mine}, who leads these conversations on our side. ${l.whyNow?"Given "+String(l.whyNow).replace(/\.$/,"").replace(/^./,x=>x.toLowerCase())+", ":""}it's worth a quick connect."`;
+      try{await navigator.clipboard.writeText(txt);ci.textContent="Copied";}catch(e){ci.textContent="Copy blocked";}};
+    const sc=li.querySelector("[data-skip-covered]"); if(sc&&oth)sc.onclick=()=>pbMark(l,p,s,"skipped",{note:`Covered by ${oth.by}'s LinkedIn`});
+    const copyTxt=async(txt,btn)=>{try{await navigator.clipboard.writeText(txt);btn.textContent="Copied";}catch(e){btn.textContent="Copy blocked";}ask();};
+    const cp=li.querySelector("[data-copy-step]"); if(cp)cp.onclick=()=>{const i=Math.min(pbTab[tk]||0,parts.length-1);copyTxt(parts[i].t,cp);};
+    const ca=li.querySelector("[data-copy-all]"); if(ca)ca.onclick=()=>copyTxt(parts.map(x=>x.lab.toUpperCase()+"\n"+x.t).join("\n\n"),ca);
+    li.querySelectorAll("[data-act]").forEach(a=>a.addEventListener("click",ask));});
+}
+function nextStepCell(l){const st=pbState(l);if(!st.started&&!(l.steps&&Object.keys(l.steps).length))return `<span class="pill p-warn">Choose a playbook</span>`;
+  if(st.finished)return `<span class="pill p-good">Sequence done</span>`;
+  return `<span class="ch ch-${esc(st.next.s.ch)}">${esc(CHN[st.next.s.ch])}</span> ${esc(st.next.s.title)}<br>${dueTag(st.next.due)} <span class="meta">${st.done}/${st.total}</span>`;}
+const isDue=l=>{const st=pbState(l);return st.started&&st.next&&dayOnly(st.next.due)<=todayIso();};
+const openLead2=l=>!["Won","Lost","Parked"].includes(l.stage);
+
+/* ---------- Today ---------- */
+function drawToday(){
+  const m=$("main"), mm=me(), all=Object.values(leads).filter(inAud).filter(openLead2);
+  const mine=l=>!mm||!l.play?.owner||l.play.owner===mm.name;
+  const scope=all.filter(l=>todayF==="all"||mine(l));
+  const queue=all.filter(l=>l.handoff&&!l.handoff.taken);
+  const due=scope.filter(isDue).map(l=>({l,st:pbState(l)})).sort((a,b)=>String(a.st.next.due).localeCompare(String(b.st.next.due)));
+  const soon=scope.filter(l=>{const st=pbState(l);if(!st.started||!st.next)return false;const d=dayOnly(st.next.due);return d>todayIso()&&d<=dayOnly(addDays(nowIso(),7));}).map(l=>({l,st:pbState(l)})).sort((a,b)=>String(a.st.next.due).localeCompare(String(b.st.next.due)));
+  const notStarted=scope.filter(l=>!pbState(l).started&&!(l.handoff&&!l.handoff.taken));
+  const row=({l,st})=>`<tr class="click" data-lid="${esc(l._id)}" tabindex="0"><td><span class="name">${esc(l.company)}</span><span class="dom">${esc(st.p.name)}${l.play?.owner?" · "+esc(l.play.owner):""}</span></td><td><span class="ch ch-${esc(st.next.s.ch)}">${esc(CHN[st.next.s.ch])}</span> ${esc(st.next.s.title)}</td><td>${dueTag(st.next.due)}</td><td class="meta">${st.done}/${st.total}</td></tr>`;
+  const table=(list)=>`<div class="tablebox"><table style="min-width:620px"><thead><tr><th>Lead</th><th>Next step</th><th>When</th><th>Done</th></tr></thead><tbody>${list.map(row).join("")}</tbody></table></div>`;
+  const byCh=c=>due.filter(x=>x.st.next.s.ch===c);
+  m.innerHTML=`<div class="fbar"><div class="strip">${mm?`<span class="meta">Working as <b>${esc(mm.name)}</b>${mm.role?" · "+esc((ROLES.find(r=>r[0]===mm.role)||[])[1]||""):""}</span>`:`<span class="note" style="padding:4px 10px">Pick who you are with Working as, top right, so steps are logged under your name.</span>`}</div>
+   <div class="strip"><button class="chip" type="button" data-tf="mine" aria-pressed="${todayF==="mine"}">Mine</button><button class="chip" type="button" data-tf="all" aria-pressed="${todayF==="all"}">Everyone</button></div></div>
+  <div class="tiles"><div class="tile"><span>Due now</span><b>${due.length}</b><small>Today and overdue</small></div><div class="tile"><span>Calls</span><b>${byCh("call").length}</b><small>Due now</small></div><div class="tile"><span>LinkedIn</span><b>${byCh("linkedin").length}</b><small>Due now</small></div><div class="tile"><span>Ready for a call</span><b>${queue.length}</b><small>Handed over, not taken</small></div></div>
+  ${queue.length?`<section class="sect"><header><div><h2>Ready for a call</h2><p>Warmed up and handed over. Open one and press Take the call.</p></div></header><div class="tablebox"><table style="min-width:560px"><thead><tr><th>Lead</th><th>Why it's ready</th><th>Since</th></tr></thead><tbody>${queue.map(l=>`<tr class="click" data-lid="${esc(l._id)}" tabindex="0"><td><span class="name">${esc(l.company)}</span><span class="dom">${esc(((l.contacts||[])[0]||{}).name||l.firstContact||"")}</span></td><td>${esc(l.handoff.reason||"")}${l.handoff.by?" · "+esc(l.handoff.by):""}</td><td class="meta">${esc(dShort(l.handoff.at))}</td></tr>`).join("")}</tbody></table></div></section>`:""}
+  <section class="sect"><header><div><h2>Due now</h2><p>Open a lead to see the message or call notes, then tick the step off.</p></div></header>${due.length?["call","linkedin","email","task"].filter(c=>byCh(c).length).map(c=>`<h3>${esc(CHN[c])}</h3>${table(byCh(c))}`).join(""):`<p class="muted" style="margin:0">Nothing due. ${soon.length?"The next steps are below.":""}</p>`}</section>
+  ${soon.length?`<section class="sect"><header><div><h2>Coming up this week</h2></div></header>${table(soon)}</section>`:""}
+  ${notStarted.length?`<section class="sect"><header><div><h2>Choose a playbook</h2><p>These leads don't have an approach yet. Open one and pick how you want to work it.</p></div></header><div class="strip">${notStarted.map(l=>`<button class="chip" type="button" data-lid="${esc(l._id)}">${esc(l.company)}</button>`).join("")}</div></section>`:""}`;
+  m.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>{todayF=b.dataset.tf;drawToday();});
+  m.querySelectorAll("[data-lid]").forEach(r=>{r.onclick=()=>openLead(r.dataset.lid);r.onkeydown=e=>{if(e.key==="Enter")openLead(r.dataset.lid);};});
+}
+function dueCount(){const mm=me();return Object.values(leads).filter(openLead2).filter(inAud).filter(l=>!mm||!l.play?.owner||l.play.owner===mm.name).filter(isDue).length;}
+
+/* ---------- Team and plays (setup) ---------- */
+let teamDraft=null;
+function teamSection(){
+  const tm=teamDraft||team().map(x=>({...x})), off=new Set(ws.playsOff||[]);
+  return `<section class="sect" id="pForm"><header><div><h2>Team and playbooks</h2><p>Who works this desk, how each person works, and which plays are on. If an assistant works LinkedIn from someone else's account, set Sends as, so the desk knows whose connection it is. Each role starts on its own play, and anyone can switch a lead to another play at any time.</p></div></header>
+   <div class="teamrows">${tm.map((t,i)=>`<div class="teamrow" data-ti="${i}"><input data-tn value="${esc(t.name)}" placeholder="Name" aria-label="Name"><select class="sel" data-tr aria-label="Role">${ROLES.map(r=>`<option value="${r[0]}" ${t.role===r[0]?"selected":""}>${esc(r[1])}</option>`).join("")}</select><select class="sel" data-tp aria-label="Default play"><option value="">Role default</option>${allPlays().map(p=>`<option value="${esc(p.id)}" ${t.play===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select><select class="sel" data-tli aria-label="LinkedIn sent from"><option value="">Own LinkedIn</option>${tm.filter((x,j)=>j!==i&&x.name).map(x=>`<option value="${esc(x.name)}" ${t.liAs===x.name?"selected":""}>Sends as ${esc(x.name)}</option>`).join("")}</select><button class="btn sm ghost" type="button" data-trm>Remove</button></div>`).join("")||`<p class="muted" style="margin:0">No one added yet.</p>`}</div>
+   <div class="ctl"><button class="btn sm" type="button" id="tAdd" ${canWrite?"":"disabled"}>Add a person</button></div>
+   <div class="playlist">${allPlays().map(p=>`<details class="playcard"><summary><label class="ctl" style="gap:6px"><input type="checkbox" data-pon="${esc(p.id)}" ${off.has(p.id)?"":"checked"} ${canWrite?"":"disabled"}> <b>${esc(p.name)}</b></label><span class="meta">${p.role?esc((ROLES.find(r=>r[0]===p.role)||[])[1]||"")+" · ":""}${p.steps.length} steps over ${p.steps[p.steps.length-1].day} days</span></summary><p class="meta" style="margin:6px 0">${esc(p.about||"")}</p><ol class="playsteps">${p.steps.map(s=>`<li><span class="ch ch-${esc(s.ch)}">${esc(CHN[s.ch])}</span> Day ${s.day}: ${esc(s.title)}</li>`).join("")}</ol></details>`).join("")}</div>
+   <p class="meta" style="margin:0">Hyperweb tunes the steps for each desk's industry and buyer. Ask your account manager for changes.</p>
+   <div class="ctl"><button class="btn primary sm" type="button" id="pSave" ${canWrite?"":"disabled"}>Save team and plays</button><span class="toast" id="pT"></span></div></section>`;
+}
+function readTeam(){return [...document.querySelectorAll("#pForm .teamrow")].map(r=>({name:r.querySelector("[data-tn]").value.trim(),role:r.querySelector("[data-tr]").value,play:r.querySelector("[data-tp]").value,liAs:r.querySelector("[data-tli]")?.value||""}));}
+function wireTeam(){
+  const sec=$("pForm"); if(!sec)return;
+  $("tAdd").onclick=()=>{teamDraft=[...readTeam(),{name:"",role:"nurturer",play:""}];redrawSetupTeam();};
+  sec.querySelectorAll("[data-trm]").forEach(b=>b.onclick=()=>{const i=+b.closest(".teamrow").dataset.ti;const t=readTeam();t.splice(i,1);teamDraft=t;redrawSetupTeam();});
+  $("pSave").onclick=async()=>{const t=readTeam().filter(x=>x.name), off=[...sec.querySelectorAll("[data-pon]")].filter(x=>!x.checked).map(x=>x.dataset.pon);
+    if(off.length>=allPlays().length){$("pT").textContent="Keep at least one play on.";return;}
+    try{if(loaded.wsExists)await db.collection("workspace").doc("profile").update({team:t,playsOff:off,updatedAt:nowIso()});else await db.collection("workspace").doc("profile").set({team:t,playsOff:off,createdAt:nowIso()});teamDraft=null;$("pT").textContent="Saved";}catch(e){$("pT").textContent=saveErr(e);}};
+}
+function redrawSetupTeam(){const sec=$("pForm");if(!sec)return;sec.outerHTML=teamSection();wireTeam();}
+
+/* ---------- Working as ---------- */
+function drawMe(){
+  const sel=$("meSel"); if(!sel)return; const n=meName(), tm=team();
+  sel.innerHTML=`<option value="">Pick your name</option>${tm.map(t=>`<option ${t.name===n?"selected":""}>${esc(t.name)}</option>`).join("")}${n&&!tm.some(t=>t.name===n)?`<option selected>${esc(n)}</option>`:""}<option value="__add">Not listed, add me in Setup</option>`;
+}
+
+/* ---------- Audiences ---------- */
+function drawAudiences(){
+  const nRm=Object.values(auds).filter(x=>x.removed).length;
+  const m=$("main"), list=Object.values(auds).filter(x=>showRmAud||!x.removed||x._id===curAud).sort((a,b)=>(!!a.removed)-(!!b.removed)||String(a.name).localeCompare(b.name));
+  if(curAud&&!auds[curAud])curAud=null;
+  if(!curAud&&list.length){const live=list.filter(x=>!x.removed);curAud=(audF&&auds[audF]&&!auds[audF].removed)?audF:(live[0]||list[0])._id;}
+  const a=audDraft||(curAud&&auds[curAud])||null;
+  m.innerHTML=`<section class="sect"><header><div><h2>Audiences</h2><p>Each audience is one ideal customer profile: who they are, where they are, and which buying signals count. Every sweep runs once per active audience.</p></div><div class="ctl">${nRm?`<button class="btn sm" type="button" id="aShowRm" aria-pressed="${showRmAud}">${showRmAud?"Hide removed":"Show removed"} (${nRm})</button>`:""}<button class="btn" type="button" id="aNew" ${canWrite?"":"disabled"}>New audience</button></div></header>
+   ${list.length||audDraft?`<div class="audlist">${list.map(x=>`<button class="audbtn" type="button" data-aid="${esc(x._id)}" aria-pressed="${!audDraft&&x._id===curAud}"><b>${esc(x.name)}</b><small>${x.removed?"Removed":x.active===false?"Paused":"Active"} · ${sigs.filter(s=>s.audienceId===x._id).length} signals · ${Object.values(leads).filter(l=>l.audienceId===x._id).length} leads</small></button>`).join("")}${audDraft?`<button class="audbtn" type="button" aria-pressed="true"><b>${esc(audDraft.name||"New audience")}</b><small>Not saved yet</small></button>`:""}</div>`:`<p class="muted">No audiences yet. Start one with New audience, or describe the customer and let Claude draft it.</p>`}
+  </section>
+  ${a?audForm(a):""}`;
+  m.querySelectorAll("[data-aid]").forEach(b=>b.onclick=()=>{curAud=b.dataset.aid;audDraft=null;audRmAsk=null;drawAudiences();});
+  const sr=$("aShowRm"); if(sr)sr.onclick=()=>{showRmAud=!showRmAud;drawAudiences();};
+  $("aNew").onclick=()=>{audRmAsk=null;audDraft={name:"",active:true,sizes:["11 - 50","51 - 200"],geo:{radius:25},signalTypes:SIGNAL_LIB.slice(0,4).map(([type,why])=>({type,why,on:true})),sources:{news:true,jobs:true,funding:true},weights:{need:35,ability:40,timing:25},climateAdj:0};drawAudiences();};
+  if(a)wireAudForm(a);
+}
+function audForm(a){
+  const g=a.geo||{}, src=a.sources||{}, w=a.weights||{need:35,ability:40,timing:25};
+  const types=[...(a.signalTypes||[])]; SIGNAL_LIB.forEach(([t,why])=>{if(!types.some(x=>x.type===t))types.push({type:t,why,on:false});});
+  return `<section class="sect"><header><div><h2>${esc(a.name||"New audience")}</h2><p>Changes apply from the next sweep.</p></div>
+  <div class="ctl"><button class="btn" type="button" id="aDraftBtn" ${canWrite?"":"disabled"}>Draft with Claude</button>${audDraft?"":a.removed?`<button class="btn" type="button" id="aRestore" ${canWrite?"":"disabled"}>Restore audience</button>`:`<button class="btn" type="button" id="aRmBtn" ${canWrite?"":"disabled"}>Remove audience</button>`}</div></header>
+  ${!audDraft&&audRmAsk===a._id?audRmPanel(a):""}${a.removed?`<p class="muted" style="margin:0">This audience was removed${a.removedAt?" on "+esc(dShort(a.removedAt)):""}. It isn't swept, and its signals and leads stay on the desk. Restore it to edit or use it again.</p>`:""}
+  <div id="aDraftBox" hidden class="f"><label class="full">Describe the customer in a few sentences<textarea id="aDesc" placeholder="e.g. Family-owned HVAC and plumbing contractors in Halton and Hamilton with 10 to 50 staff, doing commercial service work, who are hiring or opening a second location."></textarea></label><div class="ctl full"><button class="btn primary sm" type="button" id="aDraftGo">Draft it</button><span class="toast" id="aDT"></span></div></div>
+  <form class="f" id="aForm">
+   <label>Name<input id="a_name" required value="${esc(a.name)}" placeholder="e.g. Halton contractors, 10 to 50 staff"></label>
+   <label>Status<select id="a_active"><option value="1" ${a.active!==false?"selected":""}>Active, swept every week</option><option value="0" ${a.active===false?"selected":""}>Paused</option></select></label>
+   <label class="full">Ideal customer, one sentence<input id="a_headline" value="${esc(a.headline)}"></label>
+   <label>Who fits <small>one per line</small><textarea id="a_who">${esc((a.who||[]).join("\n"))}</textarea></label>
+   <label>Not a fit <small>one per line</small><textarea id="a_notFit">${esc((a.notFit||[]).join("\n"))}</textarea></label>
+   <label>Industries <small>one per line</small><textarea id="a_industries">${esc((a.industries||[]).join("\n"))}</textarea></label>
+   <label>First person to contact <small>roles, one per line</small><textarea id="a_titles">${esc((a.titles||[]).join("\n"))}</textarea></label>
+   <fieldset class="full"><legend>Company size (staff)</legend>${SIZES.map(s=>`<label><input type="checkbox" name="size" value="${s}" ${(a.sizes||[]).includes(s)?"checked":""}> ${s.replace(" - "," to ")}</label>`).join("")}</fieldset>
+   <label>Centre of the territory<input id="a_center" value="${esc(g.center)}" placeholder="Oakville, Ontario, Canada"></label>
+   <label>Radius<select id="a_radius">${RADII.map(r=>`<option value="${r}" ${+g.radius===r?"selected":""}>${r} miles</option>`).join("")}</select></label>
+   <label class="full">Regions and towns to include <small>one per line, used for job and funding searches</small><textarea id="a_regions" style="min-height:60px">${esc((g.regions||[]).join("\n"))}</textarea></label>
+   <fieldset class="full"><legend>Buying signals that count</legend><div class="sigrows" style="width:100%">${types.map((t,i)=>`<div class="sigrow" data-si="${i}"><input type="checkbox" ${t.on!==false?"checked":""} aria-label="Use ${esc(t.type)}"><input type="text" name="type" value="${esc(t.type)}" aria-label="Signal"><input type="text" name="why" value="${esc(t.why)}" aria-label="Why it matters"><span></span></div>`).join("")}<div class="sigrow" data-si="new"><input type="checkbox" aria-label="Use custom signal"><input type="text" name="type" placeholder="Custom signal" aria-label="Custom signal"><input type="text" name="why" placeholder="Why it matters to this customer" aria-label="Why it matters"><span></span></div></div></fieldset>
+   <fieldset class="full"><legend>Where Claude looks</legend>
+    <label><input type="checkbox" id="a_src_news" ${src.news!==false?"checked":""}> Company news (Seamless.AI)</label>
+    <label><input type="checkbox" id="a_src_jobs" ${src.jobs!==false?"checked":""}> Job postings</label>
+    <label><input type="checkbox" id="a_src_funding" ${src.funding!==false?"checked":""}> Government funding and new facilities</label>
+    <label><input type="checkbox" id="a_src_site" ${src.site?"checked":""}> Website gap checks</label>
+    <label><input type="checkbox" id="a_src_grants" ${src.grants?"checked":""}> Federal grants and contributions</label>
+    <label><input type="checkbox" id="a_src_permits" ${src.permits?"checked":""}> Building permits</label>
+    <label><input type="checkbox" id="a_src_ads" ${src.ads?"checked":""}> Advertising activity</label>
+    <label><input type="checkbox" id="a_src_reviews" ${src.reviews?"checked":""}> Review changes</label></fieldset>
+   <label>Smallest permit worth flagging <small>estimated construction value in dollars, used when building permits are on</small><input type="number" id="a_permitMin" min="0" step="50000" value="${+src.permitMin||250000}"></label>
+   <label>Permit types <small>one per line, e.g. Commercial, Industrial, Institutional, Multi-residential, Interior alterations</small><textarea id="a_permitUses" style="min-height:56px">${esc((src.permitUses||["Commercial","Industrial","Institutional"]).join("\n"))}</textarea></label>
+   <label class="full">Extra searches <small>one per line, e.g. "new distribution centre Milton"</small><textarea id="a_custom" style="min-height:60px">${esc((src.custom||[]).join("\n"))}</textarea></label>
+   ${cbForm(a)}
+   <fieldset class="full"><legend>How the fit score is weighted</legend>
+    <label>Need <input type="number" id="a_wn" min="0" max="100" value="${+w.need||0}" style="width:70px"></label>
+    <label>Ability to pay <input type="number" id="a_wa" min="0" max="100" value="${+w.ability||0}" style="width:70px"></label>
+    <label>Timing <input type="number" id="a_wt" min="0" max="100" value="${+w.timing||0}" style="width:70px"></label>
+    <label>Market adjustment <input type="number" id="a_adj" min="-10" max="10" value="${+a.climateAdj||0}" style="width:70px"></label></fieldset>
+   <label class="full">Market climate notes <small>one per line: fact | source | link. Claude reuses these in conversation starters and refreshes them monthly.</small><textarea id="a_climate">${esc((a.climate||[]).map(c=>[c.fact,c.source,c.url].filter(Boolean).join(" | ")).join("\n"))}</textarea></label>
+   <label>Signals wanted per sweep<input type="number" id="a_target" min="1" max="40" value="${+a.target||8}"></label>
+   <div class="ctl full"><button class="btn primary" type="submit" ${canWrite?"":"disabled"}>Save audience</button>${audDraft?`<button class="btn" type="button" id="aCancel">Cancel</button>`:""}<span class="toast" id="aT"></span></div>
+  </form></section>`;
+}
+function cbForm(a){
+  const c=a.crunchbase||{};
+  return `<div class="cbsrc full"><div class="full ctl" style="justify-content:space-between"><h3>Crunchbase source</h3><span class="ctl"><button class="btn sm" type="button" id="cbFill" ${canWrite?"":"disabled"} title="Claude fills this block from the audience above and builds the saved Crunchbase search">Fill from ICP</button><label class="toast" style="flex-direction:row;display:flex;gap:6px;align-items:center;color:var(--fg)"><input type="checkbox" id="cb_on" style="width:auto" ${c.on?"checked":""}> Use Crunchbase for this audience</label></span></div>
+   <p class="toast full" id="cbFT" aria-live="polite" style="margin:0">${c.filledAt?"Last filled from the ICP "+esc(dShort(c.filledAt))+". Check it, then Save audience.":"Fill from ICP drafts every field below from this audience. Nothing is saved until you press Save audience."}</p>
+   <p class="lic full">${esc(LIC[ws.crunchbase?.licence||"hyperweb"])}</p>
+   <fieldset class="full"><legend>Crunchbase signals that count</legend>${CB_TYPES.map(([k,l,why])=>`<label title="${esc(why)}"><input type="checkbox" name="cbt" value="${k}" ${(c.types||[]).includes(k)?"checked":""}> ${esc(l)}</label>`).join("")}</fieldset>
+   <label>Regions <small>one per line</small><textarea id="cb_regions" style="min-height:56px">${esc((c.regions||[]).join("\n"))}</textarea></label>
+   <label>Industries <small>one per line</small><textarea id="cb_ind" style="min-height:56px">${esc((c.industries||[]).join("\n"))}</textarea></label>
+   <label>Staff size <input id="cb_size" value="${esc(c.size||"")}" placeholder="11 to 500"></label>
+   <label>Look back (days)<input type="number" id="cb_look" min="7" max="365" value="${+c.lookbackDays||90}"></label>
+   <label>Cadence<select id="cb_cad">${CB_CADENCE.map(x=>`<option ${x===(c.cadence||"Weekly")?"selected":""}>${x}</option>`).join("")}</select></label>
+   <label>Data tokens per run <small>about 5,000 for a search with a short preview</small><input type="number" id="cb_tok" min="0" step="500" value="${+c.tokensPerRun||5000}"></label>
+   <label class="full">Search in plain words <small>what the saved search looks for; Fill from ICP writes it and the runner can rebuild the search from it</small><textarea id="cb_brief" style="min-height:48px">${esc(c.searchBrief||"")}</textarea></label>
+   <label class="full">Saved Crunchbase search <small>the search the runner re-runs each time</small><input id="cb_url" value="${esc(c.searchUrl||"")}" placeholder="https://www.crunchbase.com/search/..."></label>
+   <label class="full">Investors to watch <small>for portfolio plays, one per line</small><textarea id="cb_inv" style="min-height:48px">${esc((c.investors||[]).join("\n"))}</textarea></label>
+   <label class="full">Competitors to watch <small>one per line: name | website. The runner flags their funding and acquisitions.</small><textarea id="cb_comp" style="min-height:56px">${esc((c.competitors||[]).map(x=>[x.name,x.url].filter(Boolean).join(" | ")).join("\n"))}</textarea></label>
+   <fieldset class="full"><legend>Growth outlook</legend><label><input type="checkbox" id="cb_gh" ${c.growthHighOnly!==false?"checked":""}> Only show higher-confidence growth outlooks</label><small class="muted" style="flex-basis:100%">Crunchbase gives most small private firms the same low-confidence tier, so low tiers are left out as noise. Venture-backed companies carry more data.</small></fieldset>
+   ${c.template?`<p class="note full">Template: copy this setup when onboarding a workspace with this kind of buyer.</p>`:""}
+  </div>`;
+}
+function readCB(prev){
+  const types=[...document.querySelectorAll('#aForm input[name=cbt]:checked')].map(x=>x.value);
+  return {...(prev||{}),on:$("cb_on").checked,types,regions:lines($("cb_regions").value),industries:lines($("cb_ind").value),size:$("cb_size").value.trim(),lookbackDays:+$("cb_look").value||90,cadence:$("cb_cad").value,
+    tokensPerRun:+$("cb_tok").value||0,searchUrl:safeUrl($("cb_url").value.trim()),investors:lines($("cb_inv").value),growthHighOnly:$("cb_gh").checked,searchBrief:$("cb_brief").value.trim(),filledAt:$("cbFT").dataset.filled||prev?.filledAt||"",
+    competitors:lines($("cb_comp").value).map(x=>{const [name,url]=x.split("|").map(t=>t.trim());return {name,url:url||""};})};
+}
+function readAud(){
+  const types=[];document.querySelectorAll("#aForm .sigrow").forEach(r=>{const [cb]=r.querySelectorAll("input[type=checkbox]");const t=r.querySelector('[name=type]').value.trim(),why=r.querySelector('[name=why]').value.trim();if(t)types.push({type:t,why,on:cb.checked});});
+  return {name:$("a_name").value.trim(),active:$("a_active").value==="1",headline:$("a_headline").value.trim(),who:lines($("a_who").value),notFit:lines($("a_notFit").value),industries:lines($("a_industries").value),titles:lines($("a_titles").value),
+    sizes:[...document.querySelectorAll('#aForm input[name=size]:checked')].map(x=>x.value),geo:{center:$("a_center").value.trim(),radius:+$("a_radius").value,regions:lines($("a_regions").value)},
+    signalTypes:types,sources:{news:$("a_src_news").checked,jobs:$("a_src_jobs").checked,funding:$("a_src_funding").checked,site:$("a_src_site").checked,grants:$("a_src_grants").checked,permits:$("a_src_permits").checked,ads:$("a_src_ads").checked,reviews:$("a_src_reviews").checked,permitMin:+$("a_permitMin").value||0,permitUses:lines($("a_permitUses").value),custom:lines($("a_custom").value)},
+    weights:{need:+$("a_wn").value||0,ability:+$("a_wa").value||0,timing:+$("a_wt").value||0},climateAdj:+$("a_adj").value||0,
+    climate:lines($("a_climate").value).map(x=>{const [fact,source,url]=x.split("|").map(s=>s.trim());return {fact,source:source||"",url:url||""};}),target:+$("a_target").value||8,
+    crunchbase:readCB((audDraft||auds[curAud]||{}).crunchbase)};
+}
+function audUse(a){return {n:sigs.filter(x=>x.audienceId===a._id).length, l:Object.values(leads).filter(x=>x.audienceId===a._id).length};}
+function audRmPanel(a){
+  const u=audUse(a), used=u.n+u.l>0;
+  return `<div class="f" id="aRmBox" style="border:1px solid var(--line);border-radius:10px;padding:12px">
+   <p class="full" style="margin:0"><b>Remove ${esc(a.name)}?</b> ${used?`It has ${u.n} signal${u.n===1?"":"s"} and ${u.l} lead${u.l===1?"":"s"}. Removing it stops its sweeps and hides it from this list. Its signals and leads stay where they are, and you can restore it later.`:"Nothing on the desk uses it yet, so it will be deleted for good."}</p>
+   <div class="ctl full"><button class="btn" type="button" id="aRmGo" style="border-color:var(--bad);color:var(--bad)">${used?"Remove audience":"Delete audience"}</button><button class="btn ghost" type="button" id="aRmNo">Cancel</button><span class="toast" id="aRmT"></span></div></div>`;
+}
+function wireAudForm(a){
+  const rb=$("aRmBtn"); if(rb)rb.onclick=()=>{audRmAsk=a._id;drawAudiences();};
+  const rn=$("aRmNo"); if(rn)rn.onclick=()=>{audRmAsk=null;drawAudiences();};
+  const rg=$("aRmGo"); if(rg)rg.onclick=async()=>{
+    rg.disabled=true; const u=audUse(a), ref=db.collection("audiences").doc(a._id);
+    try{
+      if(u.n+u.l>0)await ref.update({removed:true,active:false,removedAt:nowIso(),updatedAt:nowIso()});
+      else await ref.delete();
+      audRmAsk=null; if(audF===a._id)audF=""; if(!(u.n+u.l>0)||!showRmAud)curAud=null;
+      banner(u.n+u.l>0?`${a.name} was removed. Its signals and leads are still on the desk.`:`${a.name} was deleted.`,"ok");
+      drawHead();drawAudiences();
+    }catch(err){rg.disabled=false;$("aRmT").textContent=saveErr(err);}
+  };
+  const rs=$("aRestore"); if(rs)rs.onclick=async()=>{
+    rs.disabled=true;
+    try{await db.collection("audiences").doc(a._id).update({removed:false,removedAt:"",updatedAt:nowIso()});banner(`${a.name} is back, paused. Set it to Active when you want it swept.`,"ok");}
+    catch(err){rs.disabled=false;banner(saveErr(err),"err");}
+  };
+  $("aForm").onsubmit=async e=>{e.preventDefault();const v=readAud();if(!v.name){$("aT").textContent="Give the audience a name.";return;}
+    const id=audDraft?slug(v.name):a._id;
+    try{if(audDraft&&!auds[id])await db.collection("audiences").doc(id).set({...v,createdAt:nowIso(),updatedAt:nowIso()});else await db.collection("audiences").doc(id).update({...v,updatedAt:nowIso()});
+      audDraft=null;curAud=id;$("aT").textContent="Saved";}catch(err){$("aT").textContent=saveErr(err);}};
+  const c=$("aCancel"); if(c)c.onclick=()=>{audDraft=null;drawAudiences();};
+  $("cbFill").onclick=()=>fillCBFromICP();
+  $("aDraftBtn").onclick=()=>{$("aDraftBox").hidden=!$("aDraftBox").hidden;if(!$("aDraftBox").hidden)$("aDesc").focus();};
+  $("aDraftGo").onclick=async()=>{
+    const t=$("aDT"), desc=$("aDesc").value.trim(); if(!desc){t.textContent="Describe the customer first.";return;}
+    const sample=await window.claude?.use?.("sample"); if(!sample){t.textContent="Claude isn't available in this view.";return;}
+    t.textContent="Drafting…";
+    const prompt=`Turn this description of an ideal B2B customer into a prospecting audience. Return JSON only with keys: name (short), headline (one sentence), who (3 to 5 lines), notFit (2 to 4), industries (list), titles (roles of the first person to contact), sizes (subset of ${JSON.stringify(SIZES)}), center (city, province or state, country), radius (one of 25, 50, 100, 250, in miles), regions (towns and regions to search), signalTypes (4 to 7 objects {type, why} where why says what the trigger means for THIS customer; prefer types from ${JSON.stringify(SIGNAL_LIB.map(x=>x[0]))}), custom (2 to 4 extra search phrases), weights {need, ability, timing} summing to 100.
+Plain language, Canadian spelling, commas instead of dashes. Never invent statistics.
+The company selling to them: ${JSON.stringify({name:ws.knowledge?.companyName||ws.name,offer:ws.knowledge?.offer,whoWeHelp:ws.knowledge?.whoWeHelp})}
+Description: ${desc}`;
+    try{const o=await sample.json(prompt,{modelTier:"default"});
+      audDraft={...(audDraft||a),name:o.name||"",headline:o.headline||"",who:o.who||[],notFit:o.notFit||[],industries:o.industries||[],titles:o.titles||[],sizes:(o.sizes||[]).filter(s=>SIZES.includes(s)),geo:{center:o.center||"",radius:RADII.includes(+o.radius)?+o.radius:25,regions:o.regions||[]},
+        signalTypes:(o.signalTypes||[]).map(x=>({type:x.type,why:x.why,on:true})),sources:{news:true,jobs:true,funding:true,site:false,custom:o.custom||[]},weights:o.weights||{need:35,ability:40,timing:25},climateAdj:0,active:true,target:8};
+      drawAudiences();}
+    catch(e){t.textContent=e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":"Couldn't draft it. Try again or fill the form by hand.";}
+  };
+}
+
+/* ---------- Crunchbase: fill from the audience's ICP ---------- */
+function cbSizeFromICP(sizes){
+  const r=(sizes||[]).map(x=>String(x).split(" - ").map(Number)).filter(x=>x.length===2&&!x.some(isNaN));
+  if(!r.length)return "";
+  return Math.min(...r.map(x=>x[0]))+" to "+Math.max(...r.map(x=>x[1]));
+}
+async function fillCBFromICP(){
+  const t=$("cbFT"), b=$("cbFill"), icp=readAud();
+  if(!icp.headline&&!icp.who.length&&!icp.industries.length){t.textContent="Fill in the ideal customer, who fits or industries above first, then try again.";return;}
+  const sample=await window.claude?.use?.("sample");
+  if(!sample){t.textContent="Claude isn't available in this view, so fill the Crunchbase fields by hand.";return;}
+  b.disabled=true;t.textContent="Claude is reading the ICP…";
+  const k=ws.knowledge||{}, size=cbSizeFromICP(icp.sizes);
+  const prompt=`You set up a Crunchbase source for one prospecting audience on a B2B lead generation desk. The desk finds companies that would BUY from the seller below. Translate the audience's ICP into Crunchbase search settings.
+Return JSON only:
+{"types":["subset of: grants, early, later, acq, leaders, investors"],
+ "regions":["Crunchbase-style locations, e.g. Ontario, Canada or Greater Toronto Area; broaden towns to the region or province Crunchbase knows"],
+ "industries":["Crunchbase industry names, e.g. Industrial Automation, Manufacturing, Construction, Health Care; 3 to 8"],
+ "lookbackDays":"number 30 to 180",
+ "cadence":"Weekly, Every two weeks or Monthly",
+ "investors":["investor names, ONLY if named in the data below, else empty"],
+ "competitors":[{"name":"","url":"https://..."}],
+ "growthHighOnly":true,
+ "searchBrief":"one plain sentence a Crunchbase search builder can compile: company type, industries, location, staff range, and the funding or event types to look for. No dates.",
+ "why":"one short line on the main choices"}
+Rules: pick types that fit how THIS buyer gets budget or change. Small private SMBs and nonprofits rarely raise venture money, so prefer grants, acquisitions and leadership hires for them and leave out early or later unless the ICP is venture-backed; include investors only if investors are named. Competitors: only the seller's own competitors if they are named in the data, else empty; never invent names or URLs. growthHighOnly false only when the ICP is mostly small private firms that Crunchbase scores low anyway. Plain words, Canadian spelling, commas instead of dashes.
+SELLER: ${JSON.stringify({company:k.companyName||ws.name,offer:k.offer,whoWeHelp:k.whoWeHelp,different:k.different})}
+AUDIENCE ICP: ${JSON.stringify({name:icp.name,headline:icp.headline,who:icp.who,notFit:icp.notFit,industries:icp.industries,firstContact:icp.titles,staff:icp.sizes,centre:icp.geo.center,radiusMiles:icp.geo.radius,regions:icp.geo.regions,buyingSignals:icp.signalTypes.filter(x=>x.on!==false).map(x=>x.type+": "+x.why),climate:icp.climate.map(x=>x.fact)})}
+STAFF RANGE ALREADY SET: ${size||"none"}`;
+  let o;
+  try{o=await sample.json(prompt,{modelTier:"default"});}
+  catch(e){b.disabled=false;t.textContent=e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":"Couldn't draft the Crunchbase settings. Try again.";return;}
+  const keys=CB_TYPES.map(x=>x[0]), arr=v=>Array.isArray(v)?v.map(x=>String(x).trim()).filter(Boolean):[];
+  const types=arr(o?.types).filter(x=>keys.includes(x));
+  document.querySelectorAll('#aForm input[name=cbt]').forEach(x=>x.checked=types.includes(x.value));
+  $("cb_on").checked=true;
+  if(arr(o?.regions).length)$("cb_regions").value=arr(o.regions).join("\n");
+  if(arr(o?.industries).length)$("cb_ind").value=arr(o.industries).join("\n");
+  if(size)$("cb_size").value=size;
+  const lb=Math.round(+o?.lookbackDays); if(lb>=7&&lb<=365)$("cb_look").value=lb;
+  if(CB_CADENCE.includes(o?.cadence))$("cb_cad").value=o.cadence;
+  if(!(+$("cb_tok").value))$("cb_tok").value=5000;
+  const inv=arr(o?.investors); if(inv.length&&!$("cb_inv").value.trim())$("cb_inv").value=inv.join("\n");
+  const comp=(Array.isArray(o?.competitors)?o.competitors:[]).filter(x=>x&&x.name).map(x=>[String(x.name).trim(),safeUrl(x.url)].filter(Boolean).join(" | "));
+  if(comp.length&&!$("cb_comp").value.trim())$("cb_comp").value=comp.join("\n");
+  if(typeof o?.growthHighOnly==="boolean")$("cb_gh").checked=o.growthHighOnly;
+  const brief=String(o?.searchBrief||"").trim(); if(brief)$("cb_brief").value=brief;
+  t.dataset.filled=nowIso();
+  const why=o?.why?" "+String(o.why).trim():"";
+  if(!brief){b.disabled=false;t.textContent="Filled from the ICP."+why+" No search brief came back, so add the saved search by hand. Check it, then Save audience.";return;}
+  t.textContent="Filled from the ICP. Building the saved Crunchbase search…";
+  let url="", note="";
+  try{const mcp=await getMcp(); if(!mcp)throw {code:"server_not_connected"};
+    const r=await mcp.callTool("Crunchbase","cb_expert_build_search",{search_query:brief},{cache:false});
+    url=safeUrl(r?.payload?.url||"");
+    if(!url)note=" Crunchbase didn't return a search link, so paste one by hand or let the runner build it from the plain words.";}
+  catch(e){const c=e?.code;
+    note=c==="server_not_connected"||c==="selection_required"?" Crunchbase isn't connected for you here, so the runner builds the saved search from the plain words on its next pass.":c==="needs_reauth"?" Reconnect Crunchbase in claude.ai Settings, Connectors, then press Fill from ICP again for the saved search.":c==="cancelled"?" Saved search not built.":" Couldn't build the saved search, so the runner builds it from the plain words on its next pass.";}
+  if(url)$("cb_url").value=url;
+  b.disabled=false;
+  t.textContent=(url?"Filled from the ICP, saved search built.":"Filled from the ICP.")+why+note+" Check it, then Save audience.";
+}
+
+/* ---------- Messaging and delivery ---------- */
+function drawSetup(){
+  const k=ws.knowledge||{}, m=$("main");
+  m.innerHTML=`<form id="sForm" class="panel">
+  <section class="sect"><header><div><h2>Messaging pack</h2><p>Everything Claude needs to write outreach in this company's voice. Conversation starters and every script on a lead are written from this.</p></div></header>
+   <div class="f">
+    <label>Company name<input id="k_companyName" value="${esc(k.companyName||ws.name)}"></label>
+    <label>Website<input id="k_website" value="${esc(k.website)}" placeholder="https://"></label>
+    <label class="full">What they sell <small>the offer, in a sentence or two</small><textarea id="k_offer" style="min-height:60px">${esc(k.offer)}</textarea></label>
+    <label>Who they help<textarea id="k_whoWeHelp" style="min-height:60px">${esc(k.whoWeHelp)}</textarea></label>
+    <label>What makes them different<textarea id="k_different" style="min-height:60px">${esc(k.different)}</textarea></label>
+    <label class="full">Proof <small>one per line: results, clients, credentials Claude may mention</small><textarea id="k_proof">${esc((k.proof||[]).join("\n"))}</textarea></label>
+    <label>Voice<textarea id="k_voice" style="min-height:60px" placeholder="Plain, frank, no jargon">${esc(k.voice)}</textarea></label>
+    <label>Never say<textarea id="k_avoid" style="min-height:60px">${esc((k.avoid||[]).join("\n"))}</textarea></label>
+    <label>Sender name<input id="k_senderName" value="${esc(k.senderName)}"></label>
+    <label>Sender role<input id="k_senderRole" value="${esc(k.senderRole)}"></label>
+    <label>Booking link<input id="k_bookingLink" value="${esc(k.bookingLink)}" placeholder="https://"></label>
+    <label>Mailing address <small>required in every commercial email under CASL</small><input id="k_mailingAddress" value="${esc(k.mailingAddress)}"></label>
+    <label class="full">Opt-out line<input id="k_optOut" value="${esc(k.optOut||"Not the right time? Reply 'no thanks' and I won't email again.")}"></label>
+   </div></section>
+  <section class="sect"><header><div><h2>Who we never prospect</h2><p>Competitors are peers, not buyers. Anything on this list, and anything outside the Quebec rule below, is flagged in Signals with a one-click dismiss and kept out of the client tease. Saving also adds these to every audience's Not a fit list, so sweeps skip them.</p></div></header>
+   <div class="f">
+    <label class="full">Local competitors <small>one per line: name | website. Keep it to businesses in this desk's own territory that sell the same thing to the same buyers.</small><textarea id="g_rivals" style="min-height:84px" placeholder="Smith HVAC | smithhvac.ca">${esc(competitors().map(c=>c.name+(c.domain?" | "+c.domain:"")).join("\n"))}</textarea></label>
+    <label>Quebec<select id="k_quebec"><option value="exclude" ${quebecPolicy()==="exclude"?"selected":""}>Exclude Quebec from sweeps (default)</option><option value="bilingual" ${quebecPolicy()==="bilingual"?"selected":""}>Include Quebec, outreach French first</option></select></label>
+    <p class="muted" style="margin:0;font-size:13px;align-self:end">Quebec expects commercial messages in French and has its own privacy law. Only include it when this client has someone who reads French and can handle the follow-up. Check the rules with a lawyer before turning it on.</p>
+   </div></section>
+  <section class="sect"><header><div><h2>Delivery and schedule</h2><p>Where accepted leads go and when the desk sweeps. Hyperweb sets these up for managed workspaces.</p></div></header>
+   <div class="f">
+    <label>Workspace name<input id="w_name" value="${esc(ws.name)}"></label>
+    <label>Workspace type<select id="w_type">${["Internal","Agency partner","Client"].map(x=>`<option ${x===ws.type?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Status<select id="w_status">${["Pilot","Active","Paused"].map(x=>`<option ${x===ws.status?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Sweep day<select id="w_sweepDay">${["Monday","Tuesday","Wednesday","Thursday","Friday"].map(x=>`<option ${x===(ws.sweepDay||"Monday")?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Go High Level location ID <small>leads go into this sub-account</small><input id="w_ghlLocationId" value="${esc(ws.ghlLocationId)}"></label>
+    <label>GHL pipeline ID <small>optional, creates an opportunity</small><input id="w_ghlPipelineId" value="${esc(ws.ghlPipelineId)}"></label>
+    <label>GHL stage ID<input id="w_ghlStageId" value="${esc(ws.ghlStageId)}"></label>
+    <label>Tags on every lead <small>comma separated</small><input id="w_ghlTags" value="${esc((ws.ghlTags||["signals-desk"]).join(", "))}"></label>
+    <label>Weekly digest to <small>emails, one per line</small><textarea id="w_digest" style="min-height:56px">${esc((ws.digestTo||[]).join("\n"))}</textarea></label>
+    <label>Monthly Seamless.AI credit budget<input type="number" id="w_creditBudget" min="0" value="${+ws.creditBudget||0}"></label>
+    <fieldset class="full"><legend>Crunchbase licence</legend>
+     <label><input type="radio" name="w_lic" value="hyperweb" ${(ws.crunchbase?.licence||"hyperweb")==="hyperweb"?"checked":""}> Hyperweb's Crunchbase account (managed)</label>
+     <label><input type="radio" name="w_lic" value="partner" ${ws.crunchbase?.licence==="partner"?"checked":""}> Partner's own Crunchbase connection</label>
+     <p class="lic" style="flex-basis:100%">${esc(LIC[ws.crunchbase?.licence||"hyperweb"])}</p></fieldset>
+    <label>Crunchbase data tokens a month for this desk <small>Hyperweb's account is shared by every managed desk</small><input type="number" id="w_cbBudget" min="0" step="1000" value="${+ws.crunchbase?.tokenBudget||0}"></label>
+    <label>Partner's Crunchbase account <small>who connected it, if partner licence</small><input id="w_cbOwner" value="${esc(ws.crunchbase?.connectedBy||"")}"></label>
+    <fieldset class="full"><legend>On accept</legend><label><input type="checkbox" id="w_enrichOnAccept" ${ws.enrichOnAccept?"checked":""}> Look up contacts by default (spends credits)</label></fieldset>
+   </div></section>
+  <div class="ctl"><button class="btn primary" type="submit" ${canWrite?"":"disabled"}>Save</button><span class="toast" id="sT"></span></div></form>${teamSection()}`;
+  wireTeam();
+  $("sForm").onsubmit=async e=>{e.preventDefault();
+    const kn={...(ws.knowledge||{})};["companyName","website","offer","whoWeHelp","different","voice","senderName","senderRole","bookingLink","mailingAddress","optOut","quebec"].forEach(f=>kn[f]=$("k_"+f).value.trim());kn.proof=lines($("k_proof").value);kn.avoid=lines($("k_avoid").value);
+    const rivals=parseRivals($("g_rivals").value);
+    const patch={knowledge:kn,competitors:rivals,name:$("w_name").value.trim(),type:$("w_type").value,status:$("w_status").value,sweepDay:$("w_sweepDay").value,ghlLocationId:$("w_ghlLocationId").value.trim(),ghlPipelineId:$("w_ghlPipelineId").value.trim(),ghlStageId:$("w_ghlStageId").value.trim(),
+      ghlTags:$("w_ghlTags").value.split(",").map(s=>s.trim()).filter(Boolean),digestTo:lines($("w_digest").value),creditBudget:+$("w_creditBudget").value||0,enrichOnAccept:$("w_enrichOnAccept").checked,
+      crunchbase:{...(ws.crunchbase||{}),licence:(document.querySelector("input[name=w_lic]:checked")||{}).value||"hyperweb",tokenBudget:+$("w_cbBudget").value||0,connectedBy:$("w_cbOwner").value.trim()},updatedAt:nowIso()};
+    try{if(loaded.wsExists)await db.collection("workspace").doc("profile").update(patch);else await db.collection("workspace").doc("profile").set({...patch,createdAt:nowIso()});
+      const n=await syncGuard(rivals,kn.quebec==="bilingual"?"bilingual":"exclude");
+      $("sT").textContent=n?`Saved. ${n} audience${n===1?"":"s"} updated so sweeps skip these.`:"Saved";}catch(err){$("sT").textContent=saveErr(err);}};
+}
+/* keep every audience's Not a fit list in step with the competitor list and the Quebec rule */
+async function syncGuard(rivals,qc){
+  let n=0;
+  for(const a of Object.values(auds).filter(x=>!x.removed)){
+    const keep=(a.notFit||[]).filter(l=>!String(l).startsWith(COMP_TAG)&&String(l)!==QC_TAG);
+    const next=[...keep,...rivals.map(rivalLine),...(qc==="exclude"?[QC_TAG]:[])];
+    if(JSON.stringify(next)===JSON.stringify(a.notFit||[]))continue;
+    await db.collection("audiences").doc(a._id).update({notFit:next,updatedAt:nowIso()});n++;
+  }
+  return n;
+}
+
+/* ---------- Market watch: competitor watch and monthly market brief (aggregate stats only) ---------- */
+function drawMarket(){
+  const m=$("main"), list=Object.values(auds).filter(a=>!a.removed&&(!audF||a._id===audF)).sort((a,b)=>(!!a.crunchbase?.template)-(!!b.crunchbase?.template)||String(a.name).localeCompare(b.name));
+  const lic=ws.crunchbase?.licence||"hyperweb", cbSig=sigs.filter(s=>isCB(s)&&inAud(s));
+  const pend=k=>reqs.find(r=>r.kind===k&&["Queued","Running"].includes(r.status));
+  m.innerHTML=`<p class="lic">${esc(LIC[lic])}</p>
+  <div class="tiles">
+   <div class="tile"><span>Crunchbase signals</span><b>${cbSig.length}</b><small>${cbSig.filter(s=>(s.status||"New")==="New").length} waiting for a decision</small></div>
+   <div class="tile"><span>Audiences using it</span><b>${Object.values(auds).filter(a=>!a.removed&&a.crunchbase?.on).length}</b><small>of ${Object.values(auds).filter(a=>!a.removed).length}</small></div>
+   <div class="tile"><span>Data tokens this month</span><b>${(+ws.crunchbase?.tokensMonth||0).toLocaleString("en-CA")}</b><small>${ws.crunchbase?.tokenBudget?"of "+(+ws.crunchbase.tokenBudget).toLocaleString("en-CA")+" for this desk":"No desk budget set"}</small></div>
+   <div class="tile"><span>Licence</span><b style="font-size:18px">${lic==="partner"?"Partner's own":"Hyperweb managed"}</b><small>Change under Messaging and delivery</small></div></div>
+  ${list.length?list.map(a=>{const c=a.crunchbase||{}, b=a.marketBrief||{}, w=a.competitorWatch||{};
+   return `<section class="sect" data-mk="${esc(a._id)}"><header><div><h2>${esc(a.name)} ${c.template?'<span class="pill">Template</span>':""}</h2><p>${c.on?`Crunchbase: ${esc((c.types||[]).map(k=>(CB_TYPES.find(x=>x[0]===k)||[0,k])[1]).join(", ")||"no signal types picked")} · ${esc((c.regions||[]).join(", ")||"no region")} · ${esc(c.size||"any size")} · last ${+c.lookbackDays||90} days · ${esc(c.cadence||"Weekly")}`:"Crunchbase is off for this audience. Turn it on in Audiences."}${safeUrl(c.searchUrl)?` · <a href="${esc(c.searchUrl)}" target="_blank" rel="noopener">saved search</a>`:""}</p></div>
+    <div class="ctl"><button class="btn sm" type="button" data-q="cbSweep" ${canWrite&&c.on&&!c.template?"":"disabled"}>${pend("cbSweep")?"Crunchbase run queued":"Run Crunchbase now"}</button><button class="btn sm" type="button" data-q="marketBrief" ${canWrite&&!c.template?"":"disabled"}>Refresh market brief</button><span class="toast" data-t></span></div></header>
+    <div class="grid">
+     <div class="panel" style="gap:8px"><h3>Market brief${b.month?" · "+esc(b.month):""}</h3>
+      ${(b.stats||[]).length?`<div class="stats">${b.stats.map(x=>`<div class="tile"><span>${esc(x.label)}</span><b>${esc(x.value)}</b><small>${esc(x.note||"")}</small></div>`).join("")}</div>`:`<p class="muted" style="margin:0">No brief yet. The runner writes one a month: counts and totals by industry and region, plus what they mean for this audience.</p>`}
+      ${b.summary?`<p class="why">${esc(b.summary)}</p>`:""}
+      ${(b.talkingPoints||[]).length?`<ul style="margin:0;padding-left:18px">${b.talkingPoints.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+      ${b.updatedAt?`<p class="firmo">Aggregate statistics from Crunchbase${b.source?" ("+esc(b.source)+")":""}, ${esc(dShort(b.updatedAt))}.</p>`:""}</div>
+     <div class="panel" style="gap:8px"><h3>Competitor watch</h3>
+      ${(c.competitors||[]).length?`<div>${c.competitors.map(x=>{const n=(w.items||[]).filter(i=>i.name===x.name);return `<div class="comp"><span><b>${esc(x.name)}</b>${safeUrl(x.url)?` · <a href="${esc(x.url)}" target="_blank" rel="noopener">site</a>`:""}</span><span class="pill ${n.length?"p-warn":""}">${n.length?n.length+" new":"Quiet"}</span>${n.map(i=>`<small>${esc(dShort(i.date))} · ${esc(i.what)}${i.soWhat?" · "+esc(i.soWhat):""}</small>`).join("")}</div>`;}).join("")}</div>`:`<p class="muted" style="margin:0">No competitors named. Add them in Audiences under Crunchbase source.</p>`}
+      ${(c.investors||[]).length?`<p class="firmo">Investors watched for portfolio plays: ${esc(c.investors.join(", "))}</p>`:""}</div>
+    </div></section>`;}).join(""):`<div class="empty"><h2>No audiences yet</h2><p>Set up an audience first.</p></div>`}`;
+  m.querySelectorAll("[data-mk]").forEach(sec=>sec.querySelectorAll("[data-q]").forEach(b=>b.onclick=async()=>{const t=sec.querySelector("[data-t]");b.disabled=true;try{await queueReq({kind:b.dataset.q,audienceId:sec.dataset.mk,note:b.dataset.q==="cbSweep"?"Re-run the audience's saved Crunchbase search and triage new companies":"Refresh the monthly market brief from Crunchbase aggregates"});t.textContent="Queued for the runner.";}catch(e){b.disabled=false;t.textContent=saveErr(e);}}));
+}
+
+/* ---------- Client tease: hidden-company view to sell the paid plan ---------- */
+function teaseCfg(){const t=ws.tease||{};const tier=["paid","sample","tease"].includes(t.tier)?t.tier:"sample",reveal=Math.max(1,Math.min(3,+t.reveal||2));return {tier,reveal,count:Math.max(tier==="sample"?reveal+1:1,Math.min(12,+t.count||5)),windowDays:Math.max(1,+t.windowDays||60),potential:Math.max(0,+t.potential||0),
+  ctaText:t.ctaText||"Book 20 minutes to see the full list",ctaUrl:safeUrl(t.ctaUrl)||safeUrl(ws.knowledge?.bookingLink)||"https://hyperweb.ca/connect",audienceIds:Array.isArray(t.audienceIds)?t.audienceIds:[]};}
+function teaseTotal(c,shown){if(c.potential>shown)return c.potential;const key=(ws.name||"desk")+new Date().toISOString().slice(0,7);let h=7;for(const ch of key)h=(h*31+ch.charCodeAt(0))>>>0;return shown+14+h%91;}
+let pbmOpen=false, pbmPlay="", cvExpand=new Set();
+function showPlays(){const off=new Set(ws.playsOff||[]);const all=Array.isArray(ws.plays)&&ws.plays.length?ws.plays:DEFAULT_PLAYS;return all.filter(p=>!off.has(p.id));}
+const READY={call:"Call notes ready for you",linkedin:"Message drafted for you",email:"Email drafted for you, with the booking link",task:"Guidance included"};
+function playsModal(){
+  const ps=showPlays(); if(!ps.length)return "";
+  const cur=ps.find(p=>p.id===pbmPlay)||ps[0];
+  return `<div class="pbmodal" id="pbModal" role="dialog" aria-modal="true" aria-labelledby="pbmT"><div class="pbmbox">
+   <div class="ctl" style="justify-content:space-between;align-items:start;flex-wrap:nowrap"><h2 id="pbmT">Every opportunity comes with a playbook</h2><button class="btn sm" type="button" id="pbmClose">Close</button></div>
+   <p class="sub" style="margin:0">Finding the company is half the job. Each opportunity arrives with a step-by-step sequence for building awareness, credibility and trust, so your team always knows the next move.</p>
+   <div class="pbmtabs" role="group" aria-label="Playbooks">${ps.map(p=>`<button type="button" data-pbm="${esc(p.id)}" aria-pressed="${p.id===cur.id}">${esc(p.name)}</button>`).join("")}</div>
+   <p class="meta" style="margin:0;font-size:13px">${esc(cur.about||"")} ${cur.steps.length} steps over ${cur.steps[cur.steps.length-1].day} days.</p>
+   <ol class="tl">${cur.steps.map(s=>`<li><span class="day">Day ${s.day}</span><div class="what"><span class="ctl" style="gap:6px"><span class="ch ch-${esc(s.ch)}">${esc(CHN[s.ch]||s.ch)}</span><b>${esc(s.title)}</b></span><small>${esc(s.msg?READY[s.ch]||"":READY.task)}</small></div></li>`).join("")}</ol>
+   <div class="pbmfeat"><div><b>Drafted for you</b>Every message and call script is written from the opportunity's own news.</div><div><b>Ticked off as you go</b>Everyone sees where each conversation stands.</div><div><b>Handed over warm</b>When a prospect engages, it moves to whoever makes the call.</div></div>
+   <p class="meta" style="margin:0">Plays are tuned to your industry and the way your team sells.</p></div></div>`;
+}
+const sigDate=s=>String(s.date||s.foundAt||"").slice(0,10);
+function teasePicks(){
+  const c=teaseCfg(), cut=new Date(Date.now()-c.windowDays*864e5).toISOString().slice(0,10);
+  const ok=s=>s.status!=="Dismissed"&&s.triage!=="Dismiss"&&!guardFlag(s)&&(s.teasePin!==false||s.teaseReveal===true)&&(!c.audienceIds.length||c.audienceIds.includes(s.audienceId));
+  const pinnedQ=s=>s.teasePin===true||s.teaseReveal===true;
+  const ord={Promote:0,Review:1};
+  const pinned=sigs.filter(s=>ok(s)&&pinnedQ(s)).sort((a,b)=>(b.teaseReveal===true)-(a.teaseReveal===true)||sigDate(b).localeCompare(sigDate(a)));
+  const rest=sigs.filter(s=>ok(s)&&!pinnedQ(s)&&(s.triage==="Promote"||s.triage==="Review")&&sigDate(s)>=cut)
+    .sort((a,b)=>(ord[a.triage]??2)-(ord[b.triage]??2)||sigDate(b).localeCompare(sigDate(a)));
+  return [...pinned,...rest].slice(0,c.count);
+}
+/* Sample mode: one or two real opportunities shown in full, the rest locked */
+function teaseReveals(picks){
+  const c=teaseCfg(); if(c.tier!=="sample")return new Set();
+  const chosen=picks.filter(s=>s.teaseReveal===true);
+  const ordT={Promote:0,Review:1};
+  const hasContact=s=>(leads[s.leadId||s._id]?.contacts||[]).length>0;
+  const auto=picks.filter(s=>s.teaseReveal!==true&&!isCB(s)).sort((a,b)=>hasContact(b)-hasContact(a)||(ordT[a.triage]??2)-(ordT[b.triage]??2)||(qScore(b.prelim,auds[b.audienceId],b.climateAdj)??0)-(qScore(a.prelim,auds[a.audienceId],a.climateAdj)??0));
+  return new Set([...chosen,...auto].slice(0,c.reveal).map(s=>s._id));
+}
+function teaseOrdered(){const picks=teasePicks(),rv=teaseReveals(picks);return {picks:[...[...rv].map(id=>picks.find(s=>s._id===id)),...picks.filter(s=>!rv.has(s._id))],rv};}
+function coarseRegion(s){
+  const city=String(s.city||"").replace(/\(.*?\)/g,"").split(",")[0].trim(), k=city.toLowerCase();
+  if(!k)return s.region||"Ontario";
+  if(!CITY_REGION[k]&&!BIG_CITY.has(k)&&/\b(bc|british columbia|alberta|ab|quebec|qc|manitoba|nova scotia)\b/i.test(s.city||""))return "Outside Ontario";
+  if(BIG_CITY.has(k))return city;
+  return CITY_REGION[k]||"Ontario";
+}
+const plainIndustry=s=>String(s.industry||"").replace(/\(.*?\)/g,"").replace(/\s+/g," ").trim().toLowerCase()||"business";
+const sizeTxt=s=>/\d/.test(s.size||"")?String(s.size).replace(/\(.*?\)/g,"").trim().replace(/\s*-\s*/," to ").replace(/\s*staff$/i,"")+" staff":"";
+function trigPhrase(s){const k=String(s.type||"").toLowerCase();if(/grant/i.test(s.detail||"")&&/invest|fund/.test(k))return TRIG.grant;return TRIG[k]||Object.entries(TRIG).find(([x])=>k.includes(x))?.[1]||"showed a buying signal";}
+function idWords(s){
+  const name=String(s.company||""), out=new Set();
+  name.split(/[^A-Za-z0-9&']+/).forEach(w=>{const lw=w.toLowerCase();if(lw.length>=3&&!GENERIC.has(lw))out.add(w);});
+  const d=cleanDomain(s.domain).split(".")[0]; if(d&&d.length>=3)out.add(d);
+  const l=leads[s.leadId||s._id]; (l?.contacts||[]).forEach(c=>String(c.name||"").split(/\s+/).forEach(w=>{if(w.length>=2)out.add(w);}));
+  return [...out];
+}
+const reEsc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function scrub(text,s){
+  let t=String(text||"");
+  t=t.replace(/https?:\/\/\S+/gi,"").replace(/\bwww\.\S+/gi,"").replace(/\b[\w.-]+@[\w.-]+\.\w+\b/g,"").replace(/\b[\w-]+\.(com|ca|net|org|io|co|biz|info)\b(\/\S*)?/gi,"");
+  if(s.company)t=t.replace(new RegExp(reEsc(String(s.company)),"gi"),"");
+  if(s.domain)t=t.replace(new RegExp(reEsc(cleanDomain(s.domain)),"gi"),"");
+  if(s.address)t=t.replace(new RegExp(reEsc(String(s.address)),"gi"),"");
+  t=t.replace(/\b\d{1,5}\s+[A-Z][\w.]*(\s+[A-Z][\w.]*)*\s+(Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Way|Court|Crt|Crescent|Cres|Lane|Line|Parkway|Pkwy)\b\.?/g,"");
+  idWords(s).forEach(w=>{t=t.replace(new RegExp("\\b"+reEsc(w)+"(['’]s)?\\b","gi"),"");});
+  const city=String(s.city||"").replace(/\(.*?\)/g,"").split(",")[0].trim();
+  if(city&&!BIG_CITY.has(city.toLowerCase()))t=t.replace(new RegExp("\\b"+reEsc(city)+"\\b","gi"),coarseRegion(s));
+  return t.replace(/\(\s*\)/g,"").replace(/\s+([,.;:])/g,"$1").replace(/([,;:])\s*([,.;:])/g,"$2").replace(/\s{2,}/g," ").replace(/^[\s,.;:]+/,"").trim();
+}
+function buildLine(s){
+  const sz=sizeTxt(s), reg=coarseRegion(s), d=dShort(sigDate(s)), ind=plainIndustry(s);
+  const noun=/(company|firm|maker|manufacturer|fabricator|contractor|builder|clinic|practice|agency|business|organization|organisation|charity|nonprofit|supplier|distributor|producer|provider)s?$/.test(ind)?ind:ind+" company";
+  const head=[sz,noun].filter(Boolean).join(" ");
+  const art=/^(8|11|18|8\d)\b|^[aeiou]/i.test(head)?"An":"A";
+  return `${art} ${head} ${reg==="Outside Ontario"?"outside Ontario":"in "+reg} ${trigPhrase(s)}${d?" on "+d:""}.`.replace(/\s+/g," ");
+}
+function leakWords(text,s){const t=String(text||"");return t&&scrub(t,s)!==t.replace(/\s+/g," ").trim()?[s.company,cleanDomain(s.domain),...idWords(s)].filter(w=>w&&new RegExp(reEsc(String(w)),"i").test(t)).concat(/https?:|www\.|\.(com|ca|net|org)\b|@/i.test(t)?["a link or email"]:[]):[];}
+function teaseOf(s){
+  const t=s.tease||{}, raw=String(t.line||"").trim(), safe=raw&&!leakWords(raw,s).length?scrub(raw,s):"";
+  const line=safe;
+  return {line:line||buildLine(s),industry:t.industry||plainIndustry(s),region:t.region||coarseRegion(s),size:t.size||sizeTxt(s),trigger:t.trigger||s.type||"Buying signal",date:t.date||dShort(sigDate(s)),fit:t.fit||qTier(s.prelim)||"",auto:!line};
+}
+function drawTease(){
+  const m=$("main"), c=teaseCfg(), {picks,rv}=teaseOrdered();
+  m.innerHTML=`<p class="lic">${esc(TEASE_LIC)}</p>
+  <section class="sect"><header><div><h2>Client tease</h2><p>Show a client or prospect what this desk finds for them, with the companies hidden, to sell the paid Signals plan. The newest Promote signals come first, then Review, from the last ${c.windowDays} days. Use Show in tease or Hide from tease on any signal card to change the picks. On the Sample plan, the best one or two are shown in full as proof and the rest stay locked; use Show in full below to choose which.</p></div>
+   <div class="ctl"><button class="btn primary" type="button" id="tView">Client view</button><button class="btn" type="button" id="tCopy">Copy tease email</button><span class="toast" id="tCT"></span></div></header>
+   <form class="f" id="tForm">
+    <label>Plan shown<select id="t_tier"><option value="tease" ${c.tier==="tease"?"selected":""}>Tease: hide company details</option><option value="sample" ${c.tier==="sample"?"selected":""}>Sample: show 1 or 2 in full, lock the rest</option><option value="paid" ${c.tier==="paid"?"selected":""}>Paid: show everything</option></select></label>
+    <label>Shown in full <small>Sample plan only</small><select id="t_reveal">${[1,2,3].map(n=>`<option ${n===c.reveal?"selected":""}>${n}</option>`).join("")}</select></label>
+    <label>Total in the headline <small>Sample plan; blank picks a number that changes monthly</small><input type="number" id="t_potential" min="0" max="999" value="${c.potential||""}" placeholder="Auto"></label>
+    <label>How many to show in total<input type="number" id="t_count" min="1" max="12" value="${c.count}"></label>
+    <label>Look back (days)<input type="number" id="t_window" min="1" max="180" value="${c.windowDays}"></label>
+    <label>Button text<input id="t_ctaText" value="${esc(c.ctaText)}"></label>
+    <label class="full">Button link<input id="t_ctaUrl" value="${esc(c.ctaUrl)}" placeholder="https://"></label>
+    <fieldset class="full"><legend>Audiences to draw from <small>none ticked means all</small></legend>${Object.values(auds).filter(a=>!a.removed&&!a.crunchbase?.template).map(a=>`<label><input type="checkbox" name="t_aud" value="${esc(a._id)}" ${c.audienceIds.includes(a._id)?"checked":""}> ${esc(a.name)}</label>`).join("")||'<span class="muted">No audiences yet</span>'}</fieldset>
+    <div class="ctl full"><button class="btn primary sm" type="submit" ${canWrite?"":"disabled"}>Save tease settings</button><span class="toast" id="tST"></span></div>
+   </form></section>
+  <section class="sect"><header><div><h2>What the client sees (${picks.length})</h2><p>One plain sentence per opportunity, with no company name, website, people, street address or source link. Edit any line, or let Claude draft them. Every line is scrubbed again before it is shown.</p></div>
+   <div class="ctl"><button class="btn" type="button" id="tWrite" ${canWrite&&picks.length?"":"disabled"}>Write tease lines with Claude</button><span class="toast" id="tWT"></span></div></header>
+   ${picks.length?`<div class="tlist">${picks.map((s,i)=>{const t=teaseOf(s);return `<div class="trow" data-tid="${esc(s._id)}"><header><span><span class="num meta">${i+1}.</span> <b>${esc(s.company)}</b> <span class="meta">internal only</span></span><span class="ctl">${rv.has(s._id)?'<span class="unl">Shown in full</span>':""}${rv.has(s._id)&&!(leads[s.leadId||s._id]?.contacts||[]).length?'<span class="pill p-warn">No contact yet</span>':""}${rv.has(s._id)&&isCB(s)?'<span class="pill p-bad">Crunchbase record, pick another</span>':""}${s.teasePin===true?'<span class="tpill">Pinned</span>':""}<span class="pill t-${esc(s.triage||"Review")}">${esc(s.triage||"Review")}</span>${t.auto?'<span class="pill">Auto line</span>':'<span class="pill p-good">Edited line</span>'}</span></header>
+     <textarea data-tline aria-label="Tease line for opportunity ${i+1}" ${canWrite?"":"readonly"}>${esc(t.line)}</textarea>
+     <div class="tfacts">${[t.trigger,t.industry,t.region,t.size,t.date,t.fit].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")}</div>
+     <div class="ctl">${c.tier==="sample"?`<button class="pin reveal" type="button" data-treveal aria-pressed="${s.teaseReveal===true}" ${canWrite?"":"disabled"}>Show in full</button>`:""}<button class="btn sm" type="button" data-tsave ${canWrite?"":"disabled"}>Save line</button><button class="btn sm ghost" type="button" data-treset ${canWrite?"":"disabled"}>Back to auto line</button><span class="toast" data-tt></span></div></div>`;}).join("")}</div>`
+   :`<div class="empty"><h2>Nothing to tease yet</h2><p>No Promote or Review signals in the last ${c.windowDays} days for these audiences. Pin a signal with Show in tease, or widen the look-back.</p></div>`}
+  </section>`;
+  $("tForm").onsubmit=async e=>{e.preventDefault();
+    const v={tier:$("t_tier").value,potential:+$("t_potential").value||0,reveal:+$("t_reveal").value||2,count:Math.max(1,Math.min(12,+$("t_count").value||5)),windowDays:Math.max(1,+$("t_window").value||60),ctaText:$("t_ctaText").value.trim(),ctaUrl:safeUrl($("t_ctaUrl").value.trim()),audienceIds:[...document.querySelectorAll("input[name=t_aud]:checked")].map(x=>x.value)};
+    try{if(loaded.wsExists)await db.collection("workspace").doc("profile").update({tease:v,updatedAt:nowIso()});else await db.collection("workspace").doc("profile").set({tease:v,createdAt:nowIso()});$("tST").textContent=v.ctaUrl||!$("t_ctaUrl").value.trim()?"Saved":"Saved. The link must start with https://, so the booking link is used instead.";}catch(err){$("tST").textContent=saveErr(err);}};
+  m.querySelectorAll(".trow").forEach(r=>{const s=sigs.find(x=>x._id===r.dataset.tid), tt=r.querySelector("[data-tt]");
+    r.querySelector("[data-tsave]").onclick=async()=>{const raw=r.querySelector("[data-tline]").value.trim(), lw=leakWords(raw,s);
+      if(lw.length){tt.textContent="Not saved. The line gives them away: "+[...new Set(lw)].join(", ")+". Take that out and save again.";return;}
+      try{await saveTease(s,scrub(raw,s),"Edited on the desk");tt.textContent="Saved";}catch(e){tt.textContent=saveErr(e);}};
+    const rb=r.querySelector("[data-treveal]"); if(rb)rb.onclick=async()=>{rb.disabled=true;try{await db.collection("signals").doc(s._id).update({teaseReveal:s.teaseReveal===true?null:true});}catch(e){rb.disabled=false;tt.textContent=saveErr(e);}};
+    r.querySelector("[data-treset]").onclick=async()=>{try{await db.collection("signals").doc(s._id).update({tease:{...(s.tease||{}),line:"",by:"",at:nowIso()}});}catch(e){tt.textContent=saveErr(e);}};});
+  $("tWrite").onclick=writeTeaseLines;
+  $("tView").onclick=openClientView;
+  $("tCopy").onclick=copyTeaseEmail;
+}
+async function saveTease(s,line,by){
+  const t={line,industry:plainIndustry(s),region:coarseRegion(s),size:sizeTxt(s),trigger:s.type||"Buying signal",date:dShort(sigDate(s)),fit:qTier(s.prelim)||""};
+  await db.collection("signals").doc(s._id).update({tease:{...t,by,at:nowIso()}});
+}
+async function writeTeaseLines(){
+  const t=$("tWT"), b=$("tWrite"), picks=teasePicks();
+  const sample=await window.claude?.use?.("sample");
+  if(!sample){t.textContent="Claude isn't available in this view. Edit the lines by hand, or use the auto lines.";return;}
+  b.disabled=true;t.textContent="Writing…";
+  const facts=picks.map(s=>({id:s._id,mustNotMention:[s.company,cleanDomain(s.domain),...idWords(s)].filter(Boolean),industry:plainIndustry(s),region:coarseRegion(s),size:sizeTxt(s),trigger:s.type,date:dShort(sigDate(s)),whatHappened:scrub(s.detail||"",s),whyItMatters:scrub(s.triageNote||"",s)}));
+  const prompt=`Write one plain sentence per opportunity for a sales tease shown to a prospect. The company must stay anonymous. Return JSON only: {"lines":[{"id":"","line":""}]}.
+Rules: describe the company by size, region and industry only, then what happened and when, e.g. "A 51 to 200 staff Peel Region metal fabricator was named for federal tariff-response funding on Oct 2." Never include any word in mustNotMention, a website, a person's name, a street address, a product or brand name, or a source. Use the region given, never a smaller place. Under 30 words each. Canadian spelling, commas instead of dashes, no exclamation marks, no hype.
+OPPORTUNITIES: ${JSON.stringify(facts)}`;
+  try{const out=await sample.json(prompt,{modelTier:"default"});let n=0;
+    let held=0;for(const x of (out?.lines||[])){const s=picks.find(p=>p._id===x.id);if(!s||!x.line)continue;if(leakWords(x.line,s).length){held++;continue;}await saveTease(s,scrub(x.line,s),"Claude, from the desk");n++;}
+    t.textContent=(n?`Wrote ${n} line${n===1?"":"s"}. Check them, then edit anything.`:"No lines saved.")+(held?` ${held} named the company, so the auto line stays for ${held===1?"it":"those"}.`:"");}
+  catch(e){t.textContent=e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":"Couldn't write the lines. Try again.";}
+  finally{b.disabled=false;}
+}
+function teaseHeadline(n,c){return `${n} ${n===1?"company":"companies"} in your market showing buying signals ${c.windowDays<=31?"this month":"in the last "+c.windowDays+" days"}`;}
+function paidDetail(s){
+  const l=leads[s.leadId||s._id]||{}, ct=(l.contacts||[])[0];
+  const scripts=l.scripts||{}, nScripts=["connect","afterAccept","giveFirst","email"].filter(k=>scripts[k]).length;
+  return {"Company":esc(s.company),"Website":s.domain?`<a href="https://${esc(cleanDomain(s.domain))}" target="_blank" rel="noopener">${esc(cleanDomain(s.domain))}</a>`:"Not found yet",
+    "Decision maker":ct?esc([ct.name,ct.title].filter(Boolean).join(", ")):esc("Start with "+(l.firstContact||s.firstContact||"the owner or general manager")),
+    "Why now, in detail":esc(s.triageNote||s.detail||""),"Talking points":(s.teasers||[]).length?(s.teasers||[]).slice(0,3).map(x=>esc(x.hook)).join("<br>"):(s.insight?esc(s.insight):"Written when the lead is accepted"),
+    "Outreach drafts":nScripts?`${nScripts} draft${nScripts===1?"":"s"} ready on the desk`:"Written when the lead is accepted"};
+}
+function openClientView(){
+  const c=teaseCfg(), {picks,rv}=teaseOrdered(), st=$("stage"), k=ws.knowledge||{}, brand=k.companyName||ws.name||"Signals Desk", paid=c.tier==="paid";
+  const nOpen=paid?picks.length:rv.size, nLocked=picks.length-nOpen, sample=c.tier==="sample"&&nOpen>0, total=sample?teaseTotal(c,picks.length):picks.length, more=total-nOpen, day=ws.sweepDay||"Monday";
+  const card=(s,i)=>{const t=teaseOf(s), open=paid||rv.has(s._id), pd=open?paidDetail(s):null;return `<article class="ocard ${open?"open":"locked"}"><div class="ctl" style="justify-content:space-between"><span class="ctl"><span class="num">${String(i+1).padStart(2,"0")}</span><span class="stype">${esc(t.trigger)}</span>${sample&&open?'<span class="unl">Unlocked sample</span>':""}</span>${t.fit?`<span class="pill p-info">${esc(t.fit)}</span>`:""}</div>
+     <p class="oline">${esc(open?(s.company+": "+(s.detail||t.line)):t.line)}</p>
+     <div class="tfacts">${[t.industry,t.region,t.size,t.date].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")}</div>
+     ${open&&sample?`<div class="clip ${cvExpand.has(s._id)?"x":""}" id="clip-${esc(s._id)}">`:""}<div class="locks">${TEASE_LOCKS.map(L=>open?`<div class="lk open"><span class="lab">${esc(L)}</span><span class="val">${pd[L]}</span></div>`:`<div class="lk">${LOCK_SVG}<span class="lab">${esc(L)}</span><span class="bar" aria-label="${esc(L)} is locked"></span></div>`).join("")}</div>${open&&sample?`</div><button class="btn sm ghost exp" type="button" data-exp="${esc(s._id)}" aria-expanded="${cvExpand.has(s._id)}" aria-controls="clip-${esc(s._id)}">${cvExpand.has(s._id)?"Show less":"Show full details"}</button>`:""}</article>`;};
+  const sub=paid?"The full details for each opportunity, ready to act on.":sample?`Each one fits your ideal customer and has a reason to buy right now. We've unlocked ${["","one","two","three"][nOpen]||nOpen} so you can see exactly what you get.`:"Each one fits your ideal customer and has a reason to buy right now. The names and the rest of the detail come with the Signals plan.";
+  st.innerHTML=`<div class="cv"><div class="cvbar"><span class="eyebrow">${esc(brand)} · Signals ${paid?"":"preview"}</span><button class="btn sm" type="button" id="cvClose">Close client view</button></div>
+   <div class="cvhead"><div><h2>${esc(teaseHeadline(total,c))}</h2><p class="sub" style="margin-top:8px">${esc(sub)}</p></div>${showPlays().length?`<button class="btn primary pbcta" type="button" id="cvPlays"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h9l3 3v9H4z"/><path d="M7 9h6M7 12h6M7 15h4"/></svg>View our playbooks</button>`:""}</div>
+   ${picks.length?(sample?`<div class="opengrid">${picks.slice(0,nOpen).map(card).join("")}</div>`+(nLocked?`<div class="waiting"><h3>${nLocked} of ${more} more opportunities waiting</h3><p>Each one comes with the same depth as the ${nOpen===1?"one":"ones"} above. We search your market every ${esc(day)}, and buying windows like these close fast. Every week you wait, more of them start a conversation with someone else.</p></div>`+picks.slice(nOpen).map((s,i)=>card(s,i+nOpen)).join(""):""):picks.map(card).join(""))
+     :`<div class="empty"><h2>Nothing to show yet</h2><p>New signals arrive with each weekly sweep.</p></div>`}
+   ${paid?"":`<div class="cta"><p><b>${sample&&nLocked?`Want the other ${more}?`:"Want the names?"}</b> ${sample?`New signals land every ${esc(day)}. Talk to us today and the next list comes straight to you, with the decision maker, why now, talking points, outreach drafts and a playbook for each one.`:"The Signals plan delivers companies like these every week, with the decision maker, why now, talking points and outreach drafts."}</p><a class="btn primary" href="${esc(c.ctaUrl)}" target="_blank" rel="noopener">${esc(c.ctaText)}</a></div>`}
+   <p class="cvfoot">Prepared by ${esc(brand)}. Summaries are written by ${esc(brand)} from public buying signals.</p></div>${pbmOpen?playsModal():""}`;
+  const wasOpen=!st.hidden, keep=st.scrollTop; st.hidden=false;document.body.classList.add("staged");st.scrollTop=wasOpen?keep:0;
+  st.querySelectorAll("[data-exp]").forEach(b=>b.onclick=()=>{const id=b.dataset.exp;cvExpand.has(id)?cvExpand.delete(id):cvExpand.add(id);openClientView();st.querySelector(`[data-exp="${CSS.escape(id)}"]`)?.focus();});
+  const pbBtn=$("cvPlays"); if(pbBtn)pbBtn.onclick=()=>{pbmOpen=true;openClientView();$("pbmClose")?.focus();};
+  const pm=$("pbModal"); if(pm){$("pbmClose").onclick=()=>{pbmOpen=false;openClientView();$("cvPlays")?.focus();};pm.onclick=e=>{if(e.target===pm){pbmOpen=false;openClientView();}};pm.querySelectorAll("[data-pbm]").forEach(b=>b.onclick=()=>{pbmPlay=b.dataset.pbm;openClientView();pm&&$("pbModal")?.querySelector(`[data-pbm="${b.dataset.pbm}"]`)?.focus();});}
+  $("cvClose").onclick=closeClientView; $("cvClose").focus();
+}
+function closeClientView(){pbmOpen=false;$("stage").hidden=true;document.body.classList.remove("staged");}
+document.addEventListener("keydown",e=>{if(e.key!=="Escape"||$("stage").hidden)return;if(pbmOpen){pbmOpen=false;openClientView();return;}closeClientView();});
+function teaseEmail(){
+  const c=teaseCfg(), {picks,rv}=teaseOrdered(), k=ws.knowledge||{}, paid=c.tier==="paid", n=picks.length, nOpen=paid?n:rv.size, sample=c.tier==="sample"&&nOpen>0;
+  const total=sample?teaseTotal(c,n):n;
+  const subject=teaseHeadline(total,c).replace(/^./,x=>x.toUpperCase());
+  const intro=paid?`Here are ${n} companies in your market that showed buying signals in the last ${c.windowDays} days, with the details.`:sample?`${total} companies in your market showed buying signals in the last ${c.windowDays} days. Here are ${n} of them. The first ${nOpen===1?"one is":nOpen+" are"} shown in full so you can see what you'd get. We search your market every ${ws.sweepDay||"Monday"}, so the sooner we talk, the fewer you miss.`:`Here are ${n} companies in your market that showed buying signals in the last ${c.windowDays} days. We've kept the names back for now.`;
+  const items=picks.map((s,i)=>{const t=teaseOf(s), open=paid||rv.has(s._id);return {n:i+1,line:open?`${s.company}: ${s.detail||t.line}`:t.line,meta:[t.trigger,t.region,t.date].filter(Boolean).join(" · ")};});
+  const foot=k.mailingAddress||`${k.companyName||"Hyperweb Communications Inc."}, [mailing address]`;
+  const opt=k.optOut||"[opt-out line]";
+  const sender=[k.senderName,k.senderRole].filter(Boolean).join(", ")||"[your name]";
+  const lock=paid?"":sample?`For the other ${n-nOpen}, the company names, decision makers, why-now detail, talking points and outreach drafts come with the Signals plan.`:"The company names, decision makers, why-now detail, talking points and outreach drafts come with the Signals plan.";
+  const text=[`Subject: ${subject}`,"",intro,"",...items.map(x=>`${x.n}. ${x.line}\n   ${x.meta}`),"",lock,"",`${c.ctaText}: ${c.ctaUrl}`,"",sender,"","--",foot,opt].filter((x,i,a)=>!(x===""&&a[i-1]==="")).join("\n");
+  const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#141b26;max-width:620px">
+<p>${esc(intro)}</p>
+<ol style="padding-left:20px">${items.map(x=>`<li style="margin:0 0 12px"><b>${esc(x.line)}</b><br><span style="color:#5a6475;font-size:13px">${esc(x.meta)}</span></li>`).join("")}</ol>
+${lock?`<p>${esc(lock)}</p>`:""}
+<p><a href="${esc(c.ctaUrl)}" style="display:inline-block;background:#1d4ed8;color:#ffffff;text-decoration:none;padding:10px 16px;border-radius:6px;font-weight:bold">${esc(c.ctaText)}</a></p>
+<p>${esc(sender)}</p>
+<p style="color:#5a6475;font-size:12px;border-top:1px solid #d3d9e2;padding-top:10px">${esc(foot)}<br>${esc(opt)}</p></div>`;
+  return {subject,text,html};
+}
+async function copyTeaseEmail(){
+  const t=$("tCT"), e=teaseEmail();
+  try{
+    if(window.ClipboardItem&&navigator.clipboard?.write){await navigator.clipboard.write([new ClipboardItem({"text/plain":new Blob([e.text],{type:"text/plain"}),"text/html":new Blob([e.html],{type:"text/html"})})]);}
+    else await navigator.clipboard.writeText(e.text);
+    t.textContent="Copied. Paste into a Go High Level or Gmail email; the subject is the first line.";
+  }catch(err){
+    t.innerHTML=`Copy blocked here. Select and copy:<textarea class="mtxt" style="width:100%;min-height:160px;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)" readonly>${esc(e.text)}</textarea>`;
+  }
+}
+
+/* ---------- Runs ---------- */
+function drawRuns(){
+  const m=$("main"), rs=[...runs].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  const month=new Date().toISOString().slice(0,7), credits=rs.filter(r=>String(r.at).startsWith(month)).reduce((s,r)=>s+(+r.credits||0),0);
+  const last8=rs.slice(0,8).reverse(), mx=Math.max(1,...last8.map(r=>+r.found||0));
+  const fb={};sigs.filter(s=>s.status==="Dismissed"&&s.decidedBy==="Desk").forEach(s=>{fb[s.dismissReason||"Other"]=(fb[s.dismissReason||"Other"]||0)+1;});
+  const acc=sigs.filter(s=>s.status==="Accepted").length, dec=sigs.filter(s=>s.decidedBy==="Desk"&&s.status!=="New").length;
+  const open=reqs.filter(r=>["Queued","Running","Failed"].includes(r.status)).sort((a,b)=>String(b.requestedAt).localeCompare(String(a.requestedAt)));
+  m.innerHTML=`<div class="tiles">
+    <div class="tile"><span>Sweeps run</span><b>${rs.length}</b><small>${rs[0]?"Last "+esc(dShort(rs[0].at)):"None yet"}</small></div>
+    <div class="tile"><span>Signals found</span><b>${sigs.length}</b><small>${sigs.filter(s=>s.triage!=="Dismiss").length} worth a look</small></div>
+    <div class="tile"><span>Accept rate</span><b>${dec?Math.round(acc/dec*100)+"%":"–"}</b><small>${acc} of ${dec} decided on the desk</small></div>
+    <div class="tile"><span>Credits this month</span><b>${credits}</b><small>${ws.creditBudget?"of "+ws.creditBudget+" budgeted":"No budget set"}</small></div></div>
+  ${last8.length?`<section class="sect"><header><div><h2>Last ${last8.length} sweeps</h2></div><div class="legend"><span><i style="background:var(--accent)"></i>Found</span><span><i style="background:var(--signal)"></i>Worth a look</span></div></header>
+   <div class="bars" role="img" aria-label="Signals found and kept per sweep">${last8.map(r=>`<div style="flex-direction:row;align-items:flex-end;gap:2px"><div><b>${+r.found||0}</b><i style="height:${(+r.found||0)/mx*70}px"></i></div><div><b>${+r.kept||0}</b><i class="k" style="height:${(+r.kept||0)/mx*70}px"></i></div></div>`).join("")}</div>
+   <div class="blabs">${last8.map(r=>`<span>${esc(dShort(r.at))}</span>`).join("")}</div></section>`:""}
+  ${Object.keys(fb).length?`<section class="sect"><header><div><h2>What the desk dismissed, and why</h2><p>The runner reads these before every sweep and avoids repeating them.</p></div></header><div class="strip">${Object.entries(fb).sort((a,b)=>b[1]-a[1]).map(([r,n])=>`<span class="chip">${esc(r)} <b>${n}</b></span>`).join("")}</div></section>`:""}
+  ${open.length?`<section class="sect"><header><div><h2>Requests</h2></div></header><div class="tablebox"><table style="min-width:560px"><thead><tr><th>What</th><th>Status</th><th>Asked</th><th>Note</th></tr></thead><tbody>${open.map(r=>`<tr><td>${esc(r.kind)}${r.leadId?" · "+esc(leads[r.leadId]?.company||r.leadId):r.audienceId?" · "+esc(audName(r.audienceId)):""}</td><td><span class="pill ${r.status==="Failed"?"p-bad":r.status==="Running"?"p-warn":"p-info"}">${esc(r.status)}</span></td><td class="meta">${esc(dShort(r.requestedAt))}</td><td class="meta">${esc(r.note||"")}</td></tr>`).join("")}</tbody></table></div></section>`:""}
+  <section class="sect"><header><div><h2>Run log</h2></div></header>${rs.length?`<div class="tablebox"><table><thead><tr><th>When</th><th>Audience</th><th class="n">Found</th><th class="n">Kept</th><th class="n">Dismissed</th><th class="n">Credits</th><th>Sources and notes</th></tr></thead><tbody>${rs.map(r=>`<tr><td class="meta">${esc(dShort(r.at))}</td><td>${esc(r.audienceId?audName(r.audienceId):"All")}</td><td class="n">${r.found??"–"}</td><td class="n">${r.kept??"–"}</td><td class="n">${r.dismissed??"–"}</td><td class="n">${r.credits??0}</td><td class="meta" style="max-width:420px">${esc((r.sources||[]).join(", "))}${(r.notes||[]).length?"<br>"+r.notes.map(esc).join("<br>"):""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted" style="margin:0">No runs yet.</p>`}</section>`;
+}
+
+function banner(msg,kind){$("banner").innerHTML=msg?`<p class="${kind||"note"}">${esc(msg)}</p>`:"";}
+
+/* ---------- client view: tools and internals stay behind the scenes ---------- */
+let TEAM=false, asClient=false;
+try{asClient=localStorage.getItem("sd-asclient")==="1";}catch(e){}
+const isClientView=()=>!TEAM||asClient;
+const HIDE_SEL='.cbsrc,.lic,.cbtag,.hq,[data-q="cbSweep"],.pin,.tpill,.tabs [data-tab="tease"],.tabs [data-tab="runs"]';
+const HIDE_TEXT=[/^data tokens/i,/^licence$/i,/^audiences using it$/i,/crunchbase data tokens/i,/partner's crunchbase account/i,/credit budget/i,/^crunchbase licence$/i,/^credits this month$/i,/^credits$/i];
+const PHRASES=[
+ [/Open this desk in claude\.ai while signed in to see/g,"Sign in to see"],
+ [/Write tease lines with Claude/g,"Draft tease lines"],[/Rewrite with Claude/g,"Redraft outreach"],[/Write with Claude/g,"Draft outreach"],[/Draft with Claude/g,"Draft it for me"],
+ [/let Claude draft (it|them)/g,"have $1 drafted for you"],
+ [/Claude isn't available in this view/g,"Drafting isn't available in this view"],[/Claude isn't allowed for this page in your view/g,"Drafting isn't turned on for you here"],
+ [/Claude is busy/g,"The desk is busy"],[/Claude is reading the ICP/g,"Reading the ICP"],
+ [/Where Claude looks/g,"Where we look"],[/Claude searches for new buying signals/g,"Search for new buying signals"],
+ [/as Claude finds them/g,"as they're found"],[/Claude looks them up on the next runner pass/g,"We look them up shortly"],
+ [/on (the|its) next (runner )?pass/g,"shortly"],[/Queued for the runner\./g,"Queued."],
+ [/The runner writes one a month/g,"A new one arrives each month"],[/The runner reads these/g,"The desk reads these"],
+ [/Claude, from the desk/g,"Drafted on the desk"],[/Everything Claude needs/g,"Everything the desk needs"],
+ [/credentials Claude may mention/g,"credentials we may mention"],[/Claude reuses these/g,"The desk reuses these"],
+ [/\s*\((Seamless\.?AI|Crunchbase)\)/gi,""],[/\s*\(spends credits\)/g,""],
+ [/Crunchbase signals/g,"Funding and growth signals"],[/Aggregate statistics from Crunchbase/g,"Aggregate market statistics"],
+ [/Refresh the monthly market brief from Crunchbase aggregates/g,"Refresh the monthly market brief"],
+ [/Re-run the audience's saved Crunchbase search and triage new companies/g,"Look for new funding and growth signals"],
+ [/Crunchbase is off for this audience\. Turn it on in Audiences\./g,"Funding and growth tracking is off for this audience."],
+ [/Crunchbase: /g,"Tracking: "],[/Add them in Audiences under Crunchbase source\./g,"Ask your account manager to add them."],
+ [/It never shows Crunchbase or Seamless\.AI records, company names/g,"It never shows company names"],
+ [/Crunchbase/g,"market data"],[/Seamless\.?\s?AI/gi,"company data"],[/\bClaude\b/g,"the desk"],[/\b[Rr]unner\b/g,"desk"]];
+const VEND=/crunchbase|seamless|\bclaude\b|\brunner\b/i;
+function neutral(t){
+  if(!VEND.test(t)&&!/spends credits/.test(t))return t;
+  let o=t; for(const [re,to] of PHRASES)o=o.replace(re,to);
+  return o.replace(/(^\s*|[.!?]\s+)(the desk|market data|company data)/g,(m,a,w)=>a+w[0].toUpperCase()+w.slice(1));
+}
+let cvObs=null, cvQueued=false;
+function cvPass(){
+  cvQueued=false;
+  document.body.classList.toggle("client",isClientView());document.body.classList.toggle("team",TEAM);
+  const vb=$("viewAs"), vt=asClient?"Back to team view":"See client view"; if(vb&&vb.textContent!==vt)vb.textContent=vt;
+  if(!isClientView())return;
+  if(cvObs)cvObs.disconnect();
+  if(tab==="tease"||tab==="runs"){tab="inbox";remember();draw();}
+  document.querySelectorAll(HIDE_SEL).forEach(el=>el.setAttribute("data-hx",""));
+  document.querySelectorAll(".tile>span,label,legend,th").forEach(el=>{
+    const own=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.nodeValue).join("").trim();
+    if(own&&HIDE_TEXT.some(re=>re.test(own))){const box=el.tagName==="SPAN"?el.parentElement:el.tagName==="LEGEND"?el.parentElement:el;box.setAttribute("data-hx","");
+      if(el.tagName==="TH"){const i=[...el.parentElement.children].indexOf(el);el.closest("table")?.querySelectorAll("tr").forEach(tr=>tr.children[i]?.setAttribute("data-hx",""));}}});
+  document.querySelectorAll('a[href*="crunchbase.com"],a[href*="seamless.ai"]').forEach(a=>a.replaceWith(document.createTextNode(neutral(a.textContent))));
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const el=n.parentElement;return !el||el.closest("script,style,[data-hx]")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+  for(let n;(n=w.nextNode());){const v=neutral(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;}
+  document.querySelectorAll("[title],[aria-label],[placeholder]").forEach(el=>{if(el.closest("[data-hx]"))return;["title","aria-label","placeholder"].forEach(k=>{const v=el.getAttribute(k);if(v&&VEND.test(v))el.setAttribute(k,neutral(v));});});
+  cvObs.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["title","aria-label","placeholder"]});
+}
+function cvQueue(){if(!cvQueued){cvQueued=true;queueMicrotask(cvPass);}}
+cvObs=new MutationObserver(cvQueue);
+cvObs.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["title","aria-label","placeholder"]});
+$("viewAs").onclick=()=>{asClient=!asClient;try{localStorage.setItem("sd-asclient",asClient?"1":"0");}catch(e){}
+  document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();if(curLead&&!$("drawer").hidden)drawLead();cvQueue();};
+
+$("meSel").onchange=e=>{const v=e.target.value;if(v==="__add"){tab="setup";remember();draw();return;}try{localStorage.setItem("sd-me",v);}catch(x){}draw();if(curLead&&!$("drawer").hidden)drawLead();};
+/* ---------- boot ---------- */
+drawHead();draw();
+(async()=>{
+  db=await window.claude?.use?.("db");
+  if(!db){$("wsMeta").textContent="Not connected";banner("Open this desk in claude.ai while signed in to see its signals and leads.");return;}
+  try{const u=await window.claude.use("user");const c=await u?.can?.("data.write");if(c===false)canWrite=false;TEAM=!!(await u?.canEdit?.());}catch(e){}
+  if(TEAM){document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();}cvQueue();
+  getMcp();
+  const redraw=()=>{drawHead();if($("drawer").hidden||!curLead){if(!(tab==="audiences"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#aForm"))&&!(tab==="setup"&&document.activeElement?.closest?.("#sForm,#pForm"))&&!(tab==="tease"&&document.activeElement?.closest?.("#tForm,.trow")))draw();}else{drawLead();}if(!$("stage").hidden&&!document.activeElement?.closest?.("#stage a"))openClientView();};
+  db.collection("workspace").onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==="profile");loaded.wsExists=!!d;ws=d?d.data():{};drawHead();if(tab==="setup"?!document.activeElement?.closest?.("#sForm,#pForm"):tab==="tease"?!document.activeElement?.closest?.("#tForm,.trow"):true)draw();},()=>banner("Couldn't load the workspace. Reload the page to try again.","err"));
+  db.collection("audiences").onSnapshot(snap=>{auds={};snap.docs.forEach(s=>auds[s.id]={_id:s.id,...s.data()});redraw();},()=>{});
+  db.collection("signals").onSnapshot(snap=>{sigs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});
+  db.collection("leads").onSnapshot(snap=>{leads={};snap.docs.forEach(s=>leads[s.id]={_id:s.id,...s.data()});if(curLead&&!$("drawer").hidden&&document.activeElement?.closest?.("#drawer textarea,#drawer input.pbnote"))return;redraw();},()=>{});
+  db.collection("runs").onSnapshot(snap=>{runs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});
+  db.collection("requests").onSnapshot(snap=>{reqs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});
+})();
+</script>
+
+</body></html>

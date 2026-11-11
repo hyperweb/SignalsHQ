@@ -1,0 +1,20 @@
+{
+  "name": "signals-hq",
+  "version": "0.1.0",
+  "description": "Signals HQ by Hyperweb: managed lead generation desks at signals.hyperweb.ca",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "import": "node scripts/import.js",
+    "add-user": "node scripts/add-user.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

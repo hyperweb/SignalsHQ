@@ -1,0 +1,58 @@
+# DigitalOcean App Platform spec for Signals HQ.
+# Create the app from this file (Apps > Create App > "Import from App Spec"), or with doctl:
+#   doctl apps create --spec .do/app.yaml
+# Secrets marked SECRET are entered in the DigitalOcean console, never committed.
+name: signals-hq
+region: tor
+domains:
+  - domain: signals.hyperweb.ca
+    type: PRIMARY
+services:
+  - name: web
+    github:
+      repo: hyperweb/SignalsHQ
+      branch: main
+      deploy_on_push: true
+    environment_slug: node-js
+    build_command: npm ci --omit=dev
+    run_command: npm start
+    http_port: 8080
+    instance_count: 1          # keep at 1: live page updates are sent from memory
+    instance_size_slug: apps-s-1vcpu-1gb
+    health_check:
+      http_path: /healthz
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: APP_URL
+        value: https://signals.hyperweb.ca
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: DATABASE_CA_CERT
+        scope: RUN_TIME
+        value: ${db.CA_CERT}
+      - key: RUNNER_TOKEN
+        type: SECRET
+      - key: GOOGLE_CLIENT_ID
+        type: SECRET
+      - key: GOOGLE_CLIENT_SECRET
+        type: SECRET
+      - key: GOOGLE_REFRESH_TOKEN
+        type: SECRET
+      - key: MAIL_FROM
+        value: Carl Messenger-Lehmann <carl@hyperweb.ca>
+      - key: ANTHROPIC_API_KEY
+        type: SECRET
+      - key: FIRECRAWL_API_KEY
+        type: SECRET
+      - key: CRUNCHBASE_API_KEY
+        type: SECRET
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: true
+    cluster_name: signals-hq-db
+    db_name: signals
+    db_user: signals
