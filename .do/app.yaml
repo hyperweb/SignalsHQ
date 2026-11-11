@@ -40,8 +40,10 @@ services:
         type: SECRET
       - key: GOOGLE_REFRESH_TOKEN
         type: SECRET
+      - key: RESEND_API_KEY
+        type: SECRET
       - key: MAIL_FROM
-        value: Carl Messenger-Lehmann <carl@hyperweb.ca>
+        value: Signals HQ <signals@hyperweb.ca>
       - key: ANTHROPIC_API_KEY
         type: SECRET
       - key: FIRECRAWL_API_KEY
@@ -51,7 +53,7 @@ services:
 databases:
   - name: db
     engine: PG
-    version: "16"
+    version: "17"
     production: true
     cluster_name: signals-hq-db
     db_name: signals

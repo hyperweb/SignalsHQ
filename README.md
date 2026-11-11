@@ -21,18 +21,19 @@ The HQ and desk pages are the same pages that ran as Claude artifacts. A small r
 
 ## Deploy on DigitalOcean (one time)
 
-1. **Database.** Databases > Create > PostgreSQL 16, region **Toronto (TOR1)**, smallest plan. Name it `signals-hq-db`.
+1. **Database.** Databases > Create > PostgreSQL 17, region **Toronto (TOR1)**, smallest plan. Name it `signals-hq-db`.
 2. **App.** Apps > Create App > GitHub > `hyperweb/SignalsHQ`, branch `main`. Then Settings > App Spec > Edit, and paste `.do/app.yaml`. This attaches the database, sets the region to Toronto and adds the domain.
 3. **Secrets.** In the app's Settings > Environment Variables, fill in each `SECRET`:
    - `RUNNER_TOKEN`: any random string of 40+ characters (e.g. from a password manager). The Claude runner uses it.
-   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`: a Google Cloud OAuth client for carl@hyperweb.ca with the `gmail.send` scope (steps below).
+   - `RESEND_API_KEY` and `MAIL_FROM` (e.g. `Signals HQ <signals@hyperweb.ca>`): sends sign-in links. The sending domain must be verified in Resend.
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (optional, round two): a Google Cloud OAuth client for carl@hyperweb.ca with the `gmail.send` scope, for outreach sent as Carl (steps below).
    - `ANTHROPIC_API_KEY`, `FIRECRAWL_API_KEY`, `CRUNCHBASE_API_KEY`.
 4. **Domain.** At the registrar for hyperweb.ca, add a `CNAME` record: `signals` pointing to the app's `ondigitalocean.app` address (shown under Settings > Domains). DigitalOcean issues the certificate on its own.
 5. **First person.** In the app's Console tab, run:
    `node scripts/add-user.js carl@hyperweb.ca staff "Carl Messenger-Lehmann"`
    Then sign in at signals.hyperweb.ca and add everyone else from **People and access**.
 
-Until the Gmail secrets are in, sign-in links are written to the app's runtime log instead of emailed.
+Until `RESEND_API_KEY` is in, sign-in links are written to the app's runtime log instead of emailed.
 
 ### Gmail sending (gmail.send)
 
@@ -81,6 +82,7 @@ server.js              routes: sign-in, pages, page data API, admin, runner API
 lib/store.js           document store (set, merge-update, delete, queries, change events)
 lib/auth.js            email-link sign-in, sessions, who can open which desk
 lib/connectors.js      Firecrawl, Crunchbase and Claude calls made for the pages
+lib/mail.js            sign-in email via Resend (falls back to Gmail, then the log)
 lib/gmail.js           Gmail API sender
 lib/views.js           sign-in, desk chooser, People and access, page wrapper
 pages/hq.html          Signals HQ page
