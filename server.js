@@ -202,6 +202,14 @@ app.patch(`${R}/doc`, needRunner, wrap(async (req, res) => {
 app.delete(`${R}/doc`, needRunner, wrap(async (req, res) => {
   try { await store.deleteDoc(req.query.space, req.query.path, req.query.ifVersion ? +req.query.ifVersion : undefined); res.json({ ok: true }); } catch (e) { sendErr(res, e); }
 }));
+// Remove every document in one desk's space (used when HQ deletes a desk). HQ itself can't be removed this way.
+app.post(`${R}/delete-space`, needRunner, wrap(async (req, res) => {
+  const space = String(req.body.space || "");
+  if (!/^desk:[A-Za-z0-9_\-.~:@+]{1,200}$/.test(space) || req.body.confirm !== space) return sendErr(res, { code: "invalid_argument", message: "Pass {space: \"desk:<id>\", confirm: \"desk:<id>\"}" });
+  const r = await pool.query("DELETE FROM docs WHERE space=$1", [space]);
+  await pool.query("UPDATE users SET desks = array_remove(desks, $1)", [space.slice(5)]);
+  res.json({ ok: true, deleted: r.rowCount });
+}));
 
 app.use((err, req, res, next) => { console.error(err); res.status(500).json({ code: "unavailable", message: "Server error" }); });
 

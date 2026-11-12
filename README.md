@@ -25,7 +25,7 @@ The HQ and desk pages are the same pages that ran as Claude artifacts. A small r
 2. **App.** Apps > Create App > GitHub > `hyperweb/SignalsHQ`, branch `main`. Then Settings > App Spec > Edit, and paste `.do/app.yaml`. This attaches the database, sets the region to Toronto and adds the domain.
 3. **Secrets.** In the app's Settings > Environment Variables, fill in each `SECRET`:
    - `RUNNER_TOKEN`: any random string of 40+ characters (e.g. from a password manager). The Claude runner uses it.
-   - `RESEND_API_KEY` and `MAIL_FROM` (e.g. `Signals HQ <signals@hyperweb.ca>`): sends sign-in links. The sending domain must be verified in Resend.
+   - `RESEND_API_KEY` and `MAIL_FROM` (e.g. `Signals HQ <signals@signals.hyperweb.ca>`): sends sign-in links. The sending domain must be verified in Resend.
    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (optional, round two): a Google Cloud OAuth client for carl@hyperweb.ca with the `gmail.send` scope, for outreach sent as Carl (steps below).
    - `ANTHROPIC_API_KEY`, `FIRECRAWL_API_KEY`, `CRUNCHBASE_API_KEY`.
 4. **Domain.** At the registrar for hyperweb.ca, add a `CNAME` record: `signals` pointing to the app's `ondigitalocean.app` address (shown under Settings > Domains). DigitalOcean issues the certificate on its own.

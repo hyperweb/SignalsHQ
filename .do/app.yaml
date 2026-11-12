@@ -43,7 +43,7 @@ services:
       - key: RESEND_API_KEY
         type: SECRET
       - key: MAIL_FROM
-        value: Signals HQ <signals@hyperweb.ca>
+        value: Signals HQ <signals@signals.hyperweb.ca>
       - key: ANTHROPIC_API_KEY
         type: SECRET
       - key: FIRECRAWL_API_KEY
