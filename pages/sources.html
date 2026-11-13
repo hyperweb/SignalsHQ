@@ -1,0 +1,239 @@
+<main class="src">
+<div class="head">
+  <div><h1>Signal sources</h1><p class="muted">Every source Hyperweb listens to, managed here apart from the desks. Packs bundle sources; each desk gets the packs you tick, with its own territory and overrides. Sources in Testing reach desks as Hyperweb only, so clients never see them until you set them Live.</p></div>
+  <button class="btn primary" type="button" id="newSrc">New source</button>
+</div>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="catalog" aria-selected="true">Catalog</button>
+  <button role="tab" data-tab="packs" aria-selected="false">Packs</button>
+  <button role="tab" data-tab="access" aria-selected="false">Desk access</button>
+  <button role="tab" data-tab="activity" aria-selected="false">Activity</button>
+</nav>
+<p id="msg" class="note" hidden></p>
+<section id="view"></section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
+
+<style>
+.src{max-width:1240px;margin:0 auto;padding:8px 16px 64px;display:flex;flex-direction:column;gap:16px}
+.head{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:flex-start}.head h1{font-size:28px}.head p{margin:4px 0 0;max-width:780px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;background:none;border:0;border-bottom:2px solid transparent;padding:9px 12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+.note{background:var(--sunk);border-radius:8px;padding:10px 12px;margin:0}.note.err{background:var(--bad-soft);color:var(--bad)}.note.ok{background:var(--good-soft);color:var(--good)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.stat b{display:block;font:600 24px "Familjen Grotesk",sans-serif}.stat span{color:var(--muted);font-size:13px}
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 11px;cursor:pointer}.chip[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+.sc header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.sc h3{margin:0;font:600 17px "Familjen Grotesk",sans-serif}
+.sc .sub{color:var(--muted);font-size:13px}.sc p{margin:0;font-size:14px}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--sunk);color:var(--fg);white-space:nowrap}
+.s-Draft{background:var(--sunk);color:var(--muted)}.s-Testing{background:#fdf0d5;color:#8a5a00}.s-Live{background:var(--good-soft);color:var(--good)}.s-Paused{background:#e4e7ff;color:#3a3fa8}.s-Retired{background:var(--sunk);color:var(--muted);text-decoration:line-through}
+.e-on{background:var(--good-soft);color:var(--good)}.e-hyperweb{background:#fdf0d5;color:#8a5a00}.e-off{background:var(--sunk);color:var(--muted)}
+@media (prefers-color-scheme:dark){.s-Testing,.e-hyperweb{background:#3a2c0c;color:#f2c56b}.s-Paused{background:#22264a;color:#a9adf5}}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;color:var(--muted)}.nums b{display:block;font-size:16px;color:var(--fg)}
+.last{font-size:13px;color:var(--muted)}.last.bad{color:var(--bad)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btn.sm{padding:5px 10px;font-size:13px}.btn[disabled]{opacity:.5;cursor:not-allowed}
+.tbl{width:100%;border-collapse:collapse}.tbl th,.tbl td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+.tbl th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}.wrapx{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.tbl small{color:var(--muted)}
+textarea{font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%;min-height:90px;resize:vertical}
+textarea.prose{font:inherit;min-height:64px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.drawer[hidden],.scrim[hidden]{display:none!important}
+.acts select{width:auto}
+.scrim{position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:21;overflow-y:auto;padding:20px 20px 40px;display:flex;flex-direction:column;gap:14px}
+.drawer h2{font-size:21px}.help{font-size:13px;color:var(--muted);margin:0}
+.box{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.box h3{margin:0;font:600 16px "Familjen Grotesk",sans-serif}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px}.checks label{flex-direction:row;align-items:center;gap:6px;color:var(--fg);font-size:14px}.checks input{width:auto}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+.dropped{color:var(--muted)}.dropped td:first-child{text-decoration:line-through}
+details summary{cursor:pointer;color:var(--accent);font-size:13px}
+</style>
+
+<script>
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const when=v=>v?new Date(v).toLocaleString("en-CA",{timeZone:"America/Toronto",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";
+let D={sources:[],packs:[],score:{},meta:{}}, M=null, tab="catalog", stF="active", curDesk="", showDrafts=false;
+try{const v=JSON.parse(localStorage.getItem("src-view")||"{}");if(v.tab)tab=v.tab;if(v.desk)curDesk=v.desk;}catch(e){}
+const remember=()=>{try{localStorage.setItem("src-view",JSON.stringify({tab,desk:curDesk}))}catch(e){}};
+async function api(m,u,b){const r=await fetch(u,{method:m,headers:b?{"content-type":"application/json"}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||"Something went wrong");return j;}
+function say(t,k){const m=$("#msg");m.hidden=!t;m.className="note "+(k||"");m.textContent=t||"";if(t&&k==="ok")setTimeout(()=>{if(m.textContent===t)m.hidden=true;},6000);}
+async function load(){D=await api("GET","/api/sources");if(tab==="access"||!M)M=await api("GET","/api/access");draw();}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=async()=>{tab=b.dataset.tab;remember();if(tab==="access")M=await api("GET","/api/access");draw();});
+$("#newSrc").onclick=()=>editSource(null);
+
+const METHOD=k=>D.meta.methods?.[k]?.label||k;
+const srcName=id=>D.sources.find(s=>s.id===id)?.name||id;
+const pct=(a,b)=>b?Math.round(a*100/b)+"%":"–";
+function draw(){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===tab)));
+  if(tab==="catalog")drawCatalog();else if(tab==="packs")drawPacks();else if(tab==="access")drawAccess();else drawActivity();
+}
+
+/* ---------- catalog ---------- */
+function drawCatalog(){
+  const by=s=>D.sources.filter(x=>x.status===s).length;
+  const list=D.sources.filter(s=>stF==="all"||(stF==="active"?["Testing","Live"].includes(s.status):s.status===stF));
+  const packsOf=id=>D.packs.filter(p=>p.sources.includes(id)).map(p=>p.name);
+  $("#view").innerHTML=`
+  <div class="stats">${[["Live","Live, reaching clients"],["Testing","Testing, Hyperweb only"],["Draft","Draft, not running"],["Paused","Paused"]].map(([k,l])=>`<div class="stat"><b>${by(k)}</b><span>${l}</span></div>`).join("")}
+    <div class="stat"><b>${Object.values(D.score).reduce((a,s)=>a+s.held,0)}</b><span>Items held for the team</span></div></div>
+  <div class="fbar">${[["active","Running"],["Live","Live"],["Testing","Testing"],["Draft","Draft"],["Paused","Paused"],["Retired","Retired"],["all","All"]].map(([k,l])=>`<button class="chip" data-sf="${k}" aria-pressed="${stF===k}">${l}</button>`).join("")}</div>
+  ${list.length?`<div class="cards">${list.map(s=>{const sc=D.score[s.id]||{},lr=sc.lastRun,serverRun=D.meta.methods?.[s.method]?.server;
+    return `<article class="sc"><header><div><h3>${esc(s.name)}</h3><div class="sub">${esc(METHOD(s.method))} · ${esc(D.meta.kinds?.[s.kind]||s.kind)} · ${s.mode==="per_desk"?"Per desk":"Shared feed"} · code <b>${esc(s.code)}</b></div></div><span class="pill s-${esc(s.status)}">${esc(s.status)}</span></header>
+    ${s.description?`<p>${esc(s.description)}</p>`:""}
+    <div class="sub">${esc(D.meta.schedules?.[s.schedule]||s.schedule)}${s.next_run_at&&["Testing","Live"].includes(s.status)?` · next ${esc(when(s.next_run_at))}`:""}${packsOf(s.id).length?` · in ${esc(packsOf(s.id).join(", "))}`:" · in no pack"}</div>
+    <div class="nums"><span><b>${sc.items30||0}</b>found, 30 days</span><span><b>${sc.delivered||0}</b>delivered${sc.desks?` to ${sc.desks} desk${sc.desks===1?"":"s"}`:""}</span><span><b>${sc.held||0}</b>held</span><span><b>${pct(sc.accepted||0,(sc.accepted||0)+(sc.dismissed||0))}</b>accepted${sc.won?`, ${sc.won} won`:""}</span></div>
+    ${s.last_error?`<p class="last bad">Last run failed: ${esc(s.last_error)}</p>`:lr?`<p class="last">Last run ${esc(when(lr.started_at))}: ${esc(lr.note||`${lr.new_items} new, ${lr.delivered} delivered`)}</p>`:`<p class="last">Not run yet</p>`}
+    <div class="acts"><button class="btn sm" data-edit="${esc(s.id)}">Edit</button>
+      ${serverRun?`<button class="btn sm" data-run="${esc(s.id)}">Run now</button>`:`<button class="btn sm" data-paste="${esc(s.id)}">Add items</button>`}
+      <button class="btn sm" data-pool="${esc(s.id)}">What it found</button>
+      <select class="btn sm" data-status="${esc(s.id)}" aria-label="Status">${D.meta.statuses.map(x=>`<option ${x===s.status?"selected":""}>${x}</option>`).join("")}</select></div>
+    </article>`;}).join("")}</div>`:`<div class="empty">No sources in this view. ${D.sources.length?"":"Use New source to add the first one."}</div>`}`;
+  document.querySelectorAll("[data-sf]").forEach(b=>b.onclick=()=>{stF=b.dataset.sf;drawCatalog();});
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editSource(D.sources.find(s=>s.id===b.dataset.edit)));
+  document.querySelectorAll("[data-pool]").forEach(b=>b.onclick=()=>showPool(b.dataset.pool));
+  document.querySelectorAll("[data-paste]").forEach(b=>b.onclick=()=>pasteItems(D.sources.find(s=>s.id===b.dataset.paste)));
+  document.querySelectorAll("[data-run]").forEach(b=>b.onclick=async()=>{b.disabled=true;b.textContent="Running…";
+    try{const r=await api("POST",`/api/sources/${encodeURIComponent(b.dataset.run)}/run`);const e=r.results.find(x=>x.status==="error");
+      say(e?`Run failed: ${e.error}`:r.results.map(x=>`${x.scope?x.scope+": ":""}${x.note||""}${x.delivered!=null?`. ${x.new_items} new, ${x.delivered} delivered`:""}`).join(" · "),e?"err":"ok");}catch(x){say(x.message,"err");}load();});
+  document.querySelectorAll("[data-status]").forEach(sel=>sel.onchange=async()=>{const s=D.sources.find(x=>x.id===sel.dataset.status),to=sel.value;
+    if(to==="Live"&&!confirm(`Set ${s.name} Live? Items still held on desks that have it switched on are released to the client view.`)){sel.value=s.status;return;}
+    try{await api("POST",`/api/sources/${encodeURIComponent(s.id)}/status`,{status:to});say(`${s.name} is now ${to}.`,"ok");}catch(x){say(x.message,"err");}load();});
+}
+
+/* ---------- source editor ---------- */
+const EXAMPLES={
+  feed:{url:"https://api.weather.gc.ca/collections/weather-alerts/items?f=json&bbox=-80.3,43.1,-79.5,43.7&limit=200",where:[{field:"alert_type",op:"in",value:"warning,watch"},{field:"status_en",op:"ne",value:"ended"}],keywords:"wind,freezing rain,ice,thunderstorm,snow squall",map:{key:"_id",title:"{alert_name_en}: {feature_name_en}",detail:"alert_text_en",date:"publication_datetime",area:"feature_name_en",severity:"alert_type"}},
+  page_watch:{urls:[{url:"https://www.example.ca/development-applications",label:"Example town, development applications",area:"Oakville"}],keywords:"site plan,rezoning,subdivision",exclude:"",watch:"links"},
+  registry:{url:"https://example.ca/registry.csv",format:"csv",map:{key:"Corporation Number",title:"{Corporation Name}",detail:"Manager: {Management Company}",area:"City"},watchFields:["Management Company"]},
+  alert_inbox:{query:"to:signals-maplehill@hyperweb.ca newer_than:3d",keywords:"tree,arbor,forestry,vegetation,grounds,landscap"},
+  runner:{instructions:"Search news from the last 7 days for property sales, REIT acquisitions and new owners of commercial or multi-unit properties in the desk's areas. One item per deal: company (the buyer), area, url, date, detail.",tools:"Firecrawl search"},
+  manual:{map:{title:"title",company:"company",area:"area",url:"url",date:"date",detail:"detail"}},
+};
+function editSource(s){
+  const n=!s; s=s||{method:"feed",kind:"account",subject:"company",mode:"shared",status:"Draft",schedule:"daily",config:{},segments:[]};
+  const cfg={...(s.config||{})}, keepIf=cfg.screen?.keepIf||"", cap=cfg.dailyCap??""; delete cfg.screen; delete cfg.dailyCap;
+  const opt=(o,v)=>Object.entries(o).map(([k,l])=>`<option value="${esc(k)}" ${k===v?"selected":""}>${esc(typeof l==="string"?l:l.label)}</option>`).join("");
+  openDrawer(`<div class="row" style="justify-content:space-between"><h2 id="dTitle">${n?"New source":esc(s.name)}</h2><button class="btn" type="button" data-close>Close</button></div>
+  <form id="sf" style="display:flex;flex-direction:column;gap:14px">
+  <div class="box"><h3>What it is</h3><div class="grid2">
+    <label>Name<input name="name" required value="${esc(s.name||"")}"></label>
+    <label>Code (UTM and CRM tag)<input name="code" value="${esc(s.code||"")}" placeholder="from the name" pattern="[a-z0-9-]{0,24}"></label>
+    <label>Signal kind<select name="kind">${opt(D.meta.kinds,s.kind)}</select></label>
+    <label>Subject<select name="subject">${opt(D.meta.subjects,s.subject)}</select></label></div>
+    <label>What it catches, in a sentence<textarea class="prose" name="description">${esc(s.description||"")}</textarea></label>
+    <div class="grid2"><label>Segments it serves<input name="segments" value="${esc((s.segments||[]).join(", "))}" placeholder="golf, condos, builders"></label>
+    <label>Cost note<input name="cost_note" value="${esc(s.cost_note||"")}" placeholder="Free, or credits per run"></label></div></div>
+  <div class="box"><h3>How it listens</h3><div class="grid2">
+    <label>Method<select name="method">${opt(D.meta.methods,s.method)}</select></label>
+    <label>Runs for<select name="mode"><option value="shared" ${s.mode!=="per_desk"?"selected":""}>Shared feed, once for every desk</option><option value="per_desk" ${s.mode==="per_desk"?"selected":""}>Per desk, with each desk's parameters</option></select></label>
+    <label>Schedule<select name="schedule">${opt(D.meta.schedules,s.schedule)}</select></label>
+    <label>Status<select name="status">${D.meta.statuses.map(x=>`<option ${x===s.status?"selected":""}>${x}</option>`).join("")}</select></label></div>
+    <p class="help" id="mHelp"></p>
+    <label>Config (JSON)<textarea name="config" rows="10" spellcheck="false">${esc(JSON.stringify(cfg,null,2))}</textarea></label>
+    <div class="row"><button class="btn sm" type="button" id="ex">Insert an example for this method</button><span class="help">Per-desk parameters (areas, keywords, a desk's own inbox query) are set on Desk access and override these.</span></div></div>
+  <div class="box"><h3>Screen and limits</h3>
+    <label>Keep only items that match this rule (Claude checks each new item; leave blank to keep everything)<textarea class="prose" name="keepIf" placeholder="The applicant is a company, developer, builder or public body, never a private homeowner.">${esc(keepIf)}</textarea></label>
+    <label style="max-width:260px">Most items per desk per day<input name="dailyCap" type="number" min="0" value="${esc(cap)}" placeholder="No limit"></label></div>
+  <div class="row"><button class="btn primary" type="submit">Save</button><span id="sfT" class="help"></span></div></form>`);
+  const f=$("#sf"), help=()=>{$("#mHelp").textContent=D.meta.methods[f.method.value]?.help||"";};help();f.method.onchange=help;
+  $("#ex").onclick=()=>{f.config.value=JSON.stringify(EXAMPLES[f.method.value]||{},null,2);};
+  f.onsubmit=async e=>{e.preventDefault();const t=$("#sfT");let c;try{c=JSON.parse(f.config.value||"{}");}catch(x){t.textContent="The config isn't valid JSON.";return;}
+    if(f.keepIf.value.trim())c.screen={keepIf:f.keepIf.value.trim()};if(f.dailyCap.value!=="")c.dailyCap=+f.dailyCap.value;
+    t.textContent="Saving…";
+    try{const r=await api("POST","/api/sources",{id:s.id,name:f.name.value,code:f.code.value,kind:f.kind.value,subject:f.subject.value,description:f.description.value,segments:f.segments.value,cost_note:f.cost_note.value,method:f.method.value,mode:f.mode.value,schedule:f.schedule.value,status:f.status.value,config:c});
+      closeDrawer();say(`Saved ${r.source.name}.`,"ok");load();}catch(x){t.textContent=x.message;}};
+}
+
+/* ---------- paste and pool ---------- */
+function pasteItems(s){
+  openDrawer(`<div class="row" style="justify-content:space-between"><h2 id="dTitle">Add items to ${esc(s.name)}</h2><button class="btn" data-close>Close</button></div>
+  <p class="help">Paste a CSV with a header row (title, company, area, url, date, detail), or one item per line. They go through the same screen and routing as anything the source finds itself.${s.status==="Draft"?" This source is a Draft, so items stay in the pool and aren't delivered.":""}</p>
+  ${s.mode==="per_desk"?`<label>For desk<select id="pDesk">${(M?.desks||[]).map(d=>`<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("")}</select></label>`:""}
+  <textarea id="pText" rows="12" placeholder="title,company,area,url,date,detail"></textarea>
+  <div class="row"><button class="btn primary" id="pGo">Add</button><span class="help" id="pT"></span></div>`);
+  $("#pGo").onclick=async()=>{const t=$("#pT");t.textContent="Adding…";try{const r=await api("POST",`/api/sources/${encodeURIComponent(s.id)}/paste`,{text:$("#pText").value,desk:$("#pDesk")?.value});t.textContent=`${r.new_items} new, ${r.kept} kept, ${r.delivered} delivered.`;load();}catch(x){t.textContent=x.message;}};
+}
+async function showPool(id){
+  const [p,r]=await Promise.all([api("GET",`/api/sources/${encodeURIComponent(id)}/pool`),api("GET",`/api/sources/${encodeURIComponent(id)}/runs`)]);
+  const dn=d=>(M?.desks||[]).find(x=>x.id===d)?.name||d;
+  openDrawer(`<div class="row" style="justify-content:space-between"><h2 id="dTitle">${esc(srcName(id))}</h2><button class="btn" data-close>Close</button></div>
+  <div class="box"><h3>Recent runs</h3>${r.runs.length?`<div class="wrapx"><table class="tbl"><thead><tr><th>When</th><th>Desk</th><th>Found</th><th>New</th><th>Kept</th><th>Sent</th><th>Note</th></tr></thead><tbody>${r.runs.slice(0,12).map(x=>`<tr><td>${esc(when(x.started_at))}<br><small>${esc(x.trigger)}</small></td><td>${esc(x.scope?dn(x.scope):"All")}</td><td>${x.found}</td><td>${x.new_items}</td><td>${x.kept}</td><td>${x.delivered}</td><td>${x.status==="error"?`<span style="color:var(--bad)">${esc(x.error)}</span>`:esc(x.note)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="help">No runs yet.</p>`}</div>
+  <div class="box"><h3>Items in the pool</h3>${p.items.length?`<div class="wrapx"><table class="tbl"><thead><tr><th>Item</th><th>Area</th><th>Found</th><th>Went to</th></tr></thead><tbody>${p.items.map(i=>`<tr class="${i.dropped?"dropped":""}"><td><b>${esc(i.company||i.title)}</b>${i.company?`<br>${esc(i.title)}`:""}${i.detail?`<br><small>${esc(i.detail.slice(0,220))}</small>`:""}${/^https:/.test(i.url)?`<br><small><a href="${esc(i.url)}" target="_blank" rel="noopener">Source link</a></small>`:""}</td><td>${esc(i.area)}</td><td>${esc(when(i.found_at))}</td><td>${i.dropped?`<small>Held back: ${esc(i.dropped)}</small>`:i.sent.length?i.sent.map(s=>`${esc(dn(s.desk))}${s.held?' <span class="pill e-hyperweb">Hyperweb only</span>':""}`).join("<br>"):"<small>No desk matched</small>"}</td></tr>`).join("")}</tbody></table></div>`:`<p class="help">Nothing found yet.</p>`}</div>`);
+}
+
+/* ---------- packs ---------- */
+function drawPacks(){
+  $("#view").innerHTML=`<p class="help">A pack is a bundle of sources. Tick packs for a desk on Desk access and it gets every source in them. Adding a source to a pack reaches every desk with that pack.</p>
+  ${D.packs.map(packBox).join("")}${packBox({id:"",name:"",description:"",sources:[]})}`;
+  document.querySelectorAll("form[data-pack]").forEach(f=>{f.onsubmit=async e=>{e.preventDefault();const t=f.querySelector("[data-t]");t.textContent="Saving…";
+    try{await api("POST","/api/packs",{id:f.dataset.pack||undefined,name:f.pname.value,description:f.pdesc.value,sources:[...f.querySelectorAll("[name=src]:checked")].map(c=>c.value)});say("Pack saved.","ok");M=null;await load();}catch(x){t.textContent=x.message;}};
+    const del=f.querySelector("[data-del]");if(del)del.onclick=async()=>{if(!confirm("Delete this pack? Desks that had it lose the sources it gave them, unless set on directly."))return;await api("DELETE",`/api/packs/${encodeURIComponent(f.dataset.pack)}`);load();};});
+}
+function packBox(p){
+  return `<form class="box" data-pack="${esc(p.id)}"><h3>${p.id?esc(p.name):"New pack"}</h3>
+  <div class="grid2"><label>Name<input name="pname" required value="${esc(p.name)}"></label><label>What it's for<input name="pdesc" value="${esc(p.description)}"></label></div>
+  <div class="checks">${D.sources.filter(s=>s.status!=="Retired"||p.sources.includes(s.id)).map(s=>`<label><input type="checkbox" name="src" value="${esc(s.id)}" ${p.sources.includes(s.id)?"checked":""}> ${esc(s.name)} <span class="pill s-${esc(s.status)}">${esc(s.status)}</span></label>`).join("")||'<span class="help">Add sources first.</span>'}</div>
+  <div class="row"><button class="btn primary sm" type="submit">${p.id?"Save":"Create pack"}</button>${p.id?'<button class="btn sm" type="button" data-del>Delete</button>':""}<span class="help" data-t></span></div></form>`;
+}
+
+/* ---------- desk access ---------- */
+function drawAccess(){
+  if(!M){$("#view").innerHTML='<p class="help">Loading…</p>';return;}
+  if(!M.desks.length){$("#view").innerHTML='<div class="empty">No desks yet. Create desks in HQ first.</div>';return;}
+  if(!M.desks.some(d=>d.id===curDesk))curDesk=M.desks[0].id;
+  const d=M.desks.find(x=>x.id===curDesk), st=d.settings||{};
+  const eff=k=>({on:"On",hyperweb:"Hyperweb only",off:"Off"})[k];
+  const all=M.sources.filter(s=>s.status!=="Retired").map(s=>({s,c:M.cells[`${d.id}|${s.id}`]})), nDraft=all.filter(x=>["Draft","Paused"].includes(x.s.status)).length, cells=showDrafts?all:all.filter(x=>!["Draft","Paused"].includes(x.s.status));
+  $("#view").innerHTML=`
+  <div class="row"><label style="min-width:280px">Desk<select id="deskSel">${M.desks.map(x=>`<option value="${esc(x.id)}" ${x.id===curDesk?"selected":""}>${esc(x.name)}</option>`).join("")}</select></label>
+    <span class="help">${all.filter(x=>x.c.effective==="on").length} sources on, ${all.filter(x=>x.c.effective==="hyperweb").length} Hyperweb only</span>
+    ${nDraft?`<label class="checks" style="margin-left:auto"><span style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="shDr" ${showDrafts?"checked":""} style="width:auto"> Show ${nDraft} draft or paused source${nDraft===1?"":"s"}</span></label>`:""}</div>
+  <form class="box" id="deskForm"><h3>${esc(d.name)}: packs and territory</h3>
+    <div class="checks">${M.packs.map(p=>`<label><input type="checkbox" name="pack" value="${esc(p.id)}" ${d.packs.includes(p.id)?"checked":""}> ${esc(p.name)}</label>`).join("")||'<span class="help">No packs yet.</span>'}</div>
+    <div class="grid2"><label>Territory (towns or regions, comma separated)<input name="areas" value="${esc((st.areas||[]).join(", "))}" placeholder="Oakville, Burlington, Milton, Mississauga, Hamilton, Halton"></label>
+    <label>Most items a day, all sources<input name="cap" type="number" min="0" value="${st.daily_cap??""}" placeholder="No limit"></label></div>
+    <div class="checks"><label><input type="checkbox" name="paused" ${st.paused?"checked":""}> Pause all deliveries to this desk</label></div>
+    <div class="row"><button class="btn primary sm" type="submit">Save desk</button><span class="help" data-t></span></div></form>
+  <div class="wrapx"><table class="tbl"><thead><tr><th>Source</th><th>Gets</th><th>Setting</th><th>Desk parameters (JSON: areas, keywords, exclude, query)</th><th>Daily cap</th><th></th></tr></thead><tbody>
+  ${cells.map(({s,c})=>`<tr data-cell="${esc(s.id)}"><td><b>${esc(s.name)}</b><br><small>${esc(METHOD(s.method))} · ${s.mode==="per_desk"?"per desk":"shared"}</small> <span class="pill s-${esc(s.status)}">${esc(s.status)}</span></td>
+    <td><span class="pill e-${c.effective}">${eff(c.effective)}</span><br><small>${esc(c.why)}</small></td>
+    <td><select name="access">${Object.entries(D.meta.access).map(([k,l])=>`<option value="${k}" ${k===c.access?"selected":""}>${l}</option>`).join("")}</select></td>
+    <td><textarea name="params" rows="2" spellcheck="false">${Object.keys(c.params||{}).length?esc(JSON.stringify(c.params)):""}</textarea></td>
+    <td><input name="cap" type="number" min="0" style="width:90px" value="${c.daily_cap??""}"></td>
+    <td><button class="btn sm" data-save>Save</button><br><small data-t></small></td></tr>`).join("")}</tbody></table></div>
+  <p class="help">On means the client sees it. Hyperweb only means the desk's team view shows it with a Testing tag and the client view never does. A source in Testing is always Hyperweb only, whatever is set here.</p>`;
+  $("#deskSel").onchange=e=>{curDesk=e.target.value;remember();drawAccess();};
+  const sd=$("#shDr"); if(sd)sd.onchange=()=>{showDrafts=sd.checked;drawAccess();};
+  $("#deskForm").onsubmit=async e=>{e.preventDefault();const f=e.target,t=f.querySelector("[data-t]");t.textContent="Saving…";
+    try{await api("POST",`/api/access/desk/${encodeURIComponent(d.id)}`,{packs:[...f.querySelectorAll("[name=pack]:checked")].map(c=>c.value),settings:{areas:f.areas.value,daily_cap:f.cap.value,paused:f.paused.checked}});M=await api("GET","/api/access");drawAccess();say(`${d.name} saved.`,"ok");}catch(x){t.textContent=x.message;}};
+  document.querySelectorAll("[data-cell]").forEach(tr=>tr.querySelector("[data-save]").onclick=async()=>{const t=tr.querySelector("[data-t]");let p={};
+    try{p=tr.querySelector("[name=params]").value.trim()?JSON.parse(tr.querySelector("[name=params]").value):{};}catch(x){t.textContent="Not valid JSON";return;}
+    t.textContent="Saving…";try{await api("POST","/api/access/cell",{desk:d.id,source:tr.dataset.cell,access:tr.querySelector("[name=access]").value,params:p,daily_cap:tr.querySelector("[name=cap]").value});M=await api("GET","/api/access");drawAccess();}catch(x){t.textContent=x.message;}});
+}
+
+/* ---------- activity ---------- */
+async function drawActivity(){
+  $("#view").innerHTML='<p class="help">Loading…</p>';
+  const [r,p]=await Promise.all([api("GET","/api/sources/all/runs"),api("GET","/api/sources/all/pool")]);
+  const dn=d=>(M?.desks||[]).find(x=>x.id===d)?.name||d;
+  $("#view").innerHTML=`<div class="box"><h3>Latest runs, every source</h3>${r.runs.length?`<div class="wrapx"><table class="tbl"><thead><tr><th>When</th><th>Source</th><th>Desk</th><th>New</th><th>Kept</th><th>Sent</th><th>Note</th></tr></thead><tbody>${r.runs.map(x=>`<tr><td>${esc(when(x.started_at))}<br><small>${esc(x.trigger)}</small></td><td>${esc(srcName(x.source_id))}</td><td>${esc(x.scope?dn(x.scope):"All")}</td><td>${x.new_items}</td><td>${x.kept}</td><td>${x.delivered}</td><td>${x.status==="error"?`<span style="color:var(--bad)">${esc(x.error)}</span>`:esc(x.note)}</td></tr>`).join("")}</tbody></table></div>`:'<p class="help">No runs yet.</p>'}</div>
+  <div class="box"><h3>Newest items in the pool</h3>${p.items.length?`<div class="wrapx"><table class="tbl"><thead><tr><th>Item</th><th>Source</th><th>Found</th><th>Went to</th></tr></thead><tbody>${p.items.map(i=>`<tr class="${i.dropped?"dropped":""}"><td><b>${esc(i.company||i.title)}</b>${i.company?`<br><small>${esc(i.title)}</small>`:""}</td><td>${esc(srcName(i.source_id))}</td><td>${esc(when(i.found_at))}</td><td>${i.dropped?`<small>${esc(i.dropped)}</small>`:i.sent.map(s=>esc(dn(s.desk))+(s.held?" (held)":"")).join(", ")||"<small>No desk matched</small>"}</td></tr>`).join("")}</tbody></table></div>`:'<p class="help">Nothing yet.</p>'}</div>`;
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(html){const d=$("#drawer");d.innerHTML=html;d.hidden=false;$("#scrim").hidden=false;d.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeDrawer);d.querySelector("input,select,textarea,button")?.focus();}
+function closeDrawer(){$("#drawer").hidden=true;$("#scrim").hidden=true;}
+$("#scrim").onclick=closeDrawer;document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#drawer").hidden)closeDrawer();});
+load().catch(e=>say(e.message,"err"));
+</script>

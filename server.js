@@ -8,6 +8,7 @@ const store = require("./lib/store");
 const auth = require("./lib/auth");
 const connectors = require("./lib/connectors");
 const views = require("./lib/views");
+const sources = require("./lib/sources");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -98,20 +99,29 @@ app.get("/desk/:id", needUser, wrap(async (req, res) => {
   if (!desk.exists) return res.status(404).send(views.message("Desk not found", "There's no desk at this address."));
   res.send(views.page("desk", space, req.user, { deskName: desk.data.name }));
 }));
+app.get("/sources", needUser, (req, res) => (req.user.role === "staff" ? res.send(views.sources(req.user)) : res.redirect("/")));
 app.get("/admin", needUser, (req, res) => (req.user.role === "staff" ? res.send(views.admin(req.user)) : res.redirect("/")));
 
 // ---------- page data API ----------
 const S = "/api/s/:space";
+// Items a signal source is still testing (hqOnly) are for the Hyperweb team only: clients never receive them.
+const hidden = (req, data) => !req.acc.team && data && data.hqOnly === true;
+const guardHidden = wrap(async (req, res, next) => {
+  if (req.acc.team) return next();
+  const p = req.body?.path || req.query.path;
+  try { const d = await store.getDoc(req.space, p); if (d.exists && hidden(req, d.data)) return sendErr(res, { code: "not_found", message: "Not found" }); } catch (e) { return sendErr(res, e); }
+  next();
+});
 app.get(`${S}/doc`, needUser, needSpace, wrap(async (req, res) => {
-  try { const d = await store.getDoc(req.space, req.query.path); res.json({ exists: d.exists, data: d.data || null }); } catch (e) { sendErr(res, e); }
+  try { const d = await store.getDoc(req.space, req.query.path); const h = hidden(req, d.data); res.json({ exists: d.exists && !h, data: h ? null : d.data || null }); } catch (e) { sendErr(res, e); }
 }));
-app.put(`${S}/doc`, needUser, needSpace, needWrite, wrap(async (req, res) => {
+app.put(`${S}/doc`, needUser, needSpace, needWrite, guardHidden, wrap(async (req, res) => {
   try { await store.setDoc(req.space, req.body.path, req.body.data, req.user.id); res.json({ ok: true }); } catch (e) { sendErr(res, e); }
 }));
-app.patch(`${S}/doc`, needUser, needSpace, needWrite, wrap(async (req, res) => {
+app.patch(`${S}/doc`, needUser, needSpace, needWrite, guardHidden, wrap(async (req, res) => {
   try { await store.updateDoc(req.space, req.body.path, req.body.data, req.user.id); res.json({ ok: true }); } catch (e) { sendErr(res, e); }
 }));
-app.delete(`${S}/doc`, needUser, needSpace, needWrite, wrap(async (req, res) => {
+app.delete(`${S}/doc`, needUser, needSpace, needWrite, guardHidden, wrap(async (req, res) => {
   try { await store.deleteDoc(req.space, req.query.path); res.json({ ok: true }); } catch (e) { sendErr(res, e); }
 }));
 app.post(`${S}/add`, needUser, needSpace, needWrite, wrap(async (req, res) => {
@@ -121,7 +131,7 @@ app.post(`${S}/query`, needUser, needSpace, wrap(async (req, res) => {
   try {
     const q = req.body || {};
     const rows = await store.query(req.space, q.coll, { where: q.where, orderBy: q.orderBy, limit: q.limit });
-    res.json({ docs: rows.map((r) => ({ id: r.id, data: r.data })) });
+    res.json({ docs: rows.filter((r) => !hidden(req, r.data)).map((r) => ({ id: r.id, data: r.data })) });
   } catch (e) { sendErr(res, e); }
 }));
 app.get(`${S}/events`, needUser, needSpace, (req, res) => {
@@ -178,6 +188,31 @@ app.post("/api/admin/users/link", needUser, needStaff, wrap(async (req, res) => 
   res.json({ ok: true });
 }));
 
+// ---------- signal sources (staff) ----------
+const SE = (res, e) => sendErr(res, e.code ? e : { code: "invalid_argument", message: e.message });
+app.get("/api/sources", needUser, needStaff, wrap(async (req, res) => {
+  const [list, packs, score] = await Promise.all([sources.listSources(), sources.listPacks(), sources.scorecard()]);
+  res.json({ sources: list, packs, score, meta: { methods: sources.METHODS, statuses: sources.STATUSES, kinds: sources.KINDS, subjects: sources.SUBJECTS, schedules: sources.SCHEDULES, access: sources.ACCESS } });
+}));
+app.post("/api/sources", needUser, needStaff, wrap(async (req, res) => { try { res.json({ source: await sources.saveSource(req.body, req.user.email) }); } catch (e) { SE(res, e); } }));
+app.post("/api/sources/:id/status", needUser, needStaff, wrap(async (req, res) => { try { res.json({ source: await sources.setStatus(req.params.id, req.body.status, req.user.email) }); } catch (e) { SE(res, e); } }));
+app.post("/api/sources/:id/run", needUser, needStaff, wrap(async (req, res) => { try { res.json({ results: await sources.runSource(req.params.id, "manual") }); } catch (e) { SE(res, e); } }));
+app.post("/api/sources/:id/paste", needUser, needStaff, wrap(async (req, res) => {
+  try { const s = await sources.getSource(req.params.id); if (!s) throw Object.assign(new Error("No such source"), { code: "not_found" });
+    res.json(await sources.push(req.params.id, { scope: s.mode === "per_desk" ? String(req.body.desk || "") : "", items: sources.parsePasted(req.body.text, s.config), note: `Pasted by ${req.user.name || req.user.email}`, trigger: "manual" })); } catch (e) { SE(res, e); }
+}));
+app.get("/api/sources/:id/runs", needUser, needStaff, wrap(async (req, res) => res.json({ runs: await sources.runsFor(req.params.id === "all" ? null : req.params.id, 50) })));
+app.get("/api/sources/:id/pool", needUser, needStaff, wrap(async (req, res) => res.json({ items: await sources.poolFor(req.params.id === "all" ? null : req.params.id, 80) })));
+app.post("/api/packs", needUser, needStaff, wrap(async (req, res) => { try { res.json({ id: await sources.savePack(req.body) }); } catch (e) { SE(res, e); } }));
+app.delete("/api/packs/:id", needUser, needStaff, wrap(async (req, res) => { await sources.deletePack(req.params.id); res.json({ ok: true }); }));
+app.get("/api/access", needUser, needStaff, wrap(async (req, res) => res.json(await sources.matrix())));
+app.post("/api/access/desk/:desk", needUser, needStaff, wrap(async (req, res) => {
+  try { if (req.body.settings) await sources.setDeskSettings(req.params.desk, req.body.settings, req.user.email); if (Array.isArray(req.body.packs)) await sources.setDeskPacks(req.params.desk, req.body.packs); res.json({ ok: true }); } catch (e) { SE(res, e); }
+}));
+app.post("/api/access/cell", needUser, needStaff, wrap(async (req, res) => {
+  try { await sources.setDeskSource(String(req.body.desk), String(req.body.source), req.body, req.user.email); res.json({ ok: true }); } catch (e) { SE(res, e); }
+}));
+
 // ---------- runner API (bearer token) ----------
 const needRunner = (req, res, next) => {
   const want = process.env.RUNNER_TOKEN || "";
@@ -202,6 +237,12 @@ app.patch(`${R}/doc`, needRunner, wrap(async (req, res) => {
 app.delete(`${R}/doc`, needRunner, wrap(async (req, res) => {
   try { await store.deleteDoc(req.query.space, req.query.path, req.query.ifVersion ? +req.query.ifVersion : undefined); res.json({ ok: true }); } catch (e) { sendErr(res, e); }
 }));
+// Signal sources for the Claude runner: what's due, and a place to push what it found
+app.get(`${R}/sources`, needRunner, wrap(async (req, res) => res.json({ sources: await sources.listSources() })));
+app.get(`${R}/sources/due`, needRunner, wrap(async (req, res) => res.json({ due: await sources.dueForRunner({ all: req.query.all === "1" }) })));
+app.post(`${R}/sources/:id/items`, needRunner, wrap(async (req, res) => {
+  try { res.json(await sources.push(req.params.id, { scope: String(req.body.desk || req.body.scope || ""), items: req.body.items, note: req.body.note })); } catch (e) { SE(res, e); }
+}));
 // Remove every document in one desk's space (used when HQ deletes a desk). HQ itself can't be removed this way.
 app.post(`${R}/delete-space`, needRunner, wrap(async (req, res) => {
   const space = String(req.body.space || "");
@@ -214,4 +255,4 @@ app.post(`${R}/delete-space`, needRunner, wrap(async (req, res) => {
 app.use((err, req, res, next) => { console.error(err); res.status(500).json({ code: "unavailable", message: "Server error" }); });
 
 const port = +process.env.PORT || 8080;
-migrate().then(() => app.listen(port, () => console.log(`Signals HQ on :${port}`))).catch((e) => { console.error("Startup failed:", e); process.exit(1); });
+migrate().then(() => app.listen(port, () => { console.log(`Signals HQ on :${port}`); sources.startScheduler(); })).catch((e) => { console.error("Startup failed:", e); process.exit(1); });

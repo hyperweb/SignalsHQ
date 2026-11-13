@@ -3,3 +3,4 @@ seed/
 .env
 *.log
 .DS_Store
+Claude outputs/

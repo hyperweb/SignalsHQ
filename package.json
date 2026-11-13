@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "import": "node scripts/import.js",
-    "add-user": "node scripts/add-user.js"
+    "add-user": "node scripts/add-user.js",
+    "seed-sources": "node scripts/seed-sources.js"
   },
   "license": "UNLICENSED",
   "dependencies": {

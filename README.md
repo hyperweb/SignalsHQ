@@ -65,6 +65,41 @@ The scheduled Claude runner reads and writes desk data with `Authorization: Bear
 
 `ifVersion` makes a write fail with 409 if someone changed the doc since it was read.
 
+## Signal sources (managed apart from the desks)
+
+**Signal sources** in the top bar (Hyperweb team only) is where every source is managed, whichever client it's for. Desks never hold source settings; they only receive what sources deliver.
+
+| Piece | What it is |
+| --- | --- |
+| **Catalog** | One record per source: name, UTM code, listening method, config, kind (account, project or market moment), schedule and status |
+| **Packs** | Bundles of sources, e.g. Core and the Arborist pack. Tick a pack for a desk and it gets every source in it |
+| **Desk access** | Per desk: packs, territory (towns or regions), daily cap, pause. Per desk and source: From packs, On, Hyperweb only or Off, plus parameters (`areas`, `keywords`, `exclude`, a desk's own inbox `query`) |
+| **Pool** | Everything a source finds is stored once, de-duplicated, optionally screened by Claude against the source's keep rule, then routed |
+| **Activity** | Every run, and where each item went |
+
+**Status lifecycle.** Draft (not running; a manual run fills the pool only) → Testing (runs; delivers as *Hyperweb only*) → Live (clients see it) → Paused or Retired. Setting a source Live releases the held items nobody has acted on.
+
+**Hyperweb only is enforced by the server.** Items marked `hqOnly` are filtered out of every page-data read for partners and clients, can't be changed by them, and never appear in the client tease.
+
+**Listening methods** (configure, don't code): open-data feed (RSS/Atom, GeoJSON or OGC API, ArcGIS, JSON, CSV), page watch, registry compare, alert inbox (Gmail; needs the `gmail.readonly` scope), Claude runner, manual or paid import. The scheduler checks every minute for due feed, page watch, registry and inbox sources; daily, weekly and monthly sources run at 5:40 am Eastern.
+
+**Where items land on a desk.** Account and project signals go to the desk's `signals` collection with `sourceId`, `sourceCode` and `sourceName`, tagged on the card. Market moments go to a `moments` collection and show as their own lane at the top of the Signals tab. Accepting a signal copies `sourceId`, `sourceCode` and UTM values onto the lead, so the scorecard (found, delivered, held, accepted, won) runs per source.
+
+**Seeding.** `npm run seed-sources` loads the Core and Arborist packs from the Maple Hill Tree research and gives the Maple Hill Tree desk both. Re-running it never changes a source's status.
+
+**Runner sources.** The Claude runner asks what's due and pushes what it finds; Signals HQ does the rest:
+
+```
+python3 /tmp/shq.py sources-due
+python3 /tmp/shq.py push-items facilities-hires @items.json --desk <desk id>
+```
+
+| Call | Does |
+| --- | --- |
+| `GET /api/runner/sources` | The catalog |
+| `GET /api/runner/sources/due` | Runner sources that are due, with each desk's territory and parameters |
+| `POST /api/runner/sources/:id/items` `{desk?, items, note?}` | Pool, screen and route items |
+
 ## Run locally
 
 ```
@@ -83,10 +118,13 @@ lib/store.js           document store (set, merge-update, delete, queries, chang
 lib/auth.js            email-link sign-in, sessions, who can open which desk
 lib/connectors.js      Firecrawl, Crunchbase and Claude calls made for the pages
 lib/mail.js            sign-in email via Resend (falls back to Gmail, then the log)
-lib/gmail.js           Gmail API sender
+lib/gmail.js           Gmail API sender and reader
+lib/sources.js         signal source catalog, packs, desk access, routing, scheduler
+lib/methods.js         listening methods: feed, page watch, registry, alert inbox
 lib/views.js           sign-in, desk chooser, People and access, page wrapper
 pages/hq.html          Signals HQ page
 pages/desk.html        Signals Desk page (one copy serves every desk)
+pages/sources.html     Signal sources page (catalog, packs, desk access, activity)
 public/claude-shim.js  window.claude runtime for the pages
 .do/app.yaml           DigitalOcean App Platform spec
 ```

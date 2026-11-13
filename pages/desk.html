@@ -249,6 +249,10 @@ a.btn{text-decoration:none;display:inline-block}
 .fbar .sel{font-size:13px}
 .lastsweep{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:0}
 .lastsweep b{color:var(--fg);font-weight:600}
+.srctag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;background:var(--sunk,#eef1f5);color:var(--muted,#5a6475);white-space:nowrap}
+.heldtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;background:#fdf0d5;color:#8a5a00;white-space:nowrap}
+.moments{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-left:4px solid var(--signal);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.moments h2{font-size:16px;margin:0}.moment{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;border-top:1px solid var(--line);padding-top:8px}.moment p{margin:2px 0 0;font-size:13px;color:var(--muted)}
 .newtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:2px 6px;background:var(--signal-soft);color:var(--signal);white-space:nowrap}
 /* client-view */
 body.client [data-hx],body.client [data-team]{display:none!important}
@@ -395,6 +399,7 @@ const ENRICH_NOTE="Find the decision maker and one more contact. For every email
 const TEASE_LOCKS=["Company","Website","Decision maker","Why now, in detail","Talking points","Outreach drafts"];
 const LOCK_SVG=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>`;
 const KIND={news:"Their news",site:"Their website",industry:"Industry",market:"Market",data:"Data"};
+let moments=[];
 let db=null, canWrite=true, ws={}, auds={}, sigs=[], leads={}, runs=[], reqs=[], tab="inbox", audF="", sigF="New", leadF="open", curAud=null, curLead=null, audDraft=null, sigSort="best", leadSort="accepted", showRmAud=false, audRmAsk=null, loaded={ws:false};
 try{const v=JSON.parse(localStorage.getItem("sd-view")||"{}");if(v.tab)tab=v.tab;if(v.aud!=null)audF=v.aud;}catch(e){}
 function remember(){try{localStorage.setItem("sd-view",JSON.stringify({tab,aud:audF}))}catch(e){}}
@@ -450,9 +455,21 @@ function lastSweepLine(){
   return parts.length?`<p class="lastsweep">${parts.join("")}</p>`:"";
 }
 
+/* ---------- market moments: reasons to contact a whole segment, not single leads ---------- */
+function momentsLane(){
+  const list=moments.filter(m=>(m.status||"New")==="New"&&!(isClientView()&&m.hqOnly)).sort((a,b)=>String(b.date||b.foundAt).localeCompare(String(a.date||a.foundAt))).slice(0,6);
+  if(!list.length)return "";
+  return `<section class="moments" aria-label="Market moments"><h2>Market moments <span class="srctag">${list.length}</span></h2>
+  <p class="help" style="margin:0;font-size:13px;color:var(--muted)">Not leads. Each one is a reason to reach a whole segment you already know, such as a storm warning for your property managers.</p>
+  ${list.map(m=>`<div class="moment" data-mid="${esc(m._id)}"><div><b>${esc(m.title)}</b>${!isClientView()&&m.hqOnly?' <span class="heldtag">Hyperweb only, testing</span>':""}<p>${esc([m.area,dShort(m.date),m.sourceName].filter(Boolean).join(" · "))}${safeUrl(m.url)?` · <a href="${esc(m.url)}" target="_blank" rel="noopener">Details</a>`:""}</p>${m.detail?`<p>${esc(String(m.detail).slice(0,260))}</p>`:""}</div>
+  <div class="ctl"><button class="btn sm" type="button" data-mused ${canWrite?"":"disabled"}>We acted on it</button><button class="btn sm" type="button" data-mdis ${canWrite?"":"disabled"}>Not relevant</button></div></div>`).join("")}</section>`;
+}
+function wireMoments(m){m.querySelectorAll("[data-mid]").forEach(row=>{const id=row.dataset.mid,set=st=>db.collection("moments").doc(id).update({status:st,decidedAt:nowIso(),decidedBy:"Desk"}).catch(()=>{});
+  const u=row.querySelector("[data-mused]"),d=row.querySelector("[data-mdis]");if(u)u.onclick=()=>set("Used");if(d)d.onclick=()=>set("Dismissed");});}
+
 /* ---------- Signals inbox ---------- */
 function drawInbox(){
-  const m=$("main"), base=sigs.filter(inAud);
+  const m=$("main"), base=sigs.filter(inAud).filter(s=>!(isClientView()&&s.hqOnly));
   const cnt=s=>base.filter(x=>(x.status||"New")===s).length;
   const ord={Promote:0,Review:1,Dismiss:2};
   const best=(a,b)=>(ord[a.triage]??1)-(ord[b.triage]??1)||(qScore(b.prelim,auds[b.audienceId],b.climateAdj)??0)-(qScore(a.prelim,auds[a.audienceId],a.climateAdj)??0)||String(b.date||"").localeCompare(String(a.date||""));
@@ -463,6 +480,7 @@ function drawInbox(){
   const nComp=flagged.filter(s=>guardFlag(s).reason.startsWith("Competitor")).length, nQc=flagged.length-nComp;
   m.innerHTML=`
   ${flagged.length?`<div class="note ctl" style="justify-content:space-between"><span><b>${flagged.length} new signal${flagged.length===1?"":"s"} shouldn't be prospected:</b> ${[nComp?`${nComp} on your competitor list`:"",nQc?`${nQc} in Quebec, which this desk excludes`:""].filter(Boolean).join(", ")}. They're marked below.</span><span class="ctl"><button class="btn sm" type="button" id="gDisAll" ${canWrite?"":"disabled"}>Dismiss ${flagged.length===1?"it":"all "+flagged.length}</button><span class="toast" id="gT"></span></span></div>`:""}
+  ${momentsLane()}
   ${pend.length?`<p class="note">A sweep is ${pend.some(r=>r.status==="Running")?"running now":"queued"}${pend[0].audienceId?" for "+esc(audName(pend[0].audienceId)):""}. New signals appear here as Claude finds them.</p>`:""}
   <div class="howto"><p>Every week the desk looks for companies that fit your audiences and have a reason to buy right now, checks each one, and sorts it into one of three piles:</p>
   <ul><li><span class="pill t-Promote">Promote</span><span>A strong fit with a real, recent reason to buy. Act on these first.</span></li>
@@ -474,7 +492,7 @@ function drawInbox(){
   <div class="fbar"><div class="strip">${["New","Fresh","Accepted","Dismissed","All"].map(s=>`<button class="chip" type="button" data-sf="${s}" aria-pressed="${sigF===s}">${s==="Fresh"?"From the last sweep":s} <b>${s==="All"?base.length:s==="Fresh"?base.filter(x=>isNewSig(x)&&(x.status||"New")==="New").length:cnt(s)}</b></button>`).join("")}</div>
   <label class="meta">Sort <select class="sel" id="sigSort">${[["best","Best fit first"],["found","Newest found"],["date","Newest signal date"],["aud","By audience"]].map(([k,l])=>`<option value="${k}" ${sigSort===k?"selected":""}>${l}</option>`).join("")}</select></label></div>
   ${list.length?`<div class="grid">${list.map(sigCard).join("")}</div>`:`<div class="empty"><h2>${base.length?"Nothing in this view":"No signals yet"}</h2><p>${base.length?"Try another filter.":Object.keys(auds).length?"The first sweep fills this inbox. Use Run a sweep now, or wait for "+esc(ws.sweepDay||"Monday")+" morning.":"Set up an audience first, then run a sweep."}</p></div>`}`;
-  wireAudChips(m); $("sigSort").onchange=e=>{sigSort=e.target.value;drawInbox();};
+  wireAudChips(m); wireMoments(m); $("sigSort").onchange=e=>{sigSort=e.target.value;drawInbox();};
   m.querySelectorAll("[data-sf]").forEach(b=>b.onclick=()=>{sigF=b.dataset.sf;drawInbox();});
   m.querySelectorAll("article[data-sid]").forEach(wireSig);
   const ga=$("gDisAll"); if(ga)ga.onclick=async()=>{ga.disabled=true;const gt=$("gT");let n=0;
@@ -493,7 +511,7 @@ function sigCard(s){
     ${s.triageNote?`<p class="why ${s.triage==="Dismiss"?"dis":""}">${esc(s.triageNote)}</p>`:""}
     ${p.need!=null?`<div class="qrow">${qm("Need",p.need)}${qm("Can pay",p.ability)}${qm("Timing",p.timing)}<span class="pill p-info">${esc(qTier(p))}</span></div>`:""}
     ${(s.teasers||[]).length||s.insight?`<details class="more"><summary>Conversation starters</summary><div class="teasers">${s.insight?`<div class="tz"><span class="k">Give first</span>${esc(s.insight)}</div>`:""}${(s.teasers||[]).map(t=>`<div class="tz"><span class="k">${esc(KIND[t.kind]||t.kind)}</span>${esc(t.hook)}<small>${t.source?(safeUrl(t.url)?`<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.source)}</a>`:esc(t.source)):""}</small></div>`).join("")}</div></details>`:""}
-    <div class="ctl">${multiAud()?audTag(s.audienceId):""}${isNewSig(s)?'<span class="newtag">From the last sweep</span>':""}${s.foundAt?`<span class="firmo">Found ${esc(dShort(s.foundAt))}</span>`:""}</div>
+    <div class="ctl">${s.sourceName?`<span class="srctag" title="Signal source${s.sourceCode?" · "+esc(s.sourceCode):""}">${esc(s.sourceName)}</span>`:""}${s.project?'<span class="srctag" title="A site or application. Work out who the buyer is before reaching out.">Project</span>':""}${!isClientView()&&s.hqOnly?'<span class="heldtag" title="This source is being tested. Only the Hyperweb team sees it until it goes live.">Hyperweb only, testing</span>':""}${multiAud()?audTag(s.audienceId):""}${isNewSig(s)?'<span class="newtag">From the last sweep</span>':""}${s.foundAt?`<span class="firmo">Found ${esc(dShort(s.foundAt))}</span>`:""}</div>
     ${st!=="Dismissed"?`<div class="ctl">${teasePicks().some(x=>x._id===s._id)?'<span class="tpill">In the tease</span>':""}<button class="pin" type="button" data-pin="show" aria-pressed="${s.teasePin===true}" ${canWrite?"":"disabled"}>Show in tease</button><button class="pin hide" type="button" data-pin="hide" aria-pressed="${s.teasePin===false}" ${canWrite?"":"disabled"}>Hide from tease</button></div>`:""}
     <div class="acts">${st==="New"?`<button class="btn primary sm" type="button" data-acc ${canWrite?"":"disabled"}>Accept as lead</button><label class="toast"><input type="checkbox" data-enrich ${ws.enrichOnAccept?"checked":""}> Find contacts</label><select class="sel" data-dr aria-label="Reason to dismiss">${DISMISS.map(r=>`<option ${r===(gf?.reason||s.suggestedReason)?"selected":""}>${r}</option>`).join("")}</select><button class="btn sm" type="button" data-dis ${canWrite?"":"disabled"}>Dismiss</button>`
       :st==="Accepted"?`<span class="toast">Accepted ${esc(dShort(s.decidedAt))}</span><button class="btn sm" type="button" data-open>Open lead</button>`
@@ -517,7 +535,7 @@ function wireSig(art){
 async function acceptSignal(s,enrich){
   const id=s._id;
   if(!leads[id]){
-    await db.collection("leads").doc(id).set({company:s.company,domain:cleanDomain(s.domain),city:s.city||"",industry:s.industry||"",size:s.size||"",audienceId:s.audienceId||"",signalId:id,
+    await db.collection("leads").doc(id).set({company:s.company,domain:cleanDomain(s.domain),city:s.city||"",industry:s.industry||"",size:s.size||"",audienceId:s.audienceId||"",signalId:id,sourceId:s.sourceId||"",sourceCode:s.sourceCode||"",utm:s.sourceCode?{utm_source:"signals",utm_medium:"outreach",utm_campaign:s.sourceCode}:null,
       signals:[{type:s.type||"",detail:s.detail||"",date:s.date||"",source:s.source||"",url:s.url||"",via:s.sourceTool||s.via||""}],whyNow:s.triageNote||s.detail||"",prelim:s.prelim||null,climateAdj:s.climateAdj??0,
       teasers:s.teasers||[],insight:s.insight||"",warmPath:s.warmPath||"",firstContact:s.firstContact||"",contacts:[],scripts:{},stage:"New",history:[{s:"New",at:nowIso()}],
       delivery:{status:ws.ghlLocationId?"Queued":"Not set up",target:ws.ghlLocationId?"Go High Level":""},acceptedAt:nowIso(),updatedAt:nowIso()});
@@ -1224,7 +1242,7 @@ function playsModal(){
 const sigDate=s=>String(s.date||s.foundAt||"").slice(0,10);
 function teasePicks(){
   const c=teaseCfg(), cut=new Date(Date.now()-c.windowDays*864e5).toISOString().slice(0,10);
-  const ok=s=>s.status!=="Dismissed"&&s.triage!=="Dismiss"&&!guardFlag(s)&&(s.teasePin!==false||s.teaseReveal===true)&&(!c.audienceIds.length||c.audienceIds.includes(s.audienceId));
+  const ok=s=>s.status!=="Dismissed"&&s.triage!=="Dismiss"&&!s.hqOnly&&!guardFlag(s)&&(s.teasePin!==false||s.teaseReveal===true)&&(!c.audienceIds.length||c.audienceIds.includes(s.audienceId));
   const pinnedQ=s=>s.teasePin===true||s.teaseReveal===true;
   const ord={Promote:0,Review:1};
   const pinned=sigs.filter(s=>ok(s)&&pinnedQ(s)).sort((a,b)=>(b.teaseReveal===true)-(a.teaseReveal===true)||sigDate(b).localeCompare(sigDate(a)));
@@ -1495,6 +1513,7 @@ drawHead();draw();
   const redraw=()=>{drawHead();if($("drawer").hidden||!curLead){if(!(tab==="audiences"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#aForm"))&&!(tab==="setup"&&document.activeElement?.closest?.("#sForm,#pForm"))&&!(tab==="tease"&&document.activeElement?.closest?.("#tForm,.trow")))draw();}else{drawLead();}if(!$("stage").hidden&&!document.activeElement?.closest?.("#stage a"))openClientView();};
   db.collection("workspace").onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==="profile");loaded.wsExists=!!d;ws=d?d.data():{};drawHead();if(tab==="setup"?!document.activeElement?.closest?.("#sForm,#pForm"):tab==="tease"?!document.activeElement?.closest?.("#tForm,.trow"):true)draw();},()=>banner("Couldn't load the workspace. Reload the page to try again.","err"));
   db.collection("audiences").onSnapshot(snap=>{auds={};snap.docs.forEach(s=>auds[s.id]={_id:s.id,...s.data()});redraw();},()=>{});
+  db.collection("moments").onSnapshot(snap=>{moments=snap.docs.map(x=>({_id:x.id,...x.data()}));redraw();},()=>{});
   db.collection("signals").onSnapshot(snap=>{sigs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});
   db.collection("leads").onSnapshot(snap=>{leads={};snap.docs.forEach(s=>leads[s.id]={_id:s.id,...s.data()});if(curLead&&!$("drawer").hidden&&document.activeElement?.closest?.("#drawer textarea,#drawer input.pbnote"))return;redraw();},()=>{});
   db.collection("runs").onSnapshot(snap=>{runs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});

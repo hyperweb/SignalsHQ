@@ -17,6 +17,12 @@ Paths: "<collection>/<doc id>", e.g. "workspace/profile".
   python3 /tmp/shq.py batch  <space> @ops.json      ops: [{"op":"set|update|delete","path":"...","data":{...},"ifVersion":N}]
   python3 /tmp/shq.py delete-space desk:<id>        (only for a desk HQ marked "Delete requested")
 
+Signal sources (managed at /sources, apart from the desks):
+  python3 /tmp/shq.py sources-due [--all]           runner sources that are due, with each desk's territory and parameters
+  python3 /tmp/shq.py push-items <source id> @items.json [--desk <desk id>] [--note TEXT]
+      items: [{"title","company","area","url","date","detail","type"}], one per finding. Use --desk for per-desk sources.
+      Signals HQ stores, de-duplicates, screens and routes them to the right desks. Never write source items into desk spaces yourself.
+
 Output is JSON. list and get include each doc's "version"; pass it back as --if-version on writes.
 A write to a doc that changed since you read it fails with code "stale": re-read and redo it.
 """
@@ -95,6 +101,14 @@ def main(a):
                 body["data"] = o["data"]
                 r = call("PUT" if o["op"] == "set" else "PATCH", "/doc", body); done.append([o["path"], r.get("version")])
         res = {"done": done}
+    elif cmd == "sources-due":
+        res = call("GET", "/sources/due", query={"all": "1"} if "--all" in a else None)
+    elif cmd == "push-items":
+        desk = opt(a, "--desk"); note = opt(a, "--note"); sid, items = a
+        body = {"items": load(items)}
+        if desk: body["desk"] = desk[0]
+        if note: body["note"] = note[0]
+        res = call("POST", "/sources/%s/items" % urllib.parse.quote(sid), body)
     elif cmd == "delete-space":
         space = a[0]; res = call("POST", "/delete-space", {"space": space, "confirm": space})
     else: sys.exit("Unknown command " + cmd)
