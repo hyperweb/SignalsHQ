@@ -128,3 +128,31 @@ pages/sources.html     Signal sources page (catalog, packs, desk access, activit
 public/claude-shim.js  window.claude runtime for the pages
 .do/app.yaml           DigitalOcean App Platform spec
 ```
+
+## Plans, leads and billing
+
+Each client desk can have a plan. A desk with no plan (Hyperweb's own desks) isn't metered.
+
+| Plan | Leads a month | Price a month |
+| --- | --- | --- |
+| Starter | 10 | $950 |
+| Growth | 25 | $2,000 |
+| Scale | 50 | $3,500 |
+
+- **Accepting a signal uses one lead** (`leads/<signalId>` being created, from the desk, the API or the runner). A signal is only ever charged once. With no leads left the accept is refused (`out_of_leads`, HTTP 402) and the desk offers an upgrade or a top-up.
+- **Draw order:** rolled-over leads, then this month's plan leads, then top-ups. Unused plan leads roll over for one month; top-up leads stay until used.
+- **Top-ups:** $125 a lead in blocks of 5 or 10, always dearer than any plan's own rate, so the desk pushes the upgrade.
+- **Upgrades** apply at once: the client pays the difference in monthly price and gets the extra leads straight away. **Smaller plans** apply at the next renewal.
+- **Lead history** (`lead_ledger`): every lead added or used, with who and when. It is the acceptance audit trail and the balance.
+- **Hyperweb team** (on the desk, Get more leads): set a plan without charging (including custom plans), credit back a replacement lead, or correct the balance with a reason. **People and access** lists every desk's plan and the purchases waiting to be invoiced.
+
+### Stripe (card payments)
+
+Without Stripe keys, purchases are added straight away and wait in People and access as To invoice (bill them in QuickBooks Online Canada). With Stripe:
+
+1. `STRIPE_SECRET_KEY=sk_test_... node scripts/stripe-setup.js` creates the products and CAD prices (plans, setup fee $1,500, pilot setup $750, extra lead $125). Run it again with the live key when ready.
+2. Stripe Dashboard > Developers > Webhooks > add `https://signals.hyperweb.ca/api/stripe/webhook` with: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+3. In the app's environment: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and either `STRIPE_AUTOMATIC_TAX=true` (if Stripe Tax is set up) or `STRIPE_TAX_RATE_ID` (an HST tax rate made in Stripe).
+4. Turn on the Customer portal (Settings > Billing > Customer portal) so clients can update their card and see invoices.
+
+Clients start a plan from the desk (Stripe Checkout, plan plus setup fee), top up through Checkout, and upgrade with a one-off invoice charged to their card. Stripe events turn payments into leads; a payment is only ever granted once.

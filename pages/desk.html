@@ -306,6 +306,34 @@ body.client [data-hx],body.client [data-team]{display:none!important}
 .playcard summary{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between;cursor:pointer}
 .playsteps{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13px}
 @media (max-width:640px){.teamrow{grid-template-columns:1fr 1fr}.teamrow input{grid-column:1/-1}}
+/* ---------- plan, lead balance, top-ups ---------- */
+.planbadge{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:6px;font-size:13px}
+.planbadge .pname{font-weight:700}.planbadge .left b{font-variant-numeric:tabular-nums}
+.planbar{display:inline-block;width:120px;height:6px;border-radius:99px;background:var(--sunk);overflow:hidden;vertical-align:middle}
+.planbar i{display:block;height:100%;background:var(--good)}.planbar.low i{background:var(--warn)}.planbar.out i{background:var(--bad)}
+.planbanner{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border-radius:8px;padding:10px 14px;margin:0 0 12px;font-size:14px}
+.planbanner.low{background:var(--warn-soft);color:var(--fg)}.planbanner.out,.planbanner.due{background:var(--bad-soft);color:var(--fg)}.planbanner.ok{background:var(--good-soft);color:var(--fg)}
+.plandlg{border:1px solid var(--line);border-radius:12px;padding:0;width:min(720px,calc(100vw - 32px));max-height:calc(100vh - 48px);background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.plandlg::backdrop{background:rgba(10,16,28,.5)}
+.plandlg .pdh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 6px}
+.plandlg h2{font-family:var(--f-display);font-size:21px;margin:0}.plandlg .pdb{padding:6px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.plandlg .sub{color:var(--muted);margin:2px 0 0;font-size:13px}
+.pcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.pcard.rec{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:var(--surface)}
+.pcard h3{margin:0;font-family:var(--f-display);font-size:17px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.pcard .big{font-family:var(--f-display);font-size:24px;font-weight:700}.pcard .big small{font-size:13px;font-weight:500;color:var(--muted)}
+.pcard p{margin:0;font-size:13px;color:var(--muted)}.pcard .row{display:flex;flex-wrap:wrap;gap:8px}
+.rtag{font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-fg);border-radius:99px;padding:2px 8px}
+.pcompare{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:13px;margin:0}
+.pconfirm{border:1px dashed var(--accent);border-radius:8px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.pledger{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.pledger col.w{width:150px}.pledger col.u{width:130px}.pledger col.n{width:60px}.pledger td{overflow-wrap:anywhere}.pledger th,.pledger td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.pledger th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}.pledger td.q{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.pledger td.q.neg{color:var(--bad)}.pledger td.q.pos{color:var(--good)}
+.pstaff{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.pstaff .row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.pstaff label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.pstaff input,.pstaff select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit;min-width:0}
+.pmsg{font-size:13px;color:var(--muted);margin:0}.pmsg.err{color:var(--bad)}
 </style>
 
 <div class="wrap">
@@ -314,6 +342,7 @@ body.client [data-hx],body.client [data-team]{display:none!important}
       <span class="eyebrow" id="wsType">Signals Desk</span>
       <h1 id="wsName">Signals Desk</h1>
       <span class="meta" id="wsMeta">Loading the workspace…</span>
+      <div class="planbadge" id="planBadge" hidden></div>
     </div>
     <div class="ctl">
       <label class="meta" for="meSel">Working as <select class="sel" id="meSel"><option value="">Pick your name</option></select></label>
@@ -323,6 +352,7 @@ body.client [data-hx],body.client [data-team]{display:none!important}
     </div>
   </header>
   <div id="banner"></div>
+  <div id="planBanner"></div>
   <nav class="tabs" role="tablist" aria-label="Desk sections">
     <button role="tab" type="button" data-tab="today" aria-selected="false">Today <b id="cToday">0</b></button>
     <button role="tab" type="button" data-tab="inbox" aria-selected="true">Signals <b id="cInbox">0</b></button>
@@ -338,6 +368,7 @@ body.client [data-hx],body.client [data-team]{display:none!important}
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
 <div class="stage" id="stage" hidden role="dialog" aria-modal="true" aria-label="Client view"></div>
+<dialog class="plandlg" id="planDlg" aria-labelledby="pdTitle"></dialog>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -514,14 +545,14 @@ function sigCard(s){
     <div class="ctl">${s.sourceName?`<span class="srctag" title="Signal source${s.sourceCode?" · "+esc(s.sourceCode):""}">${esc(s.sourceName)}</span>`:""}${s.project?'<span class="srctag" title="A site or application. Work out who the buyer is before reaching out.">Project</span>':""}${!isClientView()&&s.hqOnly?'<span class="heldtag" title="This source is being tested. Only the Hyperweb team sees it until it goes live.">Hyperweb only, testing</span>':""}${multiAud()?audTag(s.audienceId):""}${isNewSig(s)?'<span class="newtag">From the last sweep</span>':""}${s.foundAt?`<span class="firmo">Found ${esc(dShort(s.foundAt))}</span>`:""}</div>
     ${st!=="Dismissed"?`<div class="ctl">${teasePicks().some(x=>x._id===s._id)?'<span class="tpill">In the tease</span>':""}<button class="pin" type="button" data-pin="show" aria-pressed="${s.teasePin===true}" ${canWrite?"":"disabled"}>Show in tease</button><button class="pin hide" type="button" data-pin="hide" aria-pressed="${s.teasePin===false}" ${canWrite?"":"disabled"}>Hide from tease</button></div>`:""}
     <div class="acts">${st==="New"?`<button class="btn primary sm" type="button" data-acc ${canWrite?"":"disabled"}>Accept as lead</button><label class="toast"><input type="checkbox" data-enrich ${ws.enrichOnAccept?"checked":""}> Find contacts</label><select class="sel" data-dr aria-label="Reason to dismiss">${DISMISS.map(r=>`<option ${r===(gf?.reason||s.suggestedReason)?"selected":""}>${r}</option>`).join("")}</select><button class="btn sm" type="button" data-dis ${canWrite?"":"disabled"}>Dismiss</button>`
-      :st==="Accepted"?`<span class="toast">Accepted ${esc(dShort(s.decidedAt))}</span><button class="btn sm" type="button" data-open>Open lead</button>`
+      :st==="Accepted"?`<span class="toast">Accepted ${esc(dShort(s.decidedAt))}${s.decidedBy&&s.decidedBy!=="Desk"?" by "+esc(s.decidedBy):""}</span><button class="btn sm" type="button" data-open>Open lead</button>`
       :`<span class="toast">Dismissed${s.dismissReason?": "+esc(s.dismissReason):""}</span><button class="btn sm" type="button" data-res ${canWrite?"":"disabled"}>Restore</button>`}<span class="toast" data-t></span></div>
   </article>`;
 }
 function wireSig(art){
   const s=sigs.find(x=>x._id===art.dataset.sid), t=art.querySelector("[data-t]");
   const acc=art.querySelector("[data-acc]");
-  if(acc)acc.onclick=async()=>{acc.disabled=true;t.textContent="Adding…";try{await acceptSignal(s,art.querySelector("[data-enrich]")?.checked);t.textContent="";}catch(e){acc.disabled=false;t.textContent=saveErr(e);}};
+  if(acc)acc.onclick=async()=>{if(plan&&plan.out&&!leads[s._id]){openPlanDlg("out");return;}acc.disabled=true;t.textContent="Adding…";try{await acceptSignal(s,art.querySelector("[data-enrich]")?.checked);t.textContent="";}catch(e){acc.disabled=false;if(e&&e.code==="out_of_leads"){t.textContent="";loadPlan().then(()=>openPlanDlg("out"));}else t.textContent=saveErr(e);}};
   const dis=art.querySelector("[data-dis]");
   if(dis)dis.onclick=async()=>{try{await db.collection("signals").doc(s._id).update({status:"Dismissed",dismissReason:art.querySelector("[data-dr]").value,decidedAt:nowIso(),decidedBy:"Desk"});}catch(e){t.textContent=saveErr(e);}};
   const gd=art.querySelector("[data-gdis]");
@@ -538,9 +569,9 @@ async function acceptSignal(s,enrich){
     await db.collection("leads").doc(id).set({company:s.company,domain:cleanDomain(s.domain),city:s.city||"",industry:s.industry||"",size:s.size||"",audienceId:s.audienceId||"",signalId:id,sourceId:s.sourceId||"",sourceCode:s.sourceCode||"",utm:s.sourceCode?{utm_source:"signals",utm_medium:"outreach",utm_campaign:s.sourceCode}:null,
       signals:[{type:s.type||"",detail:s.detail||"",date:s.date||"",source:s.source||"",url:s.url||"",via:s.sourceTool||s.via||""}],whyNow:s.triageNote||s.detail||"",prelim:s.prelim||null,climateAdj:s.climateAdj??0,
       teasers:s.teasers||[],insight:s.insight||"",warmPath:s.warmPath||"",firstContact:s.firstContact||"",contacts:[],scripts:{},stage:"New",history:[{s:"New",at:nowIso()}],
-      delivery:{status:ws.ghlLocationId?"Queued":"Not set up",target:ws.ghlLocationId?"Go High Level":""},acceptedAt:nowIso(),updatedAt:nowIso()});
+      delivery:{status:ws.ghlLocationId?"Queued":"Not set up",target:ws.ghlLocationId?"Go High Level":""},acceptedAt:nowIso(),acceptedBy:(window.__SHQ?.user?.name||window.__SHQ?.user?.email||""),updatedAt:nowIso()});
   }
-  await db.collection("signals").doc(id).update({status:"Accepted",leadId:id,decidedAt:nowIso(),decidedBy:"Desk"});
+  await db.collection("signals").doc(id).update({status:"Accepted",leadId:id,decidedAt:nowIso(),decidedBy:(window.__SHQ?.user?.name||window.__SHQ?.user?.email||"Desk")});
   if(enrich)await queueReq({kind:"enrich",leadId:id,note:ENRICH_NOTE});
   else if(ws.ghlLocationId)await queueReq({kind:"deliver",leadId:id},true);
 }
@@ -1499,16 +1530,114 @@ function cvQueue(){if(!cvQueued){cvQueued=true;queueMicrotask(cvPass);}}
 cvObs=new MutationObserver(cvQueue);
 cvObs.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["title","aria-label","placeholder"]});
 $("viewAs").onclick=()=>{asClient=!asClient;try{localStorage.setItem("sd-asclient",asClient?"1":"0");}catch(e){}
-  document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();if(curLead&&!$("drawer").hidden)drawLead();cvQueue();};
+  document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();if(curLead&&!$("drawer").hidden)drawLead();cvQueue();drawPlan();};
 
 $("meSel").onchange=e=>{const v=e.target.value;if(v==="__add"){tab="setup";remember();draw();return;}try{localStorage.setItem("sd-me",v);}catch(x){}draw();if(curLead&&!$("drawer").hidden)drawLead();};
+/* ---------- plan, lead balance, top-ups and upgrades ---------- */
+let plan=null, planCat=null, planHist=null, planPend=null, planShowHist=false;
+const PCFG=window.__SHQ||{}, PBASE=`/api/s/${encodeURIComponent(PCFG.space||"")}`;
+const $$money=n=>"$"+Number(n||0).toLocaleString("en-CA",{maximumFractionDigits:2});
+async function papi(m,u,b){const r=await fetch(PBASE+u,{method:m,credentials:"same-origin",headers:b?{"content-type":"application/json"}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.message||"Something went wrong"),{code:j.code});return j;}
+async function loadPlan(){try{const j=await papi("GET","/plan");plan=j.status;planCat=j.catalog;}catch(e){plan=null;}drawPlan();if($("planDlg").open)drawPlanDlg();}
+const pDate=d=>d?new Date(d+"T12:00:00").toLocaleDateString("en-CA",{month:"short",day:"numeric"}):"";
+const pTime=x=>new Date(x).toLocaleString("en-CA",{timeZone:"America/Toronto",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+function drawPlan(){
+  const b=$("planBadge"), bn=$("planBanner");
+  if(!plan){b.hidden=!TEAM||isClientView();b.innerHTML=TEAM&&!isClientView()?`<span class="muted">No plan on this desk, leads aren't metered</span><button class="btn sm" type="button" data-pd>Set a plan</button>`:"";bn.innerHTML="";b.querySelectorAll("[data-pd]").forEach(x=>x.onclick=()=>openPlanDlg());return;}
+  const pct=plan.monthlyLeads?Math.min(100,Math.round(plan.left/plan.monthlyLeads*100)):0, cls=plan.out?"out":plan.low?"low":"";
+  b.hidden=false;
+  b.innerHTML=`<span class="pname">${esc(plan.name)} plan</span><span class="left"><b>${plan.left}</b> of ${plan.monthlyLeads} leads left</span><span class="planbar ${cls}" aria-hidden="true"><i style="width:${pct}%"></i></span><span class="muted">renews ${esc(pDate(plan.renews))}${plan.pendingName?` · moves to ${esc(plan.pendingName)} then`:""}</span>${canWrite?`<button class="btn sm ${plan.low||plan.out?"primary":""}" type="button" data-pd>Get more leads</button>`:""}<button class="btn sm ghost" type="button" data-ph>Lead history</button>`;
+  b.querySelector("[data-pd]")?.addEventListener("click",()=>openPlanDlg());
+  b.querySelector("[data-ph]").onclick=()=>{planShowHist=true;openPlanDlg();};
+  const nx=plan.next;
+  bn.innerHTML=plan.billing?.status==="past_due"?`<div class="planbanner due"><span><b>Your last payment didn't go through.</b> Update your card to keep your leads coming.</span>${canWrite&&plan.billing.stripe?`<button class="btn sm primary" type="button" data-portal>Update card</button>`:""}</div>`
+    :plan.out?`<div class="planbanner out"><span><b>You're out of leads until ${esc(pDate(plan.renews))}.</b> Signals keep coming in. ${nx?`Move up to ${esc(nx.name)} for ${nx.leads} leads a month, or top up to accept more now.`:"Top up to accept more now."}</span>${canWrite?`<button class="btn sm primary" type="button" data-pd>${nx?"See options":"Top up"}</button>`:""}</div>`
+    :plan.low?`<div class="planbanner low"><span><b>You have ${plan.left} lead${plan.left===1?"":"s"} left this month.</b> ${nx?`${esc(nx.name)} gives you ${nx.leads} a month and costs less per lead than topping up.`:""}</span>${canWrite?`<button class="btn sm" type="button" data-pd>${nx?"Compare options":"Top up"}</button>`:""}</div>`:"";
+  bn.querySelector("[data-pd]")?.addEventListener("click",()=>openPlanDlg());
+  bn.querySelector("[data-portal]")?.addEventListener("click",planPortal);
+}
+function openPlanDlg(reason){planPend=null;drawPlanDlg(reason);const d=$("planDlg");if(!d.open)d.showModal();if(planShowHist)loadHist();}
+async function loadHist(){try{planHist=await papi("GET","/plan/history");}catch(e){planHist={ledger:[],purchases:[],err:e.message};}if($("planDlg").open)drawPlanDlg();}
+const KIND_TXT={allocation:"Monthly leads added",rollover:"Rolled over",expiry:"Expired",topup:"Top-up",upgrade:"Upgrade",accept:"Accepted",replacement:"Replacement",adjustment:"Adjustment"};
+function histHtml(){
+  if(!planHist)return `<p class="pmsg">Loading…</p>`;
+  if(!planHist.ledger.length)return `<p class="pmsg">Nothing yet.</p>`;
+  return `<div style="max-height:280px;overflow:auto"><table class="pledger"><colgroup><col class="w"><col><col class="u"><col class="n"></colgroup><thead><tr><th>When (Eastern)</th><th>What</th><th>Who</th><th>Leads</th></tr></thead><tbody>${planHist.ledger.map(r=>`<tr><td>${esc(pTime(r.created_at))}</td><td>${esc(KIND_TXT[r.kind]||r.kind)}${r.company?`: <b>${esc(r.company)}</b>`:""}${r.note&&r.kind!=="accept"?`<br><span class="muted">${esc(r.note)}</span>`:""}</td><td>${esc(r.user_name||"")}</td><td class="q ${r.qty<0?"neg":"pos"}">${r.qty>0?"+":""}${r.qty}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function drawPlanDlg(reason){
+  const d=$("planDlg"), staff=TEAM&&!isClientView();
+  if(!plan){
+    const cat=planCat||{plans:[]};
+    d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">Choose a plan</h2><p class="sub">Every plan includes a set number of qualified leads a month. Signals are always free.</p></div><button class="btn sm ghost" type="button" data-x aria-label="Close">Close</button></div>
+    <div class="pdb"><div class="pcards">${cat.plans.map(p=>`<div class="pcard ${p.id==="growth"?"rec":""}"><h3>${esc(p.name)}${p.id==="growth"?'<span class="rtag">Recommended</span>':""}</h3><div class="big">${p.leads} <small>leads a month</small></div><p>${$$money(p.price)} a month, plus a one-time ${$$money(1500)} setup</p>
+      ${cat.stripe&&canWrite?`<button class="btn ${p.id==="growth"?"primary":""}" type="button" data-sub="${p.id}">Start ${esc(p.name)}</button>`:""}</div>`).join("")}</div>
+    ${cat.stripe?"":`<p class="pmsg">Card payments aren't switched on yet. Hyperweb sets up your plan.</p>`}
+    ${staff?staffHtml():""}<p class="pmsg" id="pdMsg"></p></div>`;
+    wirePlanDlg();return;
+  }
+  const nx=plan.next, blocks=planCat?.topupBlocks||[5,10], tp=plan.topupPrice;
+  const spent=plan.monthlyPrice+plan.topupSpendThisCycle, got=plan.monthlyLeads+plan.topupLeadsThisCycle;
+  const nudge=nx&&(plan.topupsThisCycle>0||plan.toppedUpLastCycle)?`<p class="pcompare"><b>${plan.topupsThisCycle>0?`So far this month: ${$$money(spent)} for ${got} leads.`:"You topped up last month too."}</b> ${esc(nx.name)} is ${$$money(nx.price)} for ${nx.leads} leads, every month.</p>`:"";
+  const head=reason==="out"||plan.out?`You're out of leads this month`:`Get more leads`;
+  const conf=planPend?`<div class="pconfirm"><span>${esc(planPend.label)}</span><span class="row" style="display:flex;gap:8px"><button class="btn primary" type="button" data-go>${planCat?.stripe?"Continue to payment":"Confirm"}</button><button class="btn" type="button" data-back>Back</button></span></div>`:"";
+  d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">${head}</h2><p class="sub">${esc(plan.name)} plan · ${plan.left} of ${plan.monthlyLeads} left · renews ${esc(pDate(plan.renews))}${plan.balance.rollover>0?` · ${plan.balance.rollover} rolled over`:""}${plan.balance.topup>0?` · ${plan.balance.topup} from top-ups`:""}</p></div><button class="btn sm ghost" type="button" data-x aria-label="Close">Close</button></div>
+  <div class="pdb">
+   ${canWrite?`${conf}<div class="pcards">
+    ${nx?`<div class="pcard rec"><h3>Upgrade to ${esc(nx.name)}<span class="rtag">Best value</span></h3><div class="big">${nx.leads} <small>leads a month</small></div>
+      <p>${$$money(nx.price)} a month from your next renewal. Today you pay the difference, ${$$money(nx.upgradeCost)}, and get <b>${nx.extraLeadsNow} more leads right away</b>.</p>
+      <button class="btn primary" type="button" data-up="${nx.id}">Upgrade to ${esc(nx.name)}</button></div>`
+     :`<div class="pcard"><h3>Need more than ${plan.monthlyLeads} a month?</h3><p>Talk to us about a custom plan sized to your territory.</p><a class="btn" href="https://hyperweb.ca/carl" target="_blank" rel="noopener">Book a call</a></div>`}
+    <div class="pcard"><h3>Top up this month</h3><div class="big">${$$money(tp)} <small>a lead</small></div><p>Extra leads in blocks of ${blocks.join(" or ")}. They stay on your account until you use them.</p>
+      <div class="row">${blocks.map(n=>`<button class="btn" type="button" data-top="${n}">${n} leads, ${$$money(n*tp)}</button>`).join("")}</div></div>
+   </div>${nudge}
+   ${nx?`<p class="pcompare">Topping up ${blocks[blocks.length-1]} leads costs ${$$money(blocks[blocks.length-1]*tp)} (${$$money(tp)} each). On ${esc(nx.name)} each lead works out to ${$$money(nx.price/nx.leads)}.</p>`:""}
+   <div class="row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+     ${plan.lower.length?`<label class="pmsg">Move to a smaller plan at renewal <select class="sel" id="pdDown"><option value="">Keep ${esc(plan.name)}</option>${plan.lower.map(p=>`<option value="${p.id}" ${plan.pendingPlan===p.id?"selected":""}>${esc(p.name)}, ${p.leads} leads, ${$$money(p.price)}</option>`).join("")}</select></label>`:""}
+     ${plan.billing?.stripe?`<button class="btn sm" type="button" data-portal>Billing and card</button>`:""}
+   </div>`:`<p class="pmsg">Your access is view only. Ask the account owner to add leads.</p>`}
+   <details ${planShowHist?"open":""} id="pdHist"><summary><b>Lead history</b> <span class="muted">every lead added or used, who did it and when</span></summary>${planShowHist?histHtml():""}</details>
+   ${staff?staffHtml():""}
+   <p class="pmsg" id="pdMsg"></p></div>`;
+  wirePlanDlg();
+}
+function staffHtml(){
+  return `<div class="pstaff"><b>Hyperweb team</b>
+   <div class="row"><label>Plan<select id="psPlan"><option value="">Choose</option>${["starter","growth","scale"].map(k=>`<option value="${k}" ${plan?.plan===k?"selected":""}>${k[0].toUpperCase()+k.slice(1)}</option>`).join("")}<option value="custom" ${plan?.plan==="custom"?"selected":""}>Custom</option><option value="none">No plan (stop metering)</option></select></label>
+    <label>Custom leads<input id="psLeads" type="number" min="1" style="width:90px" value="${plan?.plan==="custom"?plan.monthlyLeads:""}"></label><label>Custom price<input id="psPrice" type="number" min="0" style="width:100px" value="${plan?.plan==="custom"?plan.monthlyPrice:""}"></label>
+    ${plan?"":`<label>Starts<input id="psStart" type="date"></label>`}<button class="btn sm" type="button" data-ps>Save plan, no charge</button></div>
+   ${!plan&&planCat?.stripe?`<div class="row"><label>Or send the client to card checkout, setup fee<select id="psSetup"><option value="full">Full $1,500</option><option value="pilot">Pilot $750</option><option value="none">Waived</option></select></label><span class="pmsg">Use the Start buttons above while signed in as staff.</span></div>`:""}
+   ${plan?`<div class="row"><label>Leads<input id="pcQty" type="number" value="1" style="width:70px"></label><label style="flex:1;min-width:200px">Reason (shows in the history)<input id="pcNote" placeholder="Bounced email, replacement for …"></label><label>Type<select id="pcKind"><option value="replacement">Replacement</option><option value="adjustment">Adjustment</option></select></label><button class="btn sm" type="button" data-pc>Apply</button></div>`:""}</div>`;
+}
+function wirePlanDlg(){
+  const d=$("planDlg"), msg=t=>{const m=$("pdMsg");if(m){m.textContent=t||"";m.className="pmsg"+(t&&/couldn|n't|error|refused|failed/i.test(t)?" err":"");}};
+  d.querySelector("[data-x]").onclick=()=>{d.close();planShowHist=false;};
+  const run=async(fn,okMsg)=>{msg("Working…");try{const j=await fn();if(j.url){location.href=j.url;return;}if(j.status!==undefined){plan=j.status;}msg(j.message||okMsg||"Done.");planPend=null;drawPlan();drawPlanDlg();msg(j.message||okMsg||"Done.");if(planShowHist)loadHist();}catch(e){msg(e.message);}};
+  d.querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>run(()=>papi("POST","/plan/subscribe",{plan:b.dataset.sub,setup:$("psSetup")?.value||"full"})));
+  d.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const nx=plan.next;planPend={label:`Upgrade to ${nx.name}: pay ${$$money(nx.upgradeCost)} today and get ${nx.extraLeadsNow} more leads now. From ${pDate(plan.renews)} you pay ${$$money(nx.price)} a month.`,go:()=>papi("POST","/plan/upgrade",{to:nx.id}),ok:`You're on ${nx.name}.`};drawPlanDlg();});
+  d.querySelectorAll("[data-top]").forEach(b=>b.onclick=()=>{const n=+b.dataset.top;planPend={label:`Add ${n} leads for ${$$money(n*plan.topupPrice)}${planCat?.stripe?"":". Hyperweb adds this to your next invoice"}.`,go:()=>papi("POST","/plan/topup",{block:n}),ok:`${n} leads added.`};drawPlanDlg();});
+  d.querySelector("[data-go]")?.addEventListener("click",()=>{const p=planPend;run(p.go,p.ok);});
+  d.querySelector("[data-back]")?.addEventListener("click",()=>{planPend=null;drawPlanDlg();});
+  d.querySelector("[data-portal]")?.addEventListener("click",planPortal);
+  const dn=$("pdDown"); if(dn)dn.onchange=()=>run(()=>papi("POST","/plan/change",{to:dn.value||plan.plan}),dn.value?"Your plan changes at renewal.":"You're staying on "+plan.name+".");
+  const h=$("pdHist"); if(h)h.ontoggle=()=>{if(h.open&&!planShowHist){planShowHist=true;loadHist();}else if(!h.open)planShowHist=false;};
+  d.querySelector("[data-ps]")?.addEventListener("click",()=>{const v=$("psPlan").value;if(!v)return msg("Pick a plan first.");run(()=>papi("POST","/plan/set",{plan:v,leads:$("psLeads").value,price:$("psPrice").value,start:$("psStart")?.value||""}),v==="none"?"Plan removed. Leads aren't metered.":"Plan saved.");});
+  d.querySelector("[data-pc]")?.addEventListener("click",()=>run(()=>papi("POST","/plan/credit",{qty:$("pcQty").value,note:$("pcNote").value,kind:$("pcKind").value}),"Applied."));
+}
+async function planPortal(){try{const j=await papi("POST","/plan/portal");if(j.url)location.href=j.url;}catch(e){banner(e.message,"err");}}
+(function planBoot(){
+  const q=new URLSearchParams(location.search), bm={subscribed:["ok","Thanks, your plan is active. Your leads are ready."],topup:["ok","Payment received. Your extra leads are on your account."],cancelled:["low","No charge was made."]}[q.get("billing")];
+  if(bm){$("planBanner").insertAdjacentHTML("beforebegin",`<div class="planbanner ${bm[0]}" id="planFlash"><span>${esc(bm[1])}</span></div>`);setTimeout(()=>$("planFlash")?.remove(),12000);history.replaceState(null,"",location.pathname);}
+  loadPlan();
+  try{const es=new EventSource(`${PBASE}/events`);es.addEventListener("change",ev=>{try{if(JSON.parse(ev.data).coll==="_plan")loadPlan();}catch(e){}});}catch(e){}
+})();
+
 /* ---------- boot ---------- */
 drawHead();draw();
 (async()=>{
   db=await window.claude?.use?.("db");
   if(!db){$("wsMeta").textContent="Not connected";banner("Open this desk in claude.ai while signed in to see its signals and leads.");return;}
   try{const u=await window.claude.use("user");const c=await u?.can?.("data.write");if(c===false)canWrite=false;TEAM=!!(await u?.canEdit?.());}catch(e){}
-  if(TEAM){document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();}cvQueue();
+  if(TEAM){document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();}drawPlan();cvQueue();
   getMcp();
   const redraw=()=>{drawHead();if($("drawer").hidden||!curLead){if(!(tab==="audiences"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#aForm"))&&!(tab==="setup"&&document.activeElement?.closest?.("#sForm,#pForm"))&&!(tab==="tease"&&document.activeElement?.closest?.("#tForm,.trow")))draw();}else{drawLead();}if(!$("stage").hidden&&!document.activeElement?.closest?.("#stage a"))openClientView();};
   db.collection("workspace").onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==="profile");loaded.wsExists=!!d;ws=d?d.data():{};drawHead();if(tab==="setup"?!document.activeElement?.closest?.("#sForm,#pForm"):tab==="tease"?!document.activeElement?.closest?.("#tForm,.trow"):true)draw();},()=>banner("Couldn't load the workspace. Reload the page to try again.","err"));
