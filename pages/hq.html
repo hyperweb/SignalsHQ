@@ -1,0 +1,1059 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Signals HQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: masthead, portfolio tiles, tab rail; desks table, onboarding wizard, rolled-up learning. Shares the desk's tokens so the two read as one product. */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --sunk:#e6eaf0; --line:#d3d9e2; --fg:#141b26; --muted:#5a6475;
+  --accent:#1d4ed8; --accent-soft:#dde6fb; --accent-fg:#ffffff;
+  --signal:#c26a00; --signal-soft:#fbeacd;
+  --good:#17733a; --good-soft:#d9efe0; --warn:#946200; --warn-soft:#f6eac6; --bad:#b0321e; --bad-soft:#f7ddd7;
+  --shadow:0 14px 44px rgba(14,24,44,.18);
+  --f-display:"Familjen Grotesk","Avenir Next",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
+  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
+  --signal:#f0a640; --signal-soft:#3a2a10;
+  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
+  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
+  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
+  --signal:#f0a640; --signal-soft:#3a2a10;
+  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
+  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 56px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font:700 clamp(24px,3.2vw,32px)/1.1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 19px/1.25 var(--f-display);margin:0;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f-display);margin:0}
+.muted{color:var(--muted)}
+.mast{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+.mast .who{display:flex;flex-direction:column;gap:4px;min-width:0}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--signal)}
+.meta{color:var(--muted);font-size:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:600}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.55;cursor:default}
+.sel{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);max-width:100%}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:9px 14px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button b{font:500 11px var(--f-mono);background:var(--sunk);border-radius:999px;padding:1px 7px;margin-left:4px;color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs button:focus-visible{outline:2px solid var(--accent)}
+.panel{display:flex;flex-direction:column;gap:14px}
+.strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;gap:8px;align-items:baseline;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px}
+.chip b{font:500 12px var(--f-mono)}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.tile span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile b{font:600 28px/1.05 var(--f-display);font-variant-numeric:tabular-nums}
+.tile small{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface);min-width:0}
+.card.dim{opacity:.68}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.card header>div{min-width:0}
+.dom{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.dom a{color:inherit}
+.sigline{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:13px}
+.sigline small{grid-column:2;color:var(--muted);font-size:12px}
+.stype{font:500 10.5px var(--f-mono);text-transform:uppercase;letter-spacing:.04em;background:var(--signal-soft);color:var(--signal);border-radius:4px;padding:2px 6px;white-space:nowrap;align-self:start}
+.why{border-left:3px solid var(--accent);padding-left:10px;margin:0;font-size:13.5px}
+.why.dis{border-color:var(--line);color:var(--muted)}
+.firmo{font-size:12px;color:var(--muted);margin:0}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.t-Promote,.p-good{background:var(--good-soft);color:var(--good)}
+.t-Review,.p-warn{background:var(--warn-soft);color:var(--warn)}
+.t-Dismiss{background:var(--sunk);color:var(--muted)}
+.p-info{background:var(--accent-soft);color:var(--accent)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.meter{display:inline-flex;align-items:end;gap:2px;height:16px;vertical-align:middle}
+.meter i{display:block;width:5px;border-radius:1px;background:var(--sunk)}
+.meter i:nth-child(1){height:6px}.meter i:nth-child(2){height:11px}.meter i:nth-child(3){height:16px}
+.meter i.on{background:var(--signal)}
+.score{display:inline-flex;gap:6px;align-items:center;font:500 13px var(--f-mono);font-variant-numeric:tabular-nums}
+.qrow{display:flex;flex-wrap:wrap;gap:6px 14px}
+.qm{display:flex;flex-direction:column;gap:3px;min-width:110px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.qm span{display:flex;justify-content:space-between}.qm b{font:500 12px var(--f-mono);color:var(--fg)}
+.qm i{display:block;height:5px;border-radius:3px;background:var(--sunk);overflow:hidden}.qm i em{display:block;height:100%;background:var(--accent)}
+details.more>summary{cursor:pointer;font:600 12px var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.teasers{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:8px;margin-top:8px}
+.tz{border:1px solid var(--line);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:4px;background:var(--bg);font-size:13px}
+.tz .k{font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:2px 6px;align-self:flex-start}
+.tz small{color:var(--muted);font-size:11px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px dashed var(--line);padding-top:10px}
+.toast{font-size:13px;color:var(--muted)}
+.empty{padding:44px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px}
+.empty h2{color:var(--fg);margin-bottom:6px}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:820px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk);white-space:nowrap}
+tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--sunk)}
+td.n{font:500 13px var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.name{font-weight:600}
+form.f,.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f .full{grid-column:1/-1}
+.f label,.fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+.f label small{font-weight:400}
+.f input,.f select,.f textarea{padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:14px;width:100%;min-width:0}
+.f textarea{min-height:84px;resize:vertical;line-height:1.45}
+.f fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0;display:flex;flex-wrap:wrap;gap:8px 16px;min-width:0}
+.f legend{font-size:12px;color:var(--muted);font-weight:600;padding:0 4px}
+.f fieldset label{flex-direction:row;align-items:center;gap:6px;color:var(--fg);font-size:13px;font-weight:400}
+.f fieldset input[type=checkbox]{width:auto}
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.sect>header{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:baseline}
+.sect>header p{margin:2px 0 0;color:var(--muted);font-size:13px;max-width:70ch}
+.audlist{display:flex;flex-wrap:wrap;gap:8px}
+.audbtn{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--surface);display:flex;flex-direction:column;gap:2px;max-width:280px}
+.audbtn small{color:var(--muted);font-size:12px}
+.audbtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.audbtn:focus-visible{outline:2px solid var(--accent)}
+.sigrows{display:flex;flex-direction:column;gap:6px}
+.sigrow{display:grid;grid-template-columns:auto minmax(110px,180px) minmax(0,1fr) auto;gap:8px;align-items:center}
+.sigrow input[type=text]{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);min-width:0;width:100%}
+.ok{background:var(--good-soft);color:var(--good);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.err{background:var(--bad-soft);color:var(--bad);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;font-size:13px;margin:0}
+.scrim{position:fixed;inset:0;background:rgba(8,14,26,.4)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--surface);box-shadow:var(--shadow);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 18px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 28px) 20px;display:flex;flex-direction:column;gap:16px}
+.dhead{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.contacts{display:flex;flex-direction:column;gap:8px}
+.person{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font:600 14px var(--f-display)}
+.person small{color:var(--muted);display:block}
+.script{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.script header{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.script textarea{width:100%;min-height:90px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:13.5px;line-height:1.5;resize:vertical}
+.chars{font:500 11px var(--f-mono);color:var(--muted)}.chars.over{color:var(--bad)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.flow span{background:var(--sunk);border-radius:999px;padding:3px 10px}
+.flow span.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.runs li{margin-bottom:4px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:90px;border-bottom:1px solid var(--line)}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;min-width:0}
+.bars i{display:block;width:70%;max-width:34px;background:var(--accent);border-radius:3px 3px 0 0}
+.bars i.k{background:var(--signal)}
+.bars b{font:500 10px var(--f-mono)}
+.blabs{display:flex;gap:3px}.blabs span{flex:1;text-align:center;font-size:10px;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+@media (max-width:640px){.f,form.f{grid-template-columns:1fr}.sigrow{grid-template-columns:auto minmax(0,1fr)}.sigrow input[name=why]{grid-column:1/-1}.sigrow .btn{grid-column:1/-1;justify-self:start}}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:sl .18s ease-out}@keyframes sl{from{transform:translateX(24px);opacity:.6}}}
+
+tr.dim td{opacity:.6}
+.lic{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;font-size:13px;margin:0}
+.cbtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;background:#0a3d91;color:#fff;border-radius:4px;padding:2px 6px;white-space:nowrap}
+:root[data-theme="dark"] .cbtag{background:#7aa2ff;color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cbtag{background:#7aa2ff;color:#0b1220}}
+.f fieldset input[type=radio]{width:auto}
+.rbox{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.rbox h3{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.prog{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.prog li{display:flex;gap:8px;align-items:baseline}
+.prog li i{font-style:normal;font:500 11px var(--f-mono);min-width:44px}
+.prog li.run i{color:var(--accent)}.prog li.ok i{color:var(--good)}.prog li.skip i{color:var(--muted)}.prog li.fail i{color:var(--bad)}
+.basis{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;font-size:12px;color:var(--muted);font-weight:400}
+.sugg{border-left:3px solid var(--signal);background:var(--signal-soft);border-radius:6px;padding:6px 10px;font-size:13px;color:var(--fg);font-weight:400;display:flex;flex-direction:column;gap:6px}
+.srcs{margin:0;padding-left:18px;font-size:13px}.srcs a{overflow-wrap:anywhere}
+.ask{margin:0;padding-left:18px;font-size:13.5px}
+.askq{display:flex;flex-direction:column;gap:6px}
+.askq label{flex-direction:row!important;align-items:baseline;gap:8px!important;color:var(--fg)!important;font-size:13px!important;font-weight:400!important}
+.askq input[type=checkbox]{width:auto}
+.mats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mats li{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;font-size:13px}
+.mats li details{flex-basis:100%}.mats li summary{cursor:pointer;color:var(--accent);font-size:12px}
+.mats pre{white-space:pre-wrap;font:12px/1.45 var(--f-body);margin:6px 0 0;max-height:220px;overflow:auto;background:var(--bg);padding:8px;border-radius:6px}
+.glist{display:flex;flex-direction:column;gap:6px}
+.glist div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);font-size:13px}
+.glist small{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filebtn{display:inline-block!important;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;cursor:pointer;color:var(--fg)!important;font-size:14px!important;font-weight:400!important}
+</style>
+<div class="wrap">
+  <header class="mast">
+    <div class="who">
+      <span class="eyebrow">Hyperweb · managed lead generation</span>
+      <h1>Signals HQ</h1>
+      <span class="meta" id="hqMeta">Loading desks…</span>
+    </div>
+    <div class="ctl">
+      <button class="btn" type="button" id="healthBtn" title="Claude re-reads every desk and refreshes the numbers below">Refresh health</button>
+      <button class="btn primary" type="button" id="onbBtn">Onboard a workspace</button>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <div class="tiles" id="tiles"></div>
+  <nav class="tabs" role="tablist" aria-label="HQ sections">
+    <button role="tab" type="button" data-tab="desks" aria-selected="true">Desks</button>
+    <button role="tab" type="button" data-tab="onboard" aria-selected="false">Onboarding <b id="cOnb">0</b></button>
+    <button role="tab" type="button" data-tab="crunchbase" aria-selected="false">Crunchbase</button>
+    <button role="tab" type="button" data-tab="learn" aria-selected="false">What desks teach us</button>
+    <button role="tab" type="button" data-tab="settings" aria-selected="false">Runner</button>
+  </nav>
+  <main id="main" class="panel"></main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https:\/\//i.test(u||"")?u:"";
+const nowIso=()=>new Date().toISOString();
+const lines=t=>String(t||"").split("\n").map(s=>s.trim()).filter(Boolean);
+const slug=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)||("w"+Date.now());
+const dShort=s=>{if(!s)return "";const d=new Date(String(s).length<=10?s+"T12:00:00":s);return isNaN(d)?String(s):d.toLocaleDateString("en-CA",{month:"short",day:"numeric"});};
+const daysAgo=s=>s?Math.floor((Date.now()-new Date(s))/864e5):null;
+const saveErr=e=>e?.code==="stale"?String(e.message):(e&&(e.code==="invalid_argument"||e.code==="permission_denied"))?"Your access lets you view HQ but not change it.":"Couldn't save. Check your connection and try again.";
+const CCR="Claude Code Remote";
+const SIZES=["1 - 10","11 - 50","51 - 200","201 - 500","501 - 1000","1001 - 5000"];
+const OWNERS=[["carl@hyperweb.ca","Carl"],["toby@hyperweb.ca","Toby"],["terry@hyperweb.ca","Terry"],["kerin@hyperweb.ca","Kerin"]];
+const LIC_LABEL={hyperweb:"Hyperweb managed",partner:"Partner's own"};
+const LIC_TEXT={hyperweb:"Hyperweb's Crunchbase account (managed). The desk delivers derived insight only: why now, the message and talking points, never exported Crunchbase records. Confirm lead-list use with Crunchbase sales before selling it.",partner:"The partner's own Crunchbase connection. Data stays under their licence and does not draw on Hyperweb's allowance."};
+const cbOf=d=>d.crunchbase||{};
+const GONE=["Archived","Delete requested"], isGone=d=>GONE.includes(d.status);
+const isTemplate=d=>!!d.url&&d.url===hq.settings?.templateUrl;
+/* never-prospect lines shared with the desks: keep these strings identical to the desk page */
+const COMP_TAG="Competitor, never a prospect: ";
+const QC_TAG="Anything based in Quebec (desk policy: Quebec excluded)";
+const cleanDom=d=>String(d||"").toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/.*$/,"");
+function parseRivals(t){return String(t||"").split(/\n|;/).map(s=>s.trim()).filter(Boolean).map(s=>{
+  const m=s.match(/^(.*?)\s*(?:[(|]\s*([^)|]*?)\s*\)?)?\s*$/)||[];const name=String(m[1]||s).replace(/[,\s]+$/,"").trim(), dom=cleanDom(m[2]||"");
+  return {name,domain:/\./.test(dom)?dom:""};}).filter(x=>x.name);}
+let showArch=false, rmAsk=null;
+const QUESTIONS=[
+ ["sells","What does this business sell, and what is a typical deal worth?","e.g. Commercial HVAC service contracts, $8,000 to $40,000 a year"],
+ ["buyer","Who buys it? Industry, size, and the job title that signs off.","e.g. Property managers and facility directors at mid-size commercial landlords"],
+ ["where","Where are their best customers? Towns, regions or a radius.","e.g. Within 50 miles of Hamilton, plus Niagara"],
+ ["trigger","What usually happens at a customer right before they buy?","e.g. They buy or build a new building, a new facility manager starts, an inspection fails"],
+ ["notfit","Who is not a fit, even if they look like one?","e.g. National REITs with in-house maintenance, residential"],
+ ["rivals","Who are their local competitors? We never prospect these.","e.g. Smith HVAC (smithhvac.ca), one per line"],
+ ["examples","Name a few companies that would be ideal customers.","e.g. Encore, Stronco, Quest AV"],
+ ["proof","What proof can we mention? Results, named clients, credentials.","e.g. 24/7 service, TSSA certified, 30 years in Hamilton"],
+ ["sender","Who should outreach come from, and their booking link?","e.g. Dana Ruiz, Business Development, calendly.com/..."],
+ ["delivery","Where should leads land? GHL sub-account ID if you have it.","e.g. GHL location ID, or leave blank for now"]];
+/* canWrite starts false and only turns on once the viewer's write access is confirmed; `me` (opaque user id) stamps who made each change */
+let db=null, canWrite=false, me=null, desks={}, onbs={}, hq={}, tab="desks", wiz=null;
+const READ_ONLY="Your access lets you view HQ but not change it.";
+const denied=()=>{if(canWrite)return false;banner(READ_ONLY,"err");return true;};
+const STALE_MSG="This changed since you opened it, maybe the intake task already sent it. Nothing was saved. Look it over again.";
+try{const v=JSON.parse(localStorage.getItem("hq-view")||"{}");if(v.tab)tab=v.tab;}catch(e){}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;try{localStorage.setItem("hq-view",JSON.stringify({tab}))}catch(e){};draw();});
+function banner(m,k){$("banner").innerHTML=m?`<p class="${k||"note"}">${esc(m)}</p>`:"";}
+
+/* health */
+function health(d){
+  const h=d.health||{}, out=[];
+  if(d.status==="Paused")return {k:"",label:"Paused",why:[]};
+  if(!h.checkedAt)return {k:"p-warn",label:"Not checked",why:["The runner hasn't read this desk yet."]};
+  const sw=daysAgo(h.lastSweepAt);
+  if(sw==null)out.push("No sweep has run yet.");else if(sw>8)out.push(`Last sweep was ${sw} days ago.`);
+  if(h.creditBudget&&h.creditsMonth>h.creditBudget)out.push(`Over the credit budget (${h.creditsMonth} of ${h.creditBudget}).`);
+  if(h.failed)out.push(`${h.failed} failed request${h.failed===1?"":"s"} or deliveries.`);
+  if(h.signalsNew>15)out.push(`${h.signalsNew} signals waiting for a decision.`);
+  if(!h.audiencesActive)out.push("No active audience.");
+  if(!d.ghlLocationId&&!h.ghlLocationId)out.push("No Go High Level location for delivery.");
+  const bad=out.some(x=>/Over|failed|No active|No sweep/.test(x));
+  return {k:out.length?(bad?"p-bad":"p-warn"):"p-good",label:out.length?(bad?"Needs attention":"Watch"):"Healthy",why:out};
+}
+function draw(){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===tab)));
+  const live=Object.values(desks).filter(d=>!isGone(d)), H=live.map(d=>d.health||{});
+  const sum=k=>H.reduce((s,h)=>s+(+h[k]||0),0);
+  const dec=sum("decided"), acc=sum("accepted");
+  $("tiles").innerHTML=`
+   <div class="tile"><span>Active desks</span><b>${live.filter(d=>d.status!=="Paused").length}</b><small>${live.filter(d=>d.type==="Agency partner").length} partner · ${live.filter(d=>d.type==="Client").length} client · ${live.filter(d=>d.type==="Internal").length} internal</small></div>
+   <div class="tile"><span>Signals this week</span><b>${sum("signalsWeek")}</b><small>${sum("signalsNew")} waiting for a decision</small></div>
+   <div class="tile"><span>Leads delivered, 30 days</span><b>${sum("delivered30")}</b><small>${sum("leadsOpen")} open across desks</small></div>
+   <div class="tile"><span>Accept rate</span><b>${dec?Math.round(acc/dec*100)+"%":"–"}</b><small>${acc} of ${dec} decisions</small></div>
+   <div class="tile"><span>Credits this month</span><b>${sum("creditsMonth")}</b><small>of ${sum("creditBudget")||"no"} budgeted</small></div>
+   ${(()=>{const c=hq.crunchbase||{}, lim=+c.limit||200000, used=+c.used||0;return `<div class="tile"><span>Crunchbase tokens</span><b>${Math.round((lim-used)/1000)}k left</b><small>${used.toLocaleString("en-CA")} of ${lim.toLocaleString("en-CA")} used${c.resetsAt?", resets "+esc(dShort(c.resetsAt)):""}${c.checkedAt?`. Checked ${esc(new Date(c.checkedAt).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}))}`:""}</small></div>`;})()}`;
+  const q=Object.values(onbs).filter(o=>["Draft","Queued","Running"].includes(o.status)).length; $("cOnb").textContent=q;
+  const r=hq.runner||{}; $("hqMeta").textContent=db?`${live.length} desk${live.length===1?"":"s"} · runner ${r.lastRunAt?"last checked in "+dShort(r.lastRunAt)+" "+new Date(r.lastRunAt).toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit"}):"has not checked in yet"}`:"Not connected";
+  if(tab==="desks")drawDesks();else if(tab==="onboard")drawOnboard();else if(tab==="learn")drawLearn();else if(tab==="crunchbase")drawCB();else drawSettings();
+}
+
+function rmPanel(){
+  const d=rmAsk&&desks[rmAsk.id]; if(!d)return "";
+  if(rmAsk.mode==="delete")return `<section class="sect" id="rmBox"><header><div><h2>Delete ${esc(d.name)} for good?</h2><p>The runner deletes the desk page and everything on it (audiences, signals, leads, runs) on its next pass, then removes it from HQ. Anyone the link was shared with loses it. This can't be undone. Leads already delivered to Go High Level stay there.</p></div></header>
+   <div class="f"><label>Type the desk name to confirm<input id="rmName" autocomplete="off" placeholder="${esc(d.name)}"></label></div>
+   <div class="ctl"><button class="btn" type="button" id="rmGo" style="border-color:var(--bad);color:var(--bad)" disabled>Delete permanently</button><button class="btn" type="button" id="rmArch">Archive instead</button><button class="btn ghost" type="button" id="rmNo">Cancel</button><span class="toast" id="rmT"></span></div></section>`;
+  return `<section class="sect" id="rmBox"><header><div><h2>Remove ${esc(d.name)}?</h2><p><b>Archive</b> stops all sweeps and deliveries, takes it out of the totals and hides it here. Its data stays and you can restore it any time. <b>Delete permanently</b> removes the desk page and all its data.</p></div></header>
+   <div class="ctl"><button class="btn primary" type="button" id="rmArch">Archive</button><button class="btn" type="button" id="rmDel">Delete permanently…</button><button class="btn ghost" type="button" id="rmNo">Cancel</button><span class="toast" id="rmT"></span></div></section>`;
+}
+function wireRm(){
+  const box=$("rmBox"); if(!box)return; const d=desks[rmAsk.id], t=$("rmT");
+  box.scrollIntoView({block:"nearest"});
+  $("rmNo").onclick=()=>{rmAsk=null;drawDesks();};
+  const del=$("rmDel"); if(del)del.onclick=()=>{rmAsk.mode="delete";drawDesks();setTimeout(()=>$("rmName")?.focus(),0);};
+  const nm=$("rmName"), go=$("rmGo"); if(nm)nm.oninput=()=>{go.disabled=nm.value.trim().toLowerCase()!==String(d.name).trim().toLowerCase();};
+  $("rmArch").onclick=async()=>{if(denied())return;try{await db.collection("desks").doc(d._id).update({status:"Archived",prevStatus:isGone(d)?(d.prevStatus||"Pilot"):(d.status||"Pilot"),archivedAt:nowIso(),archivedBy:me,deleteRequestedAt:"",deleteNote:""});rmAsk=null;banner(`${d.name} is archived. Restore it from Show archived.`,"ok");}catch(e){t.textContent=saveErr(e);}};
+  if(go)go.onclick=async()=>{if(denied())return;go.disabled=true;try{await db.collection("desks").doc(d._id).update({status:"Delete requested",prevStatus:isGone(d)?(d.prevStatus||"Pilot"):(d.status||"Pilot"),deleteRequestedAt:nowIso(),deleteRequestedBy:me,deleteNote:""});rmAsk=null;
+    const ok=await fireRunner(`Delete request from Signals HQ: delete the desk desks/${d._id} (${d.name}) first.`);banner(`${d.name} will be deleted ${ok?"in the next few minutes":"on the runner's next pass"}. Until then it's archived.`,"ok");}catch(e){go.disabled=false;t.textContent=saveErr(e);}};
+}
+function drawDesks(){
+  const all=Object.values(desks), nGone=all.filter(isGone).length;
+  const m=$("main"), list=all.filter(d=>showArch||!isGone(d)).sort((a,b)=>isGone(a)-isGone(b)||String(a.name).localeCompare(b.name));
+  const strip=nGone?`<div class="strip"><button class="chip" type="button" id="archT" aria-pressed="${showArch}">Show archived <b>${nGone}</b></button></div>`:"";
+  if(!list.length){m.innerHTML=`${strip}<div class="empty"><h2>No desks registered</h2><p>Onboard a workspace to create its desk.</p></div>`;const a=$("archT");if(a)a.onclick=()=>{showArch=!showArch;drawDesks();};return;}
+  m.innerHTML=`${rmPanel()}${strip}<div class="tablebox"><table><thead><tr><th>Workspace</th><th>Health</th><th>Last sweep</th><th class="n">New signals</th><th class="n">Open leads</th><th class="n">Delivered 30d</th><th>Credits this month</th><th>Crunchbase</th><th>Owner</th><th></th></tr></thead><tbody>
+  ${list.map(d=>{const h=d.health||{}, hl=health(d), pct=h.creditBudget?Math.min(100,Math.round((h.creditsMonth||0)/h.creditBudget*100)):0;
+   return `<tr class="${isGone(d)?"dim":""}"><td><span class="name">${esc(d.name)}</span><span class="dom">${esc(d.type||"")} · ${esc(d.status||"Pilot")}${h.audiencesActive!=null?" · "+h.audiencesActive+" audience"+(h.audiencesActive===1?"":"s"):""}</span></td>
+   <td><span class="pill ${hl.k}" title="${esc(hl.why.join(" "))}">${esc(hl.label)}</span>${hl.why.length?`<span class="dom">${esc(hl.why[0])}</span>`:""}</td>
+   <td class="meta">${h.lastSweepAt?esc(dShort(h.lastSweepAt)):"–"}</td><td class="n">${h.signalsNew??"–"}</td><td class="n">${h.leadsOpen??"–"}</td><td class="n">${h.delivered30??"–"}</td>
+   <td><div class="qm" style="min-width:120px"><span>${h.creditBudget?"of "+h.creditBudget:"No budget"}<b>${h.creditsMonth??0}</b></span><i><em style="width:${pct}%;${pct>=100?"background:var(--bad)":""}"></em></i></div></td>
+   <td>${(()=>{const c=cbOf(d);return `<span class="pill ${c.licence==="partner"?"p-good":c.licence?"p-info":""}">${esc(LIC_LABEL[c.licence]||"Not set")}</span><span class="dom">${(c.sources||[]).length?esc(c.sources.length+" source"+(c.sources.length===1?"":"s")):"No sources"}${c.licence!=="partner"&&c.tokenBudget?" · "+(+c.tokensMonth||0).toLocaleString("en-CA")+" of "+(+c.tokenBudget).toLocaleString("en-CA"):""}</span>`;})()}</td>
+   <td class="meta">${esc((OWNERS.find(o=>o[0]===d.owner)||[0,d.owner||"–"])[1])}</td>
+   <td><span class="ctl" style="flex-wrap:nowrap">${safeUrl(d.url)&&d.status!=="Delete requested"?`<a class="btn sm" href="${esc(d.url)}" target="_blank" rel="noopener">Open desk</a>`:""}${isTemplate(d)?`<span class="meta" title="Every new desk is copied from this one">Template</span>`:d.status==="Delete requested"?`<span class="pill p-bad" title="${esc(d.deleteNote||"")}">${d.deleteNote?"Delete needs a hand":"Deleting"}</span><button class="btn sm ghost" type="button" data-restore="${esc(d._id)}" ${canWrite?"":"disabled"}>Cancel</button>`:d.status==="Archived"?`<button class="btn sm" type="button" data-restore="${esc(d._id)}" ${canWrite?"":"disabled"}>Restore</button><button class="btn sm ghost" type="button" data-rm="${esc(d._id)}" data-mode="delete" ${canWrite?"":"disabled"}>Delete</button>`:`<button class="btn sm ghost" type="button" data-rm="${esc(d._id)}" ${canWrite?"":"disabled"}>Remove</button>`}</span></td></tr>`;}).join("")}
+  </tbody></table></div>
+  <p class="muted" style="margin:0;font-size:13px">Numbers come from each desk's own data, read by the runner ${hq.runner?.healthAt?"on "+esc(dShort(hq.runner.healthAt)):"once a day"}. Each desk keeps its own data; HQ only holds these totals.</p>`;
+  const a=$("archT"); if(a)a.onclick=()=>{showArch=!showArch;drawDesks();};
+  m.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{rmAsk={id:b.dataset.rm,mode:b.dataset.mode||"ask"};drawDesks();if(rmAsk.mode==="delete")setTimeout(()=>$("rmName")?.focus(),0);});
+  m.querySelectorAll("[data-restore]").forEach(b=>b.onclick=async()=>{if(denied())return;const d=desks[b.dataset.restore];b.disabled=true;try{await db.collection("desks").doc(d._id).update({status:d.prevStatus&&!GONE.includes(d.prevStatus)?d.prevStatus:"Pilot",archivedAt:"",deleteRequestedAt:"",deleteNote:"",restoredAt:nowIso(),restoredBy:me});banner(`${d.name} is back.`,"ok");}catch(e){b.disabled=false;banner(saveErr(e),"err");}});
+  wireRm();
+}
+
+/* ---------- onboarding ---------- */
+function drawOnboard(){
+  const m=$("main"), list=Object.values(onbs).filter(o=>o.status!=="Discarded").sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+  m.innerHTML=`${wiz?wizHtml():ssHtml()}
+  <section class="sect"><header><div><h2>Workspaces in onboarding</h2><p>When you approve a draft, the runner creates the desk from the Hyperweb template, loads the audience and messaging pack, and registers it here. Share the new desk with the customer from its Share menu.</p></div>${wiz?"":`<button class="btn primary" type="button" id="onbNew" ${canWrite?"":"disabled"}>Onboard a workspace</button>`}</header>
+  ${list.length?`<div class="tablebox"><table style="min-width:640px"><thead><tr><th>Workspace</th><th>Status</th><th>Owner</th><th>Started</th><th>Note</th><th></th></tr></thead><tbody>${list.map(o=>`<tr><td><span class="name">${esc(o.name)}</span><span class="dom">${esc(o.type)} · ${esc(o.website||"")}</span></td><td><span class="pill ${o.status==="Done"?"p-good":o.status==="Failed"?"p-bad":o.status==="Draft"?"":"p-warn"}">${esc(o.status)}</span>${o.status==="Draft"&&o.clientAsk?.status?` <span class="pill ${o.clientAsk.status==="Answered"?"p-good":"p-info"}">${esc(o.clientAsk.status==="Sent"?"Waiting on client":o.clientAsk.status==="Partly answered"?"Client partly answered":"Client answered")}</span>`:""}</td><td class="meta">${esc((OWNERS.find(x=>x[0]===o.owner)||[0,o.owner||"–"])[1])}</td><td class="meta">${esc(dShort(o.createdAt))}</td><td class="meta">${esc(o.note||"")}</td><td>${o.status==="Draft"?`<button class="btn sm" type="button" data-resume="${esc(o._id)}">Continue</button> `:""}${["Draft","Failed","Queued"].includes(o.status)?`<button class="btn sm ghost" type="button" data-discard="${esc(o._id)}" ${canWrite?"":"disabled"}>${o.status==="Queued"?"Cancel":"Discard"}</button>`:""}${o.status==="Draft"||o.status==="Failed"||o.status==="Queued"?"":safeUrl(o.deskUrl)?`<a class="btn sm" href="${esc(o.deskUrl)}" target="_blank" rel="noopener">Open desk</a>`:""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted" style="margin:0">Nothing in onboarding.</p>`}</section>`;
+  const nb=$("onbNew"); if(nb)nb.onclick=startWiz;
+  autoCheckReplies();
+  m.querySelectorAll("[data-discard]").forEach(b=>b.onclick=async()=>{const o=onbs[b.dataset.discard];
+    if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent=o.status==="Queued"?"Confirm cancel":"Confirm discard";b.style.borderColor="var(--bad)";b.style.color="var(--bad)";setTimeout(()=>{if(b.isConnected){b.dataset.sure="";b.textContent=o.status==="Queued"?"Cancel":"Discard";b.style.borderColor="";b.style.color="";}},5000);return;}
+    if(denied())return;b.disabled=true;try{if(wiz&&wiz.id===o._id)wiz=null;await db.collection("onboarding").doc(o._id).update({status:"Discarded",prevStatus:o.status,discardedAt:nowIso(),discardedBy:me,updatedAt:nowIso()});banner(`${o.name} was ${o.status==="Queued"?"cancelled":"discarded"}.`,"ok");}catch(e){b.disabled=false;banner(saveErr(e),"err");}});
+  m.querySelectorAll("[data-resume]").forEach(b=>b.onclick=()=>{const o=onbs[b.dataset.resume];wiz={id:o._id,step:o.audience?2:1,...JSON.parse(JSON.stringify(o))};draw();});
+  if(wiz)wireWiz();else wireSs();
+}
+
+/* ---------- self-serve sign-ups: form on signals.hyperweb.ca -> intake task -> first look -> tease nudge ---------- */
+const SS_STAGES={"Researching":"p-info","Needs review":"p-bad","Ready":"p-good","Held":"","Sent":"p-info","Nudged":"p-warn","Replied":"p-good","Desk queued":"p-good","Parked":"","Rejected":""};
+const SS_DEF={on:false,dailyCap:5,reviewMode:"all",senderName:"Carl Messenger-Lehmann",senderRole:"President, Hyperweb Communications",bookingLink:"https://hyperweb.ca/connect",nudgeDays:3,parkDays:7,tag:"signals-intake",ctaText:"Book 20 minutes to see the full list",revealCount:2};
+const ssCfg=()=>({...SS_DEF,...(hq.selfServe||{})});
+let ssOpen=null, ssSet=false;
+const etTime=x=>{const d=new Date(x);return isNaN(d)?"":d.toLocaleString("en-CA",{timeZone:"America/Toronto",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+const ssList=()=>Object.values(onbs).filter(o=>o.source==="Self-serve"&&o.status!=="Discarded").sort((a,b)=>String(b.ss?.submittedAt||b.createdAt).localeCompare(String(a.ss?.submittedAt||a.createdAt)));
+function ssNext(o){const s=o.ss||{};
+  if(s.stage==="Researching")return "Research running";
+  if(s.stage==="Needs review")return "Waiting on you";
+  if(s.stage==="Held")return "On hold";
+  if(s.stage==="Ready")return s.sendAt?"First look "+etTime(s.sendAt):"First look at the next send window";
+  if(s.stage==="Sent")return s.nudge?.dueAt?"Tease nudge "+etTime(s.nudge.dueAt):"Waiting on reply";
+  if(s.stage==="Nudged")return s.parkAt?"Parks "+etTime(s.parkAt):"Waiting on reply";
+  if(s.stage==="Replied")return "Creating the desk";
+  return "";}
+function ssHtml(){
+  const c=ssCfg(), L=ssList(), today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Toronto"});
+  const nToday=L.filter(o=>new Date(o.ss?.submittedAt||0).toLocaleDateString("en-CA",{timeZone:"America/Toronto"})===today).length;
+  const cnt=st=>L.filter(o=>st.includes(o.ss?.stage)).length;
+  const open=ssOpen&&onbs[ssOpen];
+  return `<section class="sect" id="ssSec"><header><div><h2>Self-serve sign-ups <span class="pill ${c.on?"p-good":""}">${c.on?"On":"Off"}</span></h2><p>Businesses sign up through the form on signals.hyperweb.ca. The intake task researches them, drafts their audience, runs a small test sweep and checks its own work. Clean drafts send on schedule; anything flagged waits for you here. Day ${+c.nudgeDays} brings the tease: ${+c.revealCount} opportunities in full, the rest greyed out.</p></div>
+   <div class="ctl"><button class="btn sm" type="button" id="ssSetBtn">${ssSet?"Close settings":"Settings"}</button></div></header>
+   ${ssSet?ssSettingsHtml(c):""}
+   <div class="tiles"><div class="tile"><span>Sign-ups today</span><b>${nToday}</b><small>of ${+c.dailyCap} a day</small></div><div class="tile"><span>Need you</span><b>${cnt(["Needs review"])}</b><small>Flagged drafts</small></div><div class="tile"><span>Waiting on them</span><b>${cnt(["Sent","Nudged"])}</b><small>First look or tease sent</small></div><div class="tile"><span>Became desks</span><b>${cnt(["Replied","Desk queued"])}</b><small>Replied and set up</small></div></div>
+   ${L.length?`<div class="tablebox"><table style="min-width:760px"><thead><tr><th>Business</th><th>Stage</th><th>Flags</th><th>Signed up</th><th>Next</th><th></th></tr></thead><tbody>${L.map(o=>{const s=o.ss||{}, fl=s.flags||[];return `<tr class="${["Parked","Rejected"].includes(s.stage)?"dim":""}"><td><span class="name">${esc(o.name)}</span><span class="dom">${esc(hostOf(normUrl(o.website))||o.website||"")} · ${esc(s.email||"")}</span></td>
+     <td><span class="pill ${SS_STAGES[s.stage]||""}">${esc(s.stage||"Researching")}</span></td><td>${fl.length?`<span class="pill p-bad">${fl.length}</span> <span class="meta">${esc(fl[0].label||fl[0])}</span>`:`<span class="meta">None</span>`}</td>
+     <td class="meta">${esc(etTime(s.submittedAt||o.createdAt))}</td><td class="meta">${esc(ssNext(o))}</td><td><button class="btn sm" type="button" data-ssopen="${esc(o._id)}">${ssOpen===o._id?"Close":"Review"}</button></td></tr>`;}).join("")}</tbody></table></div>`:`<p class="muted" style="margin:0">No sign-ups yet. ${c.on?"They appear here within the hour of someone filling in the form.":"Turn self-serve on in Settings once the form is live."}</p>`}
+   ${open?ssDetailHtml(open,c):""}
+  </section>`;
+}
+function ssSettingsHtml(c){
+  return `<div class="f" style="border:1px dashed var(--line);border-radius:8px;padding:12px">
+   <label>Self-serve<select id="ss_on"><option value="1" ${c.on?"selected":""}>On, pick up new sign-ups</option><option value="0" ${!c.on?"selected":""}>Off, ignore the form</option></select></label>
+   <label>Sign-ups researched per day <small>each costs research credits and Crunchbase data</small><input type="number" id="ss_cap" min="0" max="50" value="${+c.dailyCap}"></label>
+   <label>Who reviews<select id="ss_rev"><option value="flags" ${c.reviewMode!=="all"?"selected":""}>Only flagged drafts, clean ones send on schedule</option><option value="all" ${c.reviewMode==="all"?"selected":""}>Every draft waits for approval</option></select></label>
+   <label>Form tag in Go High Level<input id="ss_tag" value="${esc(c.tag)}"></label>
+   <label>Emails come from<input id="ss_sn" value="${esc(c.senderName)}"></label>
+   <label>Their role<input id="ss_sr" value="${esc(c.senderRole)}"></label>
+   <label>Booking link<input id="ss_bk" value="${esc(c.bookingLink)}"></label>
+   <label>Tease button text<input id="ss_cta" value="${esc(c.ctaText)}"></label>
+   <label>Tease nudge after (days)<input type="number" id="ss_nd" min="1" max="14" value="${+c.nudgeDays}"></label>
+   <label>Park after the nudge (days)<input type="number" id="ss_pd" min="1" max="30" value="${+c.parkDays}"></label>
+   <label>Shown in full in the tease<select id="ss_rv">${[1,2,3].map(n=>`<option ${n===+c.revealCount?"selected":""}>${n}</option>`).join("")}</select></label>
+   <p class="muted full" style="margin:0;font-size:13px">First looks go out 2 to 4 hours after sign-up on weekdays before 3:00 pm, otherwise by 10:00 am the next business day. The headline always uses the real number of matched opportunities. Emails are sent from your Gmail and carry the CASL footer from the Hyperweb desk.${c.taskId?"":" The intake task isn't linked yet."}</p>
+   <div class="ctl full"><button class="btn primary sm" type="button" id="ssSave" ${canWrite?"":"disabled"}>Save settings</button><span class="toast" id="ssT"></span></div></div>`;
+}
+function ssDetailHtml(o,c){
+  const s=o.ss||{}, R=o.research||{}, sn=R.snap||o.snap||{}, P=s.preview||[], fl=s.flags||[], A=s.assumptions||[], Q=s.questions||[];
+  const fla=s.firstLook||{}, nud=s.nudge||{}, rv=P.filter(p=>p.reveal).slice(0,+c.revealCount);
+  const lockedStage=["Sent","Nudged","Replied","Desk queued","Parked","Rejected"].includes(s.stage);
+  return `<div class="rbox" id="ssBox"><h3>${esc(o.name)} <span class="pill ${SS_STAGES[s.stage]||""}">${esc(s.stage||"Researching")}</span> <span class="meta">${esc(s.firstName||"")} · ${esc(s.email||"")}</span></h3>
+   ${fl.length?`<div class="err"><b>Why it's waiting for you:</b><ul style="margin:4px 0 0;padding-left:18px">${fl.map(f=>`<li>${esc(f.label||f)}${f.detail?` <span>(${esc(f.detail)})</span>`:""}</li>`).join("")}</ul></div>`:s.stage==="Researching"?"":`<p class="ok">The self-check found nothing to flag.</p>`}
+   ${R.summary?`<p style="margin:0">${esc(R.summary)}</p>`:""}
+   ${o.audience?.headline?`<p class="why">Ideal customer: ${esc(o.audience.headline)}${o.audience.geo?.center?` · ${esc(o.audience.geo.center)}, ${+o.audience.geo.radius||50} miles`:""}</p>`:""}
+   ${(o.competitors||[]).length?`<p class="meta" style="margin:0"><b>Local competitors, never prospected:</b> ${esc(o.competitors.map(x=>x.name+(x.domain?" ("+x.domain+")":"")).join(", "))}</p>`:""}
+   ${A.length?`<div><h3 style="margin-bottom:4px">What we'll tell them we assumed</h3><ul class="ask">${A.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+   ${Q.length?`<div><h3 style="margin-bottom:4px">The questions</h3><ol class="ask">${Q.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`:""}
+   ${P.length?`<div><h3 style="margin-bottom:4px">Test sweep: ${s.matchedCount??P.length} matched, ${rv.length} picked to show in full on day ${+c.nudgeDays}</h3><div class="tablebox"><table style="min-width:560px"><thead><tr><th>Opportunity</th><th>Why now</th><th>Shown in full</th></tr></thead><tbody>${P.map((p,i)=>`<tr><td><span class="name">${esc(p.company)}</span><span class="dom">${esc([p.city,p.industry].filter(Boolean).join(" · "))}${p.fromCrunchbase?" · Crunchbase, can't be shown in full":""}</span></td><td class="meta">${esc(p.trigger||"")}${p.detail?": "+esc(p.detail):""}</td><td><input type="checkbox" data-ssrv="${i}" ${p.reveal?"checked":""} ${p.fromCrunchbase||lockedStage||!canWrite?"disabled":""} aria-label="Show ${esc(p.company)} in full"></td></tr>`).join("")}</tbody></table></div></div>`:""}
+   <div class="f">
+    <label class="full">First look, subject<input id="ss_fs" value="${esc(fla.subject||"")}" ${fla.sentAt?"readonly":""}></label>
+    <label class="full">First look, message <small>the opportunities list is added under this, greyed out</small><textarea id="ss_fb" style="min-height:160px" ${fla.sentAt?"readonly":""}>${esc(fla.body||"")}</textarea></label>
+    <label class="full">Day ${+c.nudgeDays} tease, subject<input id="ss_ns" value="${esc(nud.subject||"")}" ${nud.sentAt?"readonly":""}></label>
+    <label class="full">Day ${+c.nudgeDays} tease, message <small>the ${+c.revealCount} opportunities in full and the greyed-out rest are added under this</small><textarea id="ss_nb" style="min-height:120px" ${nud.sentAt?"readonly":""}>${esc(nud.body||"")}</textarea></label>
+   </div>
+   <p class="meta" style="margin:0">${fla.sentAt?`First look sent ${esc(etTime(fla.sentAt))}.`:s.sendAt?`First look scheduled for ${esc(etTime(s.sendAt))}.`:""}${nud.sentAt?` Tease sent ${esc(etTime(nud.sentAt))}.`:""}${s.lastReplyAt?` They replied ${esc(etTime(s.lastReplyAt))}.`:""}</p>
+   <div class="ctl">${!lockedStage?`<button class="btn primary sm" type="button" data-ssact="approve" ${canWrite?"":"disabled"}>${s.stage==="Ready"?"Save":"Approve and schedule"}</button><button class="btn sm" type="button" data-ssact="now" ${canWrite?"":"disabled"}>Approve and send now</button>${s.stage!=="Held"?`<button class="btn sm ghost" type="button" data-ssact="hold" ${canWrite?"":"disabled"}>Hold</button>`:""}`:""}
+    ${o.audience?`<button class="btn sm ghost" type="button" data-resume="${esc(o._id)}">Open the full interview</button>`:""}
+    ${!["Rejected","Desk queued"].includes(s.stage)?`<select class="sel" id="ss_rej" aria-label="Reason to turn it down" ${canWrite?"":"disabled"}><option value="">Turn it down…</option><option>Not a fit for Signals</option><option>An agency, send the partner programme</option><option>Spam or a test</option><option>Quebec, not yet</option></select><button class="btn sm ghost" type="button" id="ss_rejGo" hidden>Turn down</button>`:""}
+    <span class="toast" id="ssDT"></span></div>
+  </div>`;
+}
+async function fireIntake(text){const id=ssCfg().taskId; if(!id||!canWrite)return false; try{const mcp=await getMcp(); if(!mcp)return false; await mcp.callTool(CCR,"fire_trigger",{trigger_id:id,text},{cache:false}); return true;}catch(e){return false;}}
+function nextWindow(){
+  const now=new Date(), et=new Date(now.toLocaleString("en-US",{timeZone:"America/Toronto"})), off=now-et;
+  const at=(d,h,mi)=>{const x=new Date(d);x.setHours(h,mi,0,0);return new Date(x.getTime()+off);};
+  const wd=d=>d.getDay()>0&&d.getDay()<6;
+  if(wd(et)&&et.getHours()<15)return new Date(now.getTime()+2*36e5);
+  const d=new Date(et);do{d.setDate(d.getDate()+1);}while(!wd(d));return at(d,10,0);}
+function wireSs(){
+  const sec=$("ssSec"); if(!sec)return;
+  $("ssSetBtn").onclick=()=>{ssSet=!ssSet;drawOnboard();};
+  const sv=$("ssSave"); if(sv)sv.onclick=async()=>{if(denied())return;const t=$("ssT");
+    const v={...ssCfg(),on:$("ss_on").value==="1",dailyCap:Math.max(0,+$("ss_cap").value||0),reviewMode:$("ss_rev").value,tag:$("ss_tag").value.trim()||"signals-intake",senderName:$("ss_sn").value.trim(),senderRole:$("ss_sr").value.trim(),bookingLink:safeUrl($("ss_bk").value.trim())||SS_DEF.bookingLink,ctaText:$("ss_cta").value.trim()||SS_DEF.ctaText,nudgeDays:Math.max(1,+$("ss_nd").value||3),parkDays:Math.max(1,+$("ss_pd").value||7),revealCount:+$("ss_rv").value||2,updatedAt:nowIso(),updatedBy:me};
+    try{await db.collection("hq").doc("selfServe").set(v);t.textContent="Saved";}catch(e){t.textContent=saveErr(e);}};
+  sec.querySelectorAll("[data-ssopen]").forEach(b=>b.onclick=()=>{ssOpen=ssOpen===b.dataset.ssopen?null:b.dataset.ssopen;drawOnboard();$("ssBox")?.scrollIntoView({block:"nearest"});});
+  sec.querySelectorAll("#ssBox [data-resume]").forEach(b=>b.onclick=()=>{const o=onbs[b.dataset.resume];wiz={id:o._id,step:o.audience?2:1,...JSON.parse(JSON.stringify(o))};draw();});
+  const o=ssOpen&&onbs[ssOpen]; if(!o)return;
+  const t=$("ssDT"), ref=db.collection("onboarding").doc(o._id);
+  const edits=()=>{const s=o.ss||{}, fl={...(s.firstLook||{})}, nu={...(s.nudge||{})};
+    if(!fl.sentAt&&$("ss_fs")){fl.subject=$("ss_fs").value.trim();fl.body=$("ss_fb").value;}
+    if(!nu.sentAt&&$("ss_ns")){nu.subject=$("ss_ns").value.trim();nu.body=$("ss_nb").value;}
+    return {fl,nu};};
+  /* Every write here re-reads the sign-up first and sends only the fields it changes (update merges nested objects),
+     so a stale screen can never reset the stage or wipe firstLook.sentAt and trigger a second send. */
+  const LOCKED=["Sent","Nudged","Replied","Desk queued","Parked","Rejected"];
+  const fresh=async()=>{const snap=await ref.get();return snap?.exists?(snap.data()||{}):null;};
+  const twoStep=(b,label,run)=>{if(b.dataset.sure!=="1"){const was=b.textContent;b.dataset.sure="1";b.textContent=label;b.style.borderColor="var(--bad)";b.style.color="var(--bad)";
+    setTimeout(()=>{if(b.isConnected&&b.dataset.sure==="1"){b.dataset.sure="";b.textContent=was;b.style.borderColor="";b.style.color="";}},6000);return;} b.dataset.sure="";run();};
+  sec.querySelectorAll("[data-ssrv]").forEach(cb=>cb.onchange=async()=>{if(denied()){cb.checked=!cb.checked;return;}
+    const i=+cb.dataset.ssrv, want=cb.checked; cb.disabled=true;
+    try{const cur=await fresh(), cs=cur?.ss||{};
+      if(!cur||LOCKED.includes(cs.stage)){cb.checked=!want;t.textContent=STALE_MSG;return;}
+      const P=[...(cs.preview||[])]; if(!P[i]){cb.checked=!want;t.textContent=STALE_MSG;return;}
+      if(want&&P.filter(p=>p.reveal).length>=+ssCfg().revealCount){cb.checked=false;t.textContent=`Only ${ssCfg().revealCount} can be shown in full. Untick one first.`;return;}
+      P[i]={...P[i],reveal:want};await ref.update({ss:{preview:P},updatedAt:nowIso(),updatedBy:me});}
+    catch(e){cb.checked=!want;t.textContent=saveErr(e);}finally{cb.disabled=false;}});
+  sec.querySelectorAll("[data-ssact]").forEach(b=>b.onclick=async()=>{if(denied())return;
+    const act=b.dataset.ssact, {fl,nu}=edits(), s=o.ss||{};
+    if(act!=="hold"&&(!fl.subject||!String(fl.body||"").trim())){t.textContent="The first look needs a subject and a message.";return;}
+    const go=async()=>{
+      sec.querySelectorAll("[data-ssact]").forEach(x=>x.disabled=true);
+      try{const cur=await fresh(), cs=cur?.ss||{};
+        if(!cur||(cs.stage||"")!==(s.stage||"")||cs.firstLook?.sentAt){t.textContent=STALE_MSG;return;}
+        const at=nowIso(), patch={};
+        if(!cs.firstLook?.sentAt)patch.firstLook={subject:fl.subject,body:fl.body};
+        if(!cs.nudge?.sentAt)patch.nudge={subject:nu.subject||"",body:nu.body||""};
+        if(act==="hold")Object.assign(patch,{stage:"Held",heldAt:at,heldBy:me});
+        else Object.assign(patch,{stage:"Ready",approved:true,approvedAt:at,approvedBy:me,flags:[],flagsCleared:cs.flags||[],sendNowAt:act==="now"?at:"",sendAt:act==="now"?at:(cs.sendAt&&new Date(cs.sendAt)>new Date()?cs.sendAt:nextWindow().toISOString())});
+        await ref.update({ss:patch,updatedAt:at,updatedBy:me});
+        if(act==="now"){const ok=await fireIntake(`Self-serve: send the first look for onboarding/${o._id} now. Before sending, re-read the record and skip it if ss.firstLook.sentAt is set; write ss.firstLook.sentAt before calling Gmail.`);t.textContent=ok?"Sending in the next few minutes.":"Queued. It goes on the intake task's next pass.";}
+        else t.textContent=act==="hold"?"On hold. Nothing is sent until you approve it.":`Scheduled for ${etTime(patch.sendAt)}.`;}
+      catch(e){t.textContent=saveErr(e);}
+      finally{sec.querySelectorAll("[data-ssact]").forEach(x=>{if(x.isConnected)x.disabled=!canWrite;});}};
+    if(act==="now")twoStep(b,`Confirm: email ${s.email||"them"} now`,go);else go();});
+  const rj=$("ss_rej"), rjGo=$("ss_rejGo");
+  if(rj&&rjGo){rj.onchange=()=>{rjGo.hidden=!rj.value;rjGo.dataset.sure="";rjGo.textContent="Turn down";rjGo.style.borderColor="";rjGo.style.color="";};
+    rjGo.onclick=()=>{if(denied())return;const r=rj.value; if(!r)return; const polite=/agency|Quebec/i.test(r);
+      twoStep(rjGo,polite?`Confirm: turn down and email ${s0email(o)}`:"Confirm: turn down",async()=>{rjGo.disabled=true;rj.disabled=true;
+        try{const cur=await fresh(), cs=cur?.ss||{};
+          if(!cur||["Rejected","Desk queued","Replied"].includes(cs.stage)){t.textContent=STALE_MSG;return;}
+          const at=nowIso();
+          await ref.update({ss:{stage:"Rejected",rejectReason:r,rejectedAt:at,rejectedBy:me,prevStage:cs.stage||"",sendPolite:polite},note:"Turned down: "+r,updatedAt:at,updatedBy:me});
+          t.textContent=polite?"Turned down. They get a short, polite note on the next pass.":"Turned down. Nothing more is sent.";}
+        catch(e){t.textContent=saveErr(e);}finally{if(rjGo.isConnected){rjGo.disabled=false;rj.disabled=!canWrite;}}});};}
+}
+const s0email=o=>o?.ss?.email||"them";
+function startWiz(){wiz={id:null,step:0,name:"",type:"Client",website:"",owner:"carl@hyperweb.ca",answers:{},sweepDay:"Monday",creditBudget:150};tab="onboard";draw();window.scrollTo({top:0});}
+$("onbBtn").onclick=startWiz;
+function wizHtml(){
+  const w=wiz, steps=["Workspace","Research and confirm","Review the draft","Create the desk"];
+  const head=`<div class="flow">${steps.map((s,i)=>`<span class="${i===w.step?"on":""}">${i+1}. ${s}</span>`).join("")}</div>`;
+  if(w.step===0)return `<section class="sect"><header><div><h2>Onboard a workspace</h2><p>Who is this desk for?</p></div></header>${head}
+   <div class="f"><label>Business name<input id="w_name" value="${esc(w.name)}"></label>
+   <label>Website<input id="w_web" value="${esc(w.website)}" placeholder="https://"></label>
+   <label>Type<select id="w_type">${["Client","Agency partner","Internal"].map(x=>`<option ${x===w.type?"selected":""}>${x}</option>`).join("")}</select></label>
+   <label>Hyperweb owner<select id="w_owner">${OWNERS.map(o=>`<option value="${o[0]}" ${o[0]===w.owner?"selected":""}>${o[1]}</option>`).join("")}</select></label>
+   <label>Company LinkedIn page <small>optional, helps Claude find the right company</small><input id="w_li" value="${esc(w.linkedin||"")}" placeholder="https://www.linkedin.com/company/..."></label>
+   <label>Key people <small>optional, names or LinkedIn profile links, one per line</small><textarea id="w_people" style="min-height:56px" placeholder="Dana Ruiz, Owner">${esc((w.people||[]).join("\n"))}</textarea></label>
+   <fieldset class="full"><legend>Research</legend><label><input type="checkbox" id="w_cb" ${w.useCb!==false?"checked":""}> Include a Crunchbase lookup (about 5,000 data tokens from Hyperweb's allowance)</label></fieldset>
+   <div class="ctl full"><button class="btn primary" type="button" id="wResearch">Research and pre-fill</button><button class="btn" type="button" id="wNext">Start with a blank interview</button><button class="btn" type="button" id="wCancel">Cancel</button><span class="toast" id="wT"></span></div></div></section>`;
+  if(w.step===1){const R=w.research||{}, F=R.fields||{};
+   return `<section class="sect"><header><div><h2>Research and confirm: ${esc(w.name)}</h2><p>Claude reads their website, LinkedIn and public sources and drafts every answer. The call with the customer becomes a check of what we found, not an interview: confirm, correct, and ask only what's flagged.</p></div></header>${head}
+   ${researchHtml()}
+   ${matHtml()}
+   ${askHtml()}
+   <div class="f">${QUESTIONS.map(([k,q,ph])=>{const f=F[k]||{}, cur=w.answers?.[k]||"", sg=f.text&&f.text!==cur?f.text:"";
+     return `<label class="full">${esc(q)}<textarea id="q_${k}" data-q="${k}" style="min-height:64px" placeholder="${esc(ph)}">${esc(cur)}</textarea>
+     ${f.basis?`<span class="basis"><span class="pill ${f.basis==="found"||f.basis==="client"?"p-good":f.basis==="inferred"?"p-warn":"p-bad"}">${f.basis==="client"?"From client":f.basis==="found"?"Found":f.basis==="inferred"?"Inferred, confirm":"Not found, ask"}</span>${esc(f.source||"")}</span>`:""}
+     ${sg&&cur?`<span class="sugg"><span><b>Claude found:</b> ${esc(sg)}</span><span><button class="btn sm" type="button" data-use="${k}">Use this</button></span></span>`:""}</label>`;}).join("")}
+   <div class="ctl full"><button class="btn primary" type="button" id="wDraft">Draft the desk with Claude</button><button class="btn" type="button" id="wSave">Save and finish later</button><button class="btn" type="button" id="wBack">Back</button><span class="toast" id="wT"></span></div></div></section>`;}
+  if(w.step===2){const a=w.audience||{}, k=w.knowledge||{};
+   return `<section class="sect"><header><div><h2>Review the draft for ${esc(w.name)}</h2><p>Fix anything that's off. The customer can change all of this on their desk later.</p></div></header>${head}
+   <div class="f">
+    <label>Audience name<input id="r_aname" value="${esc(a.name)}"></label>
+    <label>Centre of the territory<input id="r_center" value="${esc(a.geo?.center)}"></label>
+    <label class="full">Ideal customer, one sentence<input id="r_headline" value="${esc(a.headline)}"></label>
+    <label>Who fits<textarea id="r_who">${esc((a.who||[]).join("\n"))}</textarea></label>
+    <label>Not a fit<textarea id="r_notFit">${esc((a.notFit||[]).join("\n"))}</textarea></label>
+    <label>Industries<textarea id="r_ind">${esc((a.industries||[]).join("\n"))}</textarea></label>
+    <label>First person to contact<textarea id="r_titles">${esc((a.titles||[]).join("\n"))}</textarea></label>
+    <label>Radius (miles)<select id="r_radius">${[25,50,100,250].map(r=>`<option ${+a.geo?.radius===r?"selected":""}>${r}</option>`).join("")}</select></label>
+    <fieldset><legend>Company size</legend>${SIZES.map(s=>`<label><input type="checkbox" name="rsize" value="${s}" ${(a.sizes||[]).includes(s)?"checked":""}> ${s.replace(" - "," to ")}</label>`).join("")}</fieldset>
+    <label class="full">Regions and towns<textarea id="r_regions" style="min-height:56px">${esc((a.geo?.regions||[]).join("\n"))}</textarea></label>
+    <label class="full">Local competitors, never prospected <small>one per line: name | website. Confirmed with the customer; they become Not a fit lines on every audience.</small><textarea id="r_rivals" style="min-height:64px">${esc((w.competitors||parseRivals(w.answers?.rivals)).map(c=>c.name+(c.domain?" | "+c.domain:"")).join("\n"))}</textarea></label>
+    <label>Quebec<select id="r_qc"><option value="exclude" ${k.quebec!=="bilingual"?"selected":""}>Exclude Quebec (default)</option><option value="bilingual" ${k.quebec==="bilingual"?"selected":""}>Include Quebec, outreach French first</option></select></label>
+    <p class="muted" style="margin:0;font-size:13px;align-self:end">Quebec expects commercial messages in French and has its own privacy law. Include it only when the customer has a French reader for outreach and replies, e.g. a Montreal office.</p>
+    <label class="full">Buying signals <small>one per line: signal | why it matters</small><textarea id="r_sig">${esc((a.signalTypes||[]).map(s=>s.type+" | "+s.why).join("\n"))}</textarea></label>
+    <label class="full">What they sell<textarea id="r_offer" style="min-height:56px">${esc(k.offer)}</textarea></label>
+    <label>Who they help<textarea id="r_whoWeHelp" style="min-height:56px">${esc(k.whoWeHelp)}</textarea></label>
+    <label>What makes them different<textarea id="r_different" style="min-height:56px">${esc(k.different)}</textarea></label>
+    <label>Proof<textarea id="r_proof">${esc((k.proof||[]).join("\n"))}</textarea></label>
+    <label>Voice<textarea id="r_voice" style="min-height:56px">${esc(k.voice)}</textarea></label>
+    <label>Sender name<input id="r_sname" value="${esc(k.senderName)}"></label>
+    <label>Sender role<input id="r_srole" value="${esc(k.senderRole)}"></label>
+    <label>Booking link<input id="r_book" value="${esc(k.bookingLink)}"></label>
+    <label>Mailing address <small>CASL</small><input id="r_addr" value="${esc(k.mailingAddress)}"></label>
+    <label>GHL location ID<input id="r_ghl" value="${esc(w.ghlLocationId||"")}"></label>
+    <label>Sweep day<select id="r_day">${["Monday","Tuesday","Wednesday","Thursday","Friday"].map(x=>`<option ${x===w.sweepDay?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Monthly credit budget<input type="number" id="r_budget" min="0" value="${+w.creditBudget||0}"></label>
+    <label>Crunchbase licence<select id="r_lic"><option value="hyperweb" ${(w.crunchbase?.licence||"hyperweb")==="hyperweb"?"selected":""}>Hyperweb's account (managed, derived insight only)</option><option value="partner" ${w.crunchbase?.licence==="partner"?"selected":""}>Partner's own Crunchbase connection</option></select></label>
+    <label>Crunchbase data tokens a month <small>from Hyperweb's shared allowance; 0 for partner licence</small><input type="number" id="r_cbtok" min="0" step="1000" value="${+(w.crunchbase?.tokenBudget??5000)}"></label>
+    <label>Weekly digest to <small>one per line</small><textarea id="r_digest" style="min-height:56px">${esc((w.digestTo||[]).join("\n"))}</textarea></label>
+    ${w.gaps?.length?`<p class="note full">Claude couldn't settle: ${esc(w.gaps.join("; "))}</p>`:""}
+    <div class="ctl full"><button class="btn primary" type="button" id="wCreate" ${canWrite?"":"disabled"}>Create the desk</button><button class="btn" type="button" id="wSave">Save draft</button><button class="btn" type="button" id="wBack">Back to interview</button><span class="toast" id="wT"></span></div></div></section>`;}
+  return `<section class="sect"><header><div><h2>${esc(w.name)} is queued</h2><p>The runner creates the desk on its next pass (it was asked to start now). It shows up under Desks with its link, and in your Slack report.</p></div></header>${head}<div class="ctl"><button class="btn" type="button" id="wDone">Done</button></div></section>`;
+}
+/* snapshot: what their own website says, shown the moment it's read */
+function snapHtml(){
+  const s=wiz?.snap; if(!s)return "";
+  const loc=[s.city,s.province,s.country].filter(Boolean).join(", ");
+  const chips=[loc,s.founded&&"Since "+s.founded,s.staff&&s.staff+" staff",s.serviceArea&&"Serves "+s.serviceArea].filter(Boolean);
+  if(!s.sells&&!chips.length)return "";
+  return `<div class="sect" style="padding:12px;gap:8px;background:var(--surface)"><div class="ctl" style="justify-content:space-between"><h3>${esc(s.name||wiz.name)}</h3><span class="pill p-good">From ${esc(s.from||"their website")}</span></div>
+   ${s.sells?`<p style="margin:0"><b>Sells:</b> ${esc(s.sells)}</p>`:""}${s.buyers?`<p style="margin:0"><b>To:</b> ${esc(s.buyers)}</p>`:""}
+   ${chips.length?`<div class="strip">${chips.map(c=>`<span class="pill">${esc(c)}</span>`).join("")}</div>`:""}
+   <p class="meta" style="margin:0">Only what their website states. Blank means it doesn't say.${wiz.researching?" The rest of the research is still running.":""}</p></div>`;
+}
+const paintSnap=()=>{const el=$("rSnap"); if(el)el.innerHTML=snapHtml();};
+function researchHtml(){
+  const w=wiz, R=w.research;
+  if(w.researching)return `<div class="rbox" aria-live="polite"><h3>Researching ${esc(w.name)} <button class="btn sm" type="button" id="rStop">Stop</button></h3><div id="rSnap">${snapHtml()}</div><ul class="prog" id="rProg">${progHtml()}</ul></div>`;
+  if(!R)return `<div class="rbox"><h3>Nothing researched yet</h3><p class="muted" style="margin:0;font-size:13px">Claude reads ${w.website?esc(w.website):"their website"}, looks for their LinkedIn company page and leadership, and checks public news${w.useCb!==false?" and Crunchbase":""}. Answers you've already typed are kept.</p><div class="ctl"><button class="btn primary" type="button" id="rGo">Research with AI</button><span class="toast" id="rT">${esc(w.rErr||"")}</span></div></div>`;
+  return `<div class="rbox"><h3>What we found <span class="meta">${esc(dShort(R.at))} ${R.at?esc(new Date(R.at).toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit"})):""}</span></h3>
+   ${snapHtml()}
+   ${R.shift?`<p class="note">${esc(R.shift)}</p>`:""}
+   ${R.summary?`<p style="margin:0">${esc(R.summary)}</p>`:""}
+   ${(R.people||[]).length?`<div class="contacts">${R.people.slice(0,6).map(p=>`<div class="person"><div class="av">${esc((p.name||"?").trim().charAt(0).toUpperCase())}</div><div><b>${esc(p.name)}</b><small>${esc(p.title||"")}${safeUrl(p.url)?` · <a href="${esc(p.url)}" target="_blank" rel="noopener">profile</a>`:""}</small></div></div>`).join("")}</div>`:""}
+   ${(R.askOnCall||[]).length?`<div><h3 style="margin-bottom:4px">Ask on the call</h3><ol class="ask">${R.askOnCall.map(q=>`<li>${esc(q)}</li>`).join("")}</ol></div>`:`<p class="ok">Nothing left to ask. Confirm the answers below with the customer.</p>`}
+   <details class="more"><summary>Sources (${(R.sources||[]).length})</summary><ul class="srcs">${(R.sources||[]).map(x=>`<li>${esc(x.label)}${safeUrl(x.url)?`: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a>`:""}</li>`).join("")}</ul>${(R.misses||[]).length?`<p class="muted" style="font-size:12px;margin:6px 0 0">Couldn't read: ${esc(R.misses.join("; "))}</p>`:""}</details>
+   <div class="ctl"><button class="btn sm" type="button" id="rGo">Research again</button><span class="toast" id="rT">${esc(w.rErr||"")}</span></div></div>`;
+}
+const progHtml=()=>(wiz?.prog||[]).map(p=>`<li class="${p.state}"><i>${p.state==="run"?"…":p.state==="ok"?"done":p.state==="skip"?"skip":"failed"}</i><span>${esc(p.label)}${p.note?` <span class="muted">${esc(p.note)}</span>`:""}</span></li>`).join("");
+const paintProg=()=>{const el=$("rProg"); if(el)el.innerHTML=progHtml();};
+const normUrl=u=>{u=String(u||"").trim(); if(!u)return ""; if(!/^https?:\/\//i.test(u))u="https://"+u; try{return new URL(u).href;}catch(e){return "";}};
+const hostOf=u=>{try{return new URL(u).hostname.replace(/^www\./,"");}catch(e){return "";}};
+function textOf(v,max){
+  if(v==null)return "";
+  if(typeof v==="string")return v.slice(0,max);
+  const md=v.markdown||v.data?.markdown||v.content;
+  if(typeof md==="string")return md.slice(0,max);
+  try{return JSON.stringify(v).slice(0,max);}catch(e){return "";}
+}
+const urlsIn=v=>{let t="";try{t=typeof v==="string"?v:JSON.stringify(v);}catch(e){}return [...new Set((t.match(/https:\/\/[^\s"'<>)\]\\]+/g)||[]).map(u=>u.replace(/[.,;]+$/,"")))];};
+function mcpMsg(e,server){
+  const c=e?.code;
+  if(c==="server_not_connected"||c==="selection_required")return `${server} isn't connected for you. Add it in claude.ai Settings, Connectors.`;
+  if(c==="needs_reauth")return `Reconnect ${server} in claude.ai Settings, Connectors.`;
+  if(c==="not_in_manifest"||c==="approval_required"||c==="consent_required")return `${server} isn't allowed for this page yet.`;
+  if(c==="blocked_by_policy")return `Your organization blocks ${server} here.`;
+  if(c==="cancelled")return "Stopped.";
+  return e?.message?String(e.message).slice(0,140):"No answer.";
+}
+let rCtl=null;
+async function runResearch(){
+  const w=wiz; if(!w||w.researching||denied())return;
+  QUESTIONS.forEach(([k])=>{const el=$("q_"+k); if(el)w.answers[k]=el.value.trim();});
+  const sample=await window.claude?.use?.("sample"), mcp=await getMcp();
+  if(!sample){w.rErr="Claude isn't available in this view.";draw();return;}
+  if(!mcp){w.rErr="Connectors aren't available in this view, so Claude can't read the web.";draw();return;}
+  rCtl=new AbortController(); const signal=rCtl.signal;
+  w.researching=true; w.rErr=""; w.prog=[]; w.snap=null; let snapP=null; draw();
+  const step=label=>{const it={label,state:"run"};w.prog.push(it);paintProg();return it;};
+  const done=(it,state,note)=>{it.state=state;if(note)it.note=note;paintProg();};
+  const bundle=[], sources=[], misses=[];
+  const site=normUrl(w.website), host=hostOf(site), name=w.name;
+  const scrape=async(url,label,max,objective)=>{
+    const it=step("Reading "+label);
+    try{const r=await mcp.callTool("Firecrawl","firecrawl_scrape",{url,formats:["markdown","links"],onlyMainContent:true,objective},{signal});
+      const t=textOf(r.payload,max); if(!t.trim()){done(it,"skip","no readable text");misses.push(label);return null;}
+      bundle.push({label,url,text:t}); sources.push({label,url}); done(it,"ok"); return r.payload;}
+    catch(e){done(it,"fail",mcpMsg(e,"Firecrawl")); misses.push(label); if(e?.code==="cancelled")throw e; return null;}
+  };
+  const search=async(query,label,limit)=>{
+    const it=step(label);
+    try{const r=await mcp.callTool("Firecrawl","firecrawl_search",{query,limit,objective:`Build a B2B prospecting profile for ${name}${host?" ("+host+")":""}`},{signal});
+      const t=textOf(r.payload,7000); bundle.push({label,url:"",text:t});
+      urlsIn(r.payload).filter(u=>!/firecrawl|googleusercontent|gstatic/.test(u)).slice(0,4).forEach(u=>sources.push({label,url:u}));
+      done(it,"ok"); return r.payload;}
+    catch(e){done(it,"fail",mcpMsg(e,"Firecrawl")); misses.push(label); if(e?.code==="cancelled")throw e; return null;}
+  };
+  try{
+    const obj="Understand what this business sells, who its customers are, where it works, and its proof points, to set up a B2B prospecting profile";
+    if(site){
+      const home=await scrape(site,"their website ("+host+")",12000,obj);
+      const homeText=bundle.find(b=>b.url===site)?.text||"";
+      if(homeText)snapP=sample.json(`From this website text, pull a quick snapshot of the business. Return JSON only: {"name":"","city":"","province":"","country":"","sells":"one short line","buyers":"one short line on who buys it","founded":"year if stated","staff":"number or range if stated","serviceArea":"towns or regions they say they serve"}. Use only what the text states; leave a field empty when it isn't stated. Never guess.\nTEXT:\n${homeText.slice(0,12000)}`,{modelTier:"quick",signal,cache:false})
+        .then(o=>{if(o&&typeof o==="object"){w.snap={...Object.fromEntries(Object.entries(o).map(([k,v])=>[k,String(v||"").trim().slice(0,160)])),from:host,at:nowIso()};paintSnap();}return w.snap;}).catch(()=>null);
+      const want=/about|service|solution|what-we-do|industr|sector|client|case|project|portfolio|work|team|leadership|contact|location/i;
+      const links=urlsIn(home||"").filter(u=>hostOf(u)===host&&u!==site&&want.test(new URL(u).pathname)&&!/\.(jpg|png|pdf|svg|webp)$/i.test(u));
+      const pick=[...new Set(links.map(u=>u.split("#")[0].replace(/\/$/,"")))].slice(0,3);
+      for(const u of pick)await scrape(u,new URL(u).pathname.replace(/\/$/,"")||"page",5000,obj);
+    }else step("No website given").state="skip";
+    if(w.linkedin)await scrape(normUrl(w.linkedin),"LinkedIn company page",5000,"Read the company's LinkedIn overview: industry, size, location, specialties");
+    await search(`"${name}" site:linkedin.com/company`,"Searching LinkedIn for the company page",3);
+    await search(`"${name}" site:linkedin.com/in owner OR president OR CEO OR director OR sales`,"Searching LinkedIn for leadership",6);
+    for(const p of (w.people||[]).slice(0,4)){
+      if(/linkedin\.com\/in\//i.test(p)){const slugName=p.split("/in/")[1]?.split(/[/?]/)[0]?.replace(/-/g," ").replace(/\d+/g,"").trim()||p;await search(`"${slugName}" ${name} site:linkedin.com/in`,"Looking up "+slugName,3);}
+      else await search(`"${p.split(",")[0]}" "${name}"`,"Looking up "+p.split(",")[0],3);
+    }
+    await search(`"${name}" ${host||""} news OR announces OR expansion OR award OR project`,"Searching news and press",6);
+    const snap=snapP?await snapP:null;
+    if(snap?.city&&snap?.sells){
+      const where=[snap.city,snap.province].filter(Boolean).join(" ");
+      await search(`${snap.sells} ${where}${host?" -site:"+host:""}`,`Looking for local competitors in ${snap.city}`,8);
+    }else step("Local competitors: no location on their website, so they're asked on the call").state="skip";
+    if(w.useCb!==false&&host){
+      const it=step("Checking Crunchbase");
+      try{const r=await mcp.callTool("Crunchbase","cb_expert_resolve_entity",{name,domains:[host],collection_id:"organizations",context:`Hyperweb is onboarding ${name} (${host}) as a lead generation client and needs its profile.`,cb_entity_get:{related_entity_limit:5}},{signal});
+        bundle.push({label:"Crunchbase profile",url:"",text:textOf(r.payload,8000)}); sources.push({label:"Crunchbase",url:"https://www.crunchbase.com"}); done(it,"ok");}
+      catch(e){done(it,"fail",mcpMsg(e,"Crunchbase")); misses.push("Crunchbase"); if(e?.code==="cancelled")throw e;}
+    }
+    if(!bundle.length)throw {code:"no_material"};
+    const it=step("Claude is writing the answers");
+    const prompt=`You are onboarding a business onto Hyperweb's managed B2B lead generation desk. Hyperweb finds prospects FOR this business, so "buyer" means this business's own customers. From the research material below, draft answers to the onboarding interview so the customer only has to confirm them.
+Return JSON only:
+{"summary":"2 to 3 sentences on who they are and what they sell",
+ "answers":{${QUESTIONS.map(([k,q])=>`"${k}":{"text":"answer for: ${q.replace(/"/g,"'")}","basis":"found|inferred|missing","source":"short label of where it came from, e.g. Website services page, LinkedIn"}`).join(",")}},
+ "people":[{"name":"","title":"","url":"profile URL if seen in the material, else empty"}],
+ "askOnCall":["short, specific questions only for what is missing or only inferred"]}
+Rules: use only the material; never invent numbers, deal sizes, clients, credentials, addresses or links. Anything under CLIENT MATERIALS came from the client or Hyperweb and outranks the website: if it names a different target market or line of business, answer for that focus and give it basis "client". basis "found" means stated in the material, "inferred" means a reasonable reading that the customer must confirm, "missing" means not there (text then empty). For "sender", suggest the owner or most senior sales or business development person found, and say the booking link is still needed. "delivery" is always missing unless the material gives a Go High Level location ID. For "trigger", infer likely buying moments from what they sell and mark it inferred. For "rivals", list 3 to 6 local competitors, one per line as "Name (domain)": only businesses that sell the same thing to the same buyers AND are based in the same city or region as this business, or inside the service area it states. Never list a business in another province or country unless this business clearly serves there, never list directories, marketplaces or national chains, and never list a company you can't tie to a website in the material. Mark rivals "inferred" (the customer confirms them), or "missing" if none qualify. Plain words, Canadian spelling, commas instead of dashes, no em dashes.
+SNAPSHOT FROM THEIR WEBSITE: ${JSON.stringify(w.snap||{})}
+EXISTING ANSWERS (keep these facts, typed by Hyperweb): ${JSON.stringify(Object.fromEntries(Object.entries(w.answers||{}).filter(([,v])=>v)))}
+BUSINESS: ${JSON.stringify({name,website:site,linkedin:w.linkedin||"",people:w.people||[],type:w.type})}
+MATERIAL:
+${bundle.map(b=>`### ${b.label}${b.url?" ("+b.url+")":""}\n${b.text}`).join("\n\n").slice(0,90000)}`;
+    const o=await sample.json(prompt+matBlock(w,40000),{modelTier:"default",signal,cache:false});
+    done(it,"ok");
+    const fields={}, A=o?.answers||{};
+    QUESTIONS.forEach(([k])=>{const a=A[k]||{}, txt=String(a.text||"").trim(), basis=["found","inferred","missing"].includes(a.basis)?a.basis:(txt?"inferred":"missing");
+      fields[k]={text:txt,basis:a.basis==="client"?"client":basis,source:String(a.source||"").slice(0,120)}; if(txt&&!w.answers[k])w.answers[k]=txt;});
+    const seen=new Set(); const uniq=sources.filter(x=>{const key=x.label+"|"+x.url;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,20);
+    w.research={at:nowIso(),summary:String(o?.summary||""),fields,people:(Array.isArray(o?.people)?o.people:[]).filter(p=>p&&p.name).slice(0,8).map(p=>({name:String(p.name),title:String(p.title||""),url:String(p.url||"")})),askOnCall:(Array.isArray(o?.askOnCall)?o.askOnCall:[]).map(String).slice(0,10),sources:uniq,misses};
+    w.researching=false; try{await saveWiz("Draft");}catch(e){} draw();
+  }catch(e){
+    w.researching=false;
+    w.rErr=e?.code==="cancelled"?"Stopped. Nothing was filled in.":e?.code==="no_material"?"Couldn't read anything about them. Check the website and LinkedIn links, or answer by hand.":e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":e?.code==="invalid_json"?"Claude's answer didn't come back in the right shape. Try again.":"Research didn't finish. Try again.";
+    draw();
+  }
+}
+/* ---------- ask the client by email ---------- */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function pendingKeys(w){return QUESTIONS.filter(([k])=>{const f=w.research?.fields?.[k];if(f?.basis==="client")return false;if(f?.basis==="inferred")return true;return !(w.answers?.[k]);}).map(([k])=>k);}
+function buildAsk(w,keys){
+  const first=((w.research?.people||[])[0]?.name||"").trim().split(/\s+/)[0]||"there", A=w.clientAsk||{};
+  const items=keys.map((k,i)=>{const q=QUESTIONS.find(x=>x[0]===k), had=w.answers?.[k]||"", f=w.research?.fields?.[k];
+    return `${i+1}. ${q[1]}${had&&f?.basis!=="missing"?`\n   What we have: ${had}\n   Is that right? If not, what should it say?`:""}`;}).join("\n\n");
+  const subject=A.subject?("Re: "+A.subject.replace(/^Re:\s*/i,"")):`A few quick questions to set up your lead desk, ${w.name}`;
+  const body=A.threadId
+   ? `Hi ${first},\n\nThanks for getting back to us. There are just a few left:\n\n${items}\n\nReply to this email whenever suits, short answers are perfect.\n\nThanks,`
+   : `Hi ${first},\n\nThanks for setting up your lead desk with Hyperweb. We've already done our homework on ${w.name} from your website and LinkedIn, so there's only a little left to confirm.\n\nJust reply to this email with your answers. Short answers are perfect, and you can type them right under each question.\n\n${items}\n\nOnce we have these, we'll set up your first audience and start sending you opportunities.\n\nThanks,`;
+  return {subject,body};
+}
+function askHtml(){
+  const w=wiz; if(!w.research||w.researching)return "";
+  const A=w.clientAsk||{}, pend=pendingKeys(w);
+  if(!w.askDraft&&pend.length){const keys=pend.filter(k=>k!=="delivery");const b=buildAsk(w,keys);w.askDraft={to:A.to||"",keys,...b,edited:false};}
+  const D=w.askDraft;
+  const statusLine=A.sentAt?`<p class="${A.status==="Answered"?"ok":"lic"}">${A.status==="Answered"?"The client answered everything we asked. ":A.status==="Partly answered"?"The client answered some of it. ":"Waiting on the client. "}Emailed ${esc(A.to)} ${esc(dShort(A.lastSentAt||A.sentAt))}.${A.lastReplyAt?" Last reply "+esc(dShort(A.lastReplyAt))+".":""}${A.lastCheckedAt?" Checked at "+esc(new Date(A.lastCheckedAt).toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit"})):""}</p>
+    <div class="ctl"><button class="btn sm" type="button" id="aCheck">Check for reply</button><span class="toast" id="aCT">${esc(w.aErr||"")}</span></div>
+    ${A.notes?`<p class="muted" style="margin:0;font-size:13px"><b>Also in their reply:</b> ${esc(A.notes)}</p>`:""}`:"";
+  if(!pend.length)return `<div class="rbox"><h3>Ask the client</h3>${statusLine||`<p class="ok">Every answer is filled in. Nothing to email.</p>`}</div>`;
+  return `<div class="rbox"><h3>${A.sentAt?"Follow up with the client":"Ask the client by email"}</h3>
+   ${statusLine}
+   <p class="muted" style="margin:0;font-size:13px">Sends from your Gmail. When they reply, the dashboard reads the reply and fills in their answers, marked From client.</p>
+   <div class="f">
+    <label class="full">Send to <small>their email</small><input id="a_to" type="email" value="${esc(D.to)}" placeholder="name@company.com"></label>
+    <div class="full askq"><span class="fl">Questions to include</span>${QUESTIONS.map(([k,q])=>`<label><input type="checkbox" data-ak="${k}" ${D.keys.includes(k)?"checked":""}> <span>${esc(q)} ${pend.includes(k)?`<span class="pill ${w.research?.fields?.[k]?.basis==="inferred"?"p-warn":"p-bad"}">${w.research?.fields?.[k]?.basis==="inferred"?"Confirm":"Missing"}</span>`:""}</span></label>`).join("")}</div>
+    <label class="full">Subject<input id="a_sub" value="${esc(D.subject)}"></label>
+    <label class="full">Email <small>edit freely; your Gmail signature is added</small><textarea id="a_body" style="min-height:260px">${esc(D.body)}</textarea></label>
+    <div class="ctl full"><button class="btn ${w.askConfirm?"primary":""}" type="button" id="aSend" ${D.keys.length?"":"disabled"}>${w.askConfirm?"Confirm: send to "+esc(D.to):"Send email"}</button>${w.askConfirm?`<button class="btn" type="button" id="aNo">Cancel</button>`:""}<button class="btn ghost sm" type="button" id="aRebuild">Rewrite from the questions</button><span class="toast" id="aT">${esc(w.aSendMsg||"")}</span></div>
+   </div></div>`;
+}
+async function sendAsk(){
+  if(denied())return;
+  const w=wiz, D=w.askDraft, A=w.clientAsk||{}, t=$("aT");
+  const mcp=await getMcp(); if(!mcp){t.textContent="Connectors aren't available in this view.";return;}
+  const btn=$("aSend"); btn.disabled=true; t.textContent="Sending…";
+  QUESTIONS.forEach(([k])=>{const el=$("q_"+k); if(el)w.answers[k]=el.value.trim();});
+  try{
+    if(!w.id)await saveWiz("Draft");
+    const input={to:[D.to],subject:D.subject,body:D.body,includeSignature:true}; if(A.threadId)input.replyThreadId=A.threadId;
+    const r=await mcp.callTool("Gmail","send_message",input,{cache:false});
+    const p=r.payload||{}, at=nowIso();
+    w.clientAsk={to:D.to,subject:A.subject||D.subject,threadId:p.threadId||A.threadId||"",firstSentAt:A.firstSentAt||at,sentAt:A.sentAt||at,lastSentAt:at,keys:[...new Set([...(A.keys||[]),...D.keys])],ingested:A.ingested||[],status:"Sent",notes:A.notes||"",history:[...(A.history||[]),{at,to:D.to,keys:D.keys}]};
+    w.note=`Emailed ${D.to} ${dShort(at)}, waiting on reply`; if(w.id)replyChecked.add(w.id); w.askDraft=null; w.askConfirm=false; w.aSendMsg="";
+    await saveWiz("Draft"); draw();
+  }catch(e){
+    btn.disabled=false; w.askConfirm=false;
+    t.textContent=(e?.code==="server_unavailable"||e?.code==="upstream_error")?"No clear answer from Gmail. Check your Sent folder before trying again, it may have gone out.":mcpMsg(e,"Gmail");
+  }
+}
+const replyChecking=new Set(), replyChecked=new Set();
+async function checkReply(o){
+  const id=o.id||o._id, A=o.clientAsk; if(!A?.threadId||replyChecking.has(id))return null;
+  replyChecking.add(id);
+  try{
+    const mcp=await getMcp(); if(!mcp)throw {code:"no_mcp"};
+    const r=await mcp.callTool("Gmail","get_thread",{threadId:A.threadId,messageFormat:"PLAIN_TEXT"},{cache:false});
+    const since=new Date(A.firstSentAt||A.sentAt).getTime();
+    const msgs=(r.payload?.messages||[]).filter(m=>!(m.labelIds||[]).includes("SENT")&&!(m.labelIds||[]).includes("DRAFT")&&new Date(m.date).getTime()>since&&!(A.ingested||[]).includes(m.id));
+    A.lastCheckedAt=nowIso();
+    if(!msgs.length){try{await db.collection("onboarding").doc(id).update({"clientAsk":A});}catch(e){} return 0;}
+    const sample=await window.claude?.use?.("sample"); if(!sample)throw {code:"no_sample"};
+    const keys=A.keys||[];
+    const prompt=`A client replied to Hyperweb's onboarding email for their B2B lead desk. Pull their answers out of the reply. Return JSON only:
+{"answers":{${keys.map(k=>`"${k}":{"status":"confirmed|corrected|answered|unanswered","text":"final answer in plain words"}`).join(",")}},"notes":"anything else useful they said, or empty"}
+Rules: use only what the reply says. "confirmed" means they agreed with what we had, so text is what we had. "corrected" means text is what we had, fixed with their correction. "unanswered" means they didn't address it, text empty. Ignore quoted earlier email text (lines starting with >) and the "On ... wrote:" block. Their signature may answer the "sender" question (name, title, booking link). Never invent anything. Plain words, Canadian spelling, commas instead of dashes.
+QUESTIONS WE ASKED: ${JSON.stringify(keys.map(k=>({key:k,question:QUESTIONS.find(x=>x[0]===k)?.[1]||k,whatWeHad:o.answers?.[k]||""})))}
+REPLY:
+${msgs.map(m=>`From: ${m.sender} (${m.date})\n${String(m.plaintextBody||m.snippet||"").slice(0,12000)}`).join("\n\n---\n\n")}`;
+    const out=await sample.json(prompt,{modelTier:"default",cache:false});
+    const when=dShort(msgs[msgs.length-1].date); let got=0;
+    o.answers=o.answers||{}; o.research=o.research||{fields:{}}; o.research.fields=o.research.fields||{};
+    keys.forEach(k=>{const a=out?.answers?.[k]; const txt=String(a?.text||"").trim();
+      if(a&&a.status!=="unanswered"&&txt){o.answers[k]=txt;o.research.fields[k]={text:txt,basis:"client",source:`Client reply, ${when}${a.status==="corrected"?", corrected":a.status==="confirmed"?", confirmed":""}`};got++;}});
+    const left=pendingKeys(o).filter(k=>keys.includes(k));
+    A.ingested=[...(A.ingested||[]),...msgs.map(m=>m.id)]; A.lastReplyAt=msgs[msgs.length-1].date; A.status=left.length?"Partly answered":"Answered";
+    if(out?.notes)A.notes=[A.notes,String(out.notes)].filter(Boolean).join(" ");
+    o.note=left.length?`Client answered ${got}, ${left.length} still open`:`Client answered ${dShort(A.lastReplyAt)}`;
+    if(Array.isArray(o.research.askOnCall))o.research.askOnCall=o.research.askOnCall.slice(0,left.length?10:0);
+    o.updatedAt=nowIso(); await db.collection("onboarding").doc(id).update({answers:o.answers,research:o.research,clientAsk:A,note:o.note,updatedAt:o.updatedAt});
+    return got;
+  }finally{replyChecking.delete(id);}
+}
+function autoCheckReplies(){
+  if(!canWrite)return;
+  Object.values(onbs).forEach(o=>{
+    if(o.status!=="Draft"||!o.clientAsk?.threadId||!["Sent","Partly answered"].includes(o.clientAsk.status)||replyChecked.has(o._id))return;
+    replyChecked.add(o._id);
+    const target=wiz&&wiz.id===o._id?wiz:JSON.parse(JSON.stringify(o));
+    checkReply(target).then(n=>{if(n&&wiz===target)draw();}).catch(()=>{});
+  });
+}
+/* ---------- client materials ---------- */
+const MAT_MAX=30000, PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/", JSZIP="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+const loadScript=src=>new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)){res();return;}const s=document.createElement("script");s.src=src;s.onload=()=>res();s.onerror=()=>rej(new Error("Couldn't load "+src));document.head.appendChild(s);});
+let pdfP=null, zipP=null;
+/* pdf.js 4.10.38: past the CVE-2024-4367 fix (crafted PDFs running code). Fonts are never compiled with eval (isEvalSupported:false below). */
+const getPdf=()=>pdfP||(pdfP=(async()=>{const L=await import(PDFJS+"pdf.min.mjs");if(!globalThis.pdfjsWorker)globalThis.pdfjsWorker=await import(PDFJS+"pdf.worker.min.mjs");L.GlobalWorkerOptions.workerSrc=PDFJS+"pdf.worker.min.mjs";return L;})().catch(e=>{pdfP=null;throw e;}));
+const getZip=()=>zipP||(zipP=loadScript(JSZIP).then(()=>window.JSZip).catch(e=>{zipP=null;throw e;}));
+const xmlText=s=>s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,"&");
+function matBlock(w,max){const M=w.materials||[]; if(!M.length)return ""; let out="\nCLIENT MATERIALS (from the client or Hyperweb; these outrank the website):\n"; for(const m of M){const chunk=`### ${m.label} (${m.kind}, added ${dShort(m.addedAt)})\n${m.text}\n\n`; if(out.length+chunk.length>max){out+=chunk.slice(0,Math.max(0,max-out.length));break;} out+=chunk;} return out;}
+async function describeImages(blobs,label,status){
+  const sample=await window.claude?.use?.("sample"); if(!sample)throw new Error("Claude isn't available here to read images.");
+  const lim=await sample.limits().catch(()=>null); if(!lim?.images)throw new Error("This view can't send images to Claude.");
+  const take=blobs.slice(0,lim.images.maxCount||8); if(status)status(`Claude is reading ${take.length} page${take.length===1?"":"s"} of ${label}…`);
+  const {text}=await sample(`These are ${take.length} page images from "${label}", material a client sent to Hyperweb, a marketing agency setting up a B2B lead generation desk for them. For each page, in order, write "Page N:" then transcribe every readable word, then one or two lines on what the page shows (offer, services, examples, named companies, numbers, photos). Plain text only, no commentary beyond that.`,{images:take,modelTier:"default",cache:false});
+  return text+(blobs.length>take.length?`\n(Only the first ${take.length} of ${blobs.length} pages were read.)`:"");
+}
+async function fileToText(file,status){
+  const name=file.name||"file", ext=(name.split(".").pop()||"").toLowerCase();
+  if(file.type.startsWith("image/"))return {kind:"image",text:await describeImages([file],name,status)};
+  if(ext==="pdf"||file.type==="application/pdf"){
+    status(`Reading ${name}…`); const L=await getPdf(); const doc=await L.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,enableXfa:false}).promise;
+    const n=Math.min(doc.numPages,60); let text="", words=0;
+    for(let i=1;i<=n;i++){const pg=await doc.getPage(i);const tc=await pg.getTextContent();const t=tc.items.map(x=>x.str).join(" ").replace(/\s+/g," ").trim();words+=t?t.split(" ").length:0;text+=`\n[Page ${i}]\n${t}`;}
+    if(words<n*25){
+      const blobs=[]; for(let i=1;i<=Math.min(n,12);i++){const pg=await doc.getPage(i);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2,1400/vp0.width)});const c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;blobs.push(await new Promise(r=>c.toBlob(r,"image/jpeg",.82)));}
+      try{const seen=await describeImages(blobs,name,status);text=seen+(words?"\n\nText layer:\n"+text:"");}
+      catch(e){if(!words)throw e;}
+    }
+    return {kind:"deck",text:text.trim()+(doc.numPages>n?`\n(First ${n} of ${doc.numPages} pages.)`:"")};
+  }
+  if(ext==="pptx"||ext==="docx"){
+    status(`Reading ${name}…`); const Z=await getZip(); const zip=await Z.loadAsync(await file.arrayBuffer());
+    if(ext==="pptx"){const sl=Object.keys(zip.files).filter(f=>/^ppt\/slides\/slide\d+\.xml$/.test(f)).sort((a,b)=>+a.match(/\d+/)[0]-+b.match(/\d+/)[0]);let text="";
+      for(const f of sl){const x=await zip.file(f).async("string");const num=f.match(/\d+/)[0];const t=[...x.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>xmlText(m[1])).join(" ");const nf=zip.file(`ppt/notesSlides/notesSlide${num}.xml`);const notes=nf?[...(await nf.async("string")).matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>xmlText(m[1])).join(" "):"";text+=`\n[Slide ${num}]\n${t}${notes?"\nNotes: "+notes:""}`;}
+      return {kind:"deck",text:text.trim()};}
+    const x=await zip.file("word/document.xml")?.async("string")||""; return {kind:"document",text:x.split(/<\/w:p>/).map(pp=>[...pp.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(m=>xmlText(m[1])).join("")).filter(Boolean).join("\n")};
+  }
+  if(/^(txt|md|csv|eml|json|html?)$/.test(ext)||file.type.startsWith("text/"))return {kind:"document",text:await file.text()};
+  throw new Error(`${name}: this file type can't be read here. Use PDF, PowerPoint, Word, text or an image.`);
+}
+function addMaterial(w,m){w.materials=w.materials||[];const text=String(m.text||"").trim();if(!text)return false;w.materials.push({id:"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),kind:m.kind,label:String(m.label||"Material").slice(0,120),text:text.slice(0,MAT_MAX),truncated:text.length>MAT_MAX,ref:m.ref||"",addedAt:nowIso()});return true;}
+const KIND={note:"Note",email:"Email",deck:"Deck",document:"Document",image:"Image"};
+function matHtml(){
+  const w=wiz, M=w.materials||[];
+  return `<div class="rbox"><h3>Client materials <span class="meta">${M.length?M.length+" added":"emails, decks, call notes"}</span></h3>
+   <p class="muted" style="margin:0;font-size:13px">Anything the client has told or sent you. It outranks what's on their website: Claude uses it first for the answers, the audience and the messaging.</p>
+   ${M.length?`<ul class="mats">${M.map(m=>`<li><span class="pill p-info">${esc(KIND[m.kind]||m.kind)}</span><b>${esc(m.label)}</b><span class="meta">${m.text.length.toLocaleString("en-CA")} characters${m.truncated?" (trimmed)":""} · ${esc(dShort(m.addedAt))}</span><button class="btn ghost sm" type="button" data-mdel="${esc(m.id)}">Remove</button><details><summary>Preview</summary><pre>${esc(m.text.slice(0,2500))}${m.text.length>2500?"\n…":""}</pre></details></li>`).join("")}</ul>`:""}
+   <div class="f">
+    <label class="full">Paste an email, call notes or anything else<textarea id="m_text" style="min-height:72px" placeholder="Paste here">${esc(w.mDraft||"")}</textarea></label>
+    <label>Label <small>optional</small><input id="m_label" value="${esc(w.mLabel||"")}" placeholder="e.g. Reply from the client, Oct 26"></label>
+    <div class="ctl" style="align-self:end"><button class="btn" type="button" id="mAdd">Add text</button></div>
+    <div class="ctl full"><label class="filebtn" for="m_file">Add files</label><input type="file" id="m_file" multiple accept=".pdf,.pptx,.docx,.txt,.md,.csv,.eml,image/*" hidden><button class="btn" type="button" id="mGmail">Find their emails in Gmail</button><span class="meta">PDF, PowerPoint, Word, text or images</span></div>
+    ${w.gList?`<div class="full glist">${w.gList.length?w.gList.map(g=>`<div><span><b>${esc(g.subject||"(no subject)")}</b><small>${esc(dShort(g.date))} · ${esc(g.from||"")} · ${esc(g.snippet||"")}</small></span>${g.added?`<span class="pill p-good">Added</span>`:`<button class="btn sm" type="button" data-gadd="${esc(g.id)}">Add</button>`}</div>`).join(""):`<p class="muted" style="margin:0">No emails with ${esc(w.gDomain||"them")} in the last six months.</p>`}</div>`:""}
+    <div class="ctl full"><button class="btn primary" type="button" id="mApply" ${M.length&&!w.mBusy?"":"disabled"}>Update answers from materials</button><span class="toast" id="mT">${esc(w.mMsg||"")}</span></div>
+   </div></div>`;
+}
+const mailDomain=w=>{const e=[...(w.people||[]),w.clientAsk?.to||""].join(" ").match(/@([a-z0-9.-]+\.[a-z]{2,})/i);return (e?e[1]:hostOf(normUrl(w.website))||"").toLowerCase();};
+function cleanMail(t){
+  t=String(t||"").replace(/\r/g,"");
+  const cut=[/\n_{10,}\s*\nFrom:/,/\nOn .{5,120}wrote:\s*\n/,/\n-{2,}\s*Original Message\s*-{2,}/i].map(r=>t.search(r)).filter(i=>i>0);
+  if(cut.length)t=t.slice(0,Math.min(...cut));
+  return t.split("\n").filter(l=>!/^\s*>/.test(l)).join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+async function findGmail(){
+  const w=wiz, mcp=await getMcp(); if(!mcp){w.mMsg="Connectors aren't available in this view.";draw();return;}
+  const dom=mailDomain(w); if(!dom){w.mMsg="Add their website or an email address first.";draw();return;}
+  w.mMsg="Searching Gmail…"; w.gDomain=dom; draw();
+  try{const r=await mcp.callTool("Gmail","search_threads",{query:`(from:${dom} OR to:${dom}) newer_than:180d`,pageSize:12},{cache:false});
+    const have=new Set((w.materials||[]).map(m=>m.ref));
+    w.gList=(r.payload?.threads||[]).map(t=>{const ms=t.messages||[];const last=ms[ms.length-1]||{};const inbound=ms.find(m=>String(m.sender||"").toLowerCase().includes(dom));return {id:t.id,subject:(ms[0]||{}).subject||"",snippet:String((inbound||last).snippet||"").replace(/&#39;/g,"'").replace(/&amp;/g,"&").replace(/&quot;/g,'"'),date:last.date,from:(inbound||last).sender||"",added:have.has("gmail:"+t.id)};});
+    w.mMsg=w.gList.length?"Pick the emails that tell us something. Older messages in each thread come with it.":"";
+  }catch(e){w.mMsg=mcpMsg(e,"Gmail");}
+  draw();
+}
+async function addGmail(id){
+  const w=wiz, mcp=await getMcp(); w.mMsg="Reading the email…"; draw();
+  try{const r=await mcp.callTool("Gmail","get_thread",{threadId:id,messageFormat:"PLAIN_TEXT"},{cache:false});
+    const ms=r.payload?.messages||[], subj=(ms[0]||{}).subject||"Email", files=[];
+    const text=ms.map(m=>{(m.attachments||[]).forEach(a=>{if(a.filename&&!/^image\.(png|jpe?g|gif)$/i.test(a.filename))files.push(a.filename);});return `From: ${m.sender} · ${new Date(m.date).toLocaleString("en-CA",{timeZone:"America/Toronto",dateStyle:"medium",timeStyle:"short"})}\n${cleanMail(m.plaintextBody||m.snippet)}`;}).join("\n\n---\n\n");
+    const uniq=[...new Set(files)];
+    addMaterial(w,{kind:"email",label:subj,text:text+(uniq.length?`\n\nAttachments on this thread: ${uniq.join(", ")}`:""),ref:"gmail:"+id});
+    const g=(w.gList||[]).find(x=>x.id===id); if(g)g.added=true;
+    const docs=uniq.filter(f=>/\.(pdf|pptx|docx)$/i.test(f));
+    w.mMsg=docs.length?`Added. Gmail can't hand over attachments here, so download ${docs.join(", ")} and add ${docs.length===1?"it":"them"} with Add files.`:"Added.";
+    try{await saveWiz("Draft");}catch(e){}
+  }catch(e){w.mMsg=mcpMsg(e,"Gmail");}
+  draw();
+}
+async function applyMaterials(){
+  const w=wiz; if(w.mBusy||denied())return;
+  QUESTIONS.forEach(([k])=>{const el=$("q_"+k); if(el)w.answers[k]=el.value.trim();});
+  const sample=await window.claude?.use?.("sample"); if(!sample){w.mMsg="Claude isn't available in this view.";draw();return;}
+  w.mBusy=true; w.mMsg="Claude is reading the materials…"; draw();
+  const R=w.research||{}, F=R.fields||{};
+  const prompt=`Hyperweb is setting up a managed B2B lead generation desk for ${w.name} (${w.website||"no website"}). Hyperweb finds prospects FOR this business, so "buyer" means the customers this desk should find. Update the onboarding answers using the CLIENT MATERIALS below. They come from the client or Hyperweb and outrank anything taken from the website.
+Return JSON only:
+{"summary":"2 to 3 sentences: who they are and what THIS desk is going after",
+ "shift":"one sentence if the materials change the target market or offer compared with the current answers, else empty",
+ "answers":{${QUESTIONS.map(([k,q])=>`"${k}":{"text":"answer for: ${q.replace(/"/g,"'")}","basis":"client|found|inferred|missing","source":"short label, e.g. Email from Dack, Oct 26 or Staging deck p.4","changed":true}`).join(",")}},
+ "people":[{"name":"","title":"","url":""}],
+ "askOnCall":["short, specific questions only for what is still missing or only inferred"]}
+Rules: basis "client" means stated in the materials. Keep a current answer (and its basis) when the materials don't touch it, with changed false. When the materials redirect the focus, rewrite answers for that focus even if the website says otherwise, and say what the website-based answer got wrong in "shift". Never invent numbers, clients, credentials, links or deal sizes. For "examples" list companies the client named as targets. "delivery" stays missing unless a Go High Level location ID is given. people: only people the materials name, with their titles. Plain words, Canadian spelling, commas instead of dashes.
+BUSINESS: ${JSON.stringify({name:w.name,website:w.website,type:w.type})}
+CURRENT ANSWERS: ${JSON.stringify(QUESTIONS.map(([k,q])=>({key:k,question:q,answer:w.answers?.[k]||"",basis:F[k]?.basis||(w.answers?.[k]?"typed by Hyperweb":"missing")})))}
+WEBSITE RESEARCH SUMMARY: ${JSON.stringify(R.summary||"")}
+${matBlock(w,120000)}`;
+  try{
+    const o=await sample.json(prompt,{modelTier:"default",cache:false});
+    const fields={...F}; let changed=0;
+    QUESTIONS.forEach(([k])=>{const a=o?.answers?.[k]; if(!a)return; const txt=String(a.text||"").trim(); if(a.changed===false&&F[k])return;
+      const basis=["client","found","inferred","missing"].includes(a.basis)?a.basis:(txt?"inferred":"missing");
+      const prevAuto=F[k]?.text||"", cur=w.answers[k]||"";
+      fields[k]={text:txt,basis,source:String(a.source||"").slice(0,120)};
+      if(txt&&(!cur||cur===prevAuto)){if(cur!==txt)changed++;w.answers[k]=txt;}});
+    const people=[...(R.people||[])];
+    (Array.isArray(o?.people)?o.people:[]).filter(p=>p&&p.name).forEach(p=>{const i=people.findIndex(x=>x.name.toLowerCase()===String(p.name).toLowerCase());const v={name:String(p.name),title:String(p.title||""),url:String(p.url||"")};if(i>=0)people[i]={...people[i],...Object.fromEntries(Object.entries(v).filter(([,x])=>x))};else people.unshift(v);});
+    w.research={...R,at:R.at||nowIso(),fields,summary:String(o?.summary||R.summary||""),shift:String(o?.shift||""),people:people.slice(0,10),askOnCall:(Array.isArray(o?.askOnCall)?o.askOnCall:R.askOnCall||[]).map(String).slice(0,10),sources:R.sources||[],misses:R.misses||[],materialsAt:nowIso()};
+    w.askDraft=null; w.mMsg=changed?`Updated ${changed} answer${changed===1?"":"s"}. Answers you typed yourself were kept; where Claude disagrees you'll see it underneath.`:"Nothing changed. Check the suggestions under each answer.";
+    try{await saveWiz("Draft");}catch(e){}
+  }catch(e){w.mMsg=e?.code==="invalid_json"?"Claude's answer came back in the wrong shape. Try again.":e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":"Couldn't update from the materials. Try again.";}
+  w.mBusy=false; draw();
+}
+function readReview(){
+  const w=wiz;
+  w.audience={...(w.audience||{}),name:$("r_aname").value.trim(),headline:$("r_headline").value.trim(),who:lines($("r_who").value),notFit:lines($("r_notFit").value),industries:lines($("r_ind").value),titles:lines($("r_titles").value),
+    sizes:[...document.querySelectorAll("input[name=rsize]:checked")].map(x=>x.value),geo:{center:$("r_center").value.trim(),radius:+$("r_radius").value,regions:lines($("r_regions").value)},
+    signalTypes:lines($("r_sig").value).map(x=>{const [type,why]=x.split("|").map(s=>s.trim());return {type,why:why||"",on:true};})};
+  w.knowledge={...(w.knowledge||{}),companyName:w.name,website:w.website,offer:$("r_offer").value.trim(),whoWeHelp:$("r_whoWeHelp").value.trim(),different:$("r_different").value.trim(),proof:lines($("r_proof").value),voice:$("r_voice").value.trim(),
+    senderName:$("r_sname").value.trim(),senderRole:$("r_srole").value.trim(),bookingLink:$("r_book").value.trim(),mailingAddress:$("r_addr").value.trim()};
+  w.knowledge.quebec=$("r_qc").value==="bilingual"?"bilingual":"exclude";
+  w.competitors=parseRivals($("r_rivals").value);
+  w.audience.notFit=[...w.audience.notFit.filter(l=>!l.startsWith(COMP_TAG)&&l!==QC_TAG),...w.competitors.map(c=>COMP_TAG+c.name+(c.domain?" ("+c.domain+")":"")),...(w.knowledge.quebec==="exclude"?[QC_TAG]:[])];
+  w.ghlLocationId=$("r_ghl").value.trim(); w.sweepDay=$("r_day").value; w.creditBudget=+$("r_budget").value||0; w.digestTo=lines($("r_digest").value);
+  w.crunchbase={licence:$("r_lic").value,tokenBudget:$("r_lic").value==="partner"?0:(+$("r_cbtok").value||0)};
+}
+async function saveWiz(status){
+  if(!canWrite)throw {code:"permission_denied"};
+  const w=wiz, id=w.id||slug(w.name)+"-"+Date.now().toString(36);
+  /* Stale-copy guard: re-read before writing. Never pull a record the runner has already picked up back to Draft,
+     and keep the newer client-email thread state (sends and ingested replies) if someone else saved it since. */
+  if(onbs[id]){const snap=await db.collection("onboarding").doc(id).get(), cur=snap?.exists?(snap.data()||{}):null;
+    if(cur&&cur.status&&!["Draft","Failed"].includes(cur.status)&&status==="Draft")throw {code:"stale",message:`This workspace is already ${cur.status}. Nothing was saved.`};
+    if(cur&&String(cur.updatedAt||"")>String(w.updatedAt||"")){const ra=cur.clientAsk, la=w.clientAsk;
+      if(ra&&(!la||String(ra.lastSentAt||ra.lastCheckedAt||"")>String(la.lastSentAt||la.lastCheckedAt||"")))w.clientAsk=ra;}}
+  const doc={name:w.name,type:w.type,website:w.website,owner:w.owner,answers:w.answers||{},audience:w.audience||null,knowledge:w.knowledge||null,gaps:w.gaps||[],ghlLocationId:w.ghlLocationId||"",sweepDay:w.sweepDay,creditBudget:w.creditBudget||0,digestTo:w.digestTo||[],crunchbase:w.crunchbase||{licence:"hyperweb",tokenBudget:5000},linkedin:w.linkedin||"",people:w.people||[],useCb:w.useCb!==false,research:w.research||null,clientAsk:w.clientAsk||null,materials:w.materials||[],snap:w.snap||null,competitors:w.competitors||parseRivals(w.answers?.rivals),note:w.note||"",status,updatedAt:nowIso(),updatedBy:me};
+  if(onbs[id])await db.collection("onboarding").doc(id).update(doc);else await db.collection("onboarding").doc(id).set({...doc,createdAt:nowIso(),createdBy:me});
+  w.id=id; w.updatedAt=doc.updatedAt; return id;
+}
+function wireWiz(){
+  const w=wiz, t=$("wT");
+  const c=$("wCancel"); if(c)c.onclick=()=>{wiz=null;draw();};
+  const rd0=()=>{w.name=$("w_name").value.trim();w.website=$("w_web").value.trim();w.type=$("w_type").value;w.owner=$("w_owner").value;w.linkedin=$("w_li").value.trim();w.people=lines($("w_people").value);w.useCb=$("w_cb").checked;if(!w.name){t.textContent="Give the business a name.";return false;}return true;};
+  const n=$("wNext"); if(n)n.onclick=()=>{if(!rd0())return;w.step=1;draw();};
+  const rs=$("wResearch"); if(rs)rs.onclick=()=>{if(!rd0())return;if(!w.website&&!w.linkedin){t.textContent="Add a website or LinkedIn page so Claude has somewhere to start.";return;}w.step=1;draw();runResearch();};
+  const rg=$("rGo"); if(rg)rg.onclick=()=>runResearch();
+  const rst=$("rStop"); if(rst)rst.onclick=()=>rCtl?.abort();
+  document.querySelectorAll("textarea[data-q]").forEach(el=>el.oninput=()=>{w.answers[el.dataset.q]=el.value.trim();});
+  const aTo=$("a_to"); if(aTo)aTo.oninput=()=>{w.askDraft.to=aTo.value.trim();w.askConfirm=false;};
+  const aSub=$("a_sub"); if(aSub)aSub.oninput=()=>{w.askDraft.subject=aSub.value;};
+  const aBody=$("a_body"); if(aBody)aBody.oninput=()=>{w.askDraft.body=aBody.value;w.askDraft.edited=true;};
+  document.querySelectorAll("[data-ak]").forEach(c=>c.onchange=()=>{const D=w.askDraft;D.keys=QUESTIONS.map(x=>x[0]).filter(k=>document.querySelector(`[data-ak="${k}"]`)?.checked);if(!D.edited){const b=buildAsk(w,D.keys);D.body=b.body;}w.askConfirm=false;draw();});
+  const aRb=$("aRebuild"); if(aRb)aRb.onclick=()=>{QUESTIONS.forEach(([k])=>{const el=$("q_"+k); if(el)w.answers[k]=el.value.trim();});const D=w.askDraft;const b=buildAsk(w,D.keys);D.subject=b.subject;D.body=b.body;D.edited=false;draw();};
+  const aNo=$("aNo"); if(aNo)aNo.onclick=()=>{w.askConfirm=false;draw();};
+  const aSend=$("aSend"); if(aSend)aSend.onclick=()=>{const D=w.askDraft;if(!EMAIL_RE.test(D.to||"")){$("aT").textContent="Add the client's email address.";return;}if(!D.keys.length){$("aT").textContent="Pick at least one question.";return;}if(!w.askConfirm){w.askConfirm=true;draw();return;}sendAsk();};
+  const aCk=$("aCheck"); if(aCk)aCk.onclick=async()=>{aCk.disabled=true;const ct=$("aCT");ct.textContent="Checking Gmail…";
+    try{QUESTIONS.forEach(([k])=>{const el=$("q_"+k); if(el)w.answers[k]=el.value.trim();});const n=await checkReply(w);w.aErr=n===null?"Already checking.":n?`Filled in ${n} answer${n===1?"":"s"} from their reply.`:(w.clientAsk?.lastReplyAt?"No new reply since the last one.":"No reply yet.");w.askDraft=null;draw();}
+    catch(e){aCk.disabled=false;ct.textContent=e?.code==="no_sample"?"Claude isn't available in this view.":e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":e?.code==="invalid_json"?"Couldn't read their reply. Try again.":mcpMsg(e,"Gmail");}};
+  if(w.step===1&&w.clientAsk?.threadId&&["Sent","Partly answered"].includes(w.clientAsk.status)&&w.id&&!replyChecked.has(w.id)){replyChecked.add(w.id);checkReply(w).then(n=>{if(n&&wiz===w){w.askDraft=null;w.aErr=`Filled in ${n} answer${n===1?"":"s"} from their reply.`;draw();}}).catch(()=>{});}
+  const mt=$("m_text"); if(mt)mt.oninput=()=>{w.mDraft=mt.value;};
+  const ml=$("m_label"); if(ml)ml.oninput=()=>{w.mLabel=ml.value;};
+  const mAdd=$("mAdd"); if(mAdd)mAdd.onclick=async()=>{const t=(w.mDraft||"").trim(); if(!t){$("mT").textContent="Paste something first.";return;} addMaterial(w,{kind:/^(from|subject|sent):/im.test(t)?"email":"note",label:(w.mLabel||"").trim()||t.split("\n")[0].slice(0,60),text:t}); w.mDraft="";w.mLabel="";w.mMsg="Added. Click Update answers from materials when you're ready."; try{await saveWiz("Draft");}catch(e){} draw();};
+  const mf=$("m_file"); if(mf)mf.onchange=async()=>{const files=[...mf.files]; if(!files.length||denied())return; const errs=[]; let n=0;
+    for(const f of files){try{const r=await fileToText(f,msg=>{const el=$("mT"); if(el)el.textContent=msg;}); if(addMaterial(w,{kind:r.kind,label:f.name,text:r.text}))n++; else errs.push(f.name+": no readable content");}catch(e){errs.push(e?.code==="not_granted"?f.name+": Claude isn't allowed for this page":String(e?.message||e).slice(0,160));}}
+    w.mMsg=(n?`Added ${n} file${n===1?"":"s"}. `:"")+errs.join(" "); if(n){try{await saveWiz("Draft");}catch(e){}} draw();};
+  const mg=$("mGmail"); if(mg)mg.onclick=()=>{if(!denied())findGmail();};
+  document.querySelectorAll("[data-gadd]").forEach(b=>b.onclick=()=>{b.disabled=true;addGmail(b.dataset.gadd);});
+  document.querySelectorAll("[data-mdel]").forEach(b=>b.onclick=async()=>{w.materials=(w.materials||[]).filter(m=>m.id!==b.dataset.mdel);try{await saveWiz("Draft");}catch(e){} draw();});
+  const ma=$("mApply"); if(ma)ma.onclick=()=>applyMaterials();
+  document.querySelectorAll("[data-use]").forEach(b=>b.onclick=e=>{e.preventDefault();const k=b.dataset.use;w.answers[k]=w.research.fields[k].text;draw();});
+  const rdA=()=>{if(w.step===1)QUESTIONS.forEach(([k])=>{w.answers[k]=$("q_"+k).value.trim();});};
+  const bk=$("wBack"); if(bk)bk.onclick=()=>{if(w.researching)rCtl?.abort();if(w.step===2)readReview();else rdA();w.step--;draw();};
+  const sv=$("wSave"); if(sv)sv.onclick=async()=>{if(w.step===2)readReview();else rdA();try{await saveWiz("Draft");t.textContent="Saved. Pick it up under Workspaces in onboarding.";}catch(e){t.textContent=saveErr(e);}};
+  const dr=$("wDraft"); if(dr)dr.onclick=async()=>{
+    if(denied())return;
+    if(w.researching){t.textContent="Wait for the research to finish, or stop it.";return;}
+    rdA(); const sample=await window.claude?.use?.("sample"); if(!sample){t.textContent="Claude isn't available in this view.";return;}
+    dr.disabled=true;t.textContent="Drafting the audience and messaging pack…";
+    const prompt=`You set up a B2B buying-signal desk for a business. From the interview, draft its first prospecting audience and its messaging pack. Return JSON only:
+{"audience":{"name":"short","headline":"one sentence","who":["3 to 5"],"notFit":["2 to 4"],"industries":[],"titles":["roles of the first person to contact"],"sizes":["subset of ${SIZES.join(", ")}"],"geo":{"center":"city, province or state, country","radius":25|50|100|250,"regions":["towns and regions"]},"signalTypes":[{"type":"","why":"what this trigger means for THIS business's buyer"}],"custom":["2 to 4 search phrases"],"weights":{"need":35,"ability":40,"timing":25}},
+ "knowledge":{"offer":"","whoWeHelp":"","different":"","proof":["only what the interview states"],"voice":"","avoid":[],"senderName":"","senderRole":"","bookingLink":"","mailingAddress":""},
+ "ghlLocationId":"if given, else empty","gaps":["anything missing that a person must fill in, e.g. mailing address for CASL"]}
+Rules: use only facts in the interview, the research notes and the client materials; the interview answers win where they conflict; companies named as ideal customers should shape the audience and its custom search phrases; never invent proof, numbers or addresses (leave a field empty and list it in gaps). Signal types should come from: Hiring marketing, Hiring sales, Expansion, Investment, New facility, Leadership change, Acquisition, Partnership, Product launch, Website gap, or a specific trigger the interview names. Plain language, Canadian spelling, commas instead of dashes.
+BUSINESS: ${JSON.stringify({name:w.name,website:w.website,type:w.type})}
+INTERVIEW: ${JSON.stringify(QUESTIONS.map(([k,q])=>({q,a:w.answers[k]||""})))}
+RESEARCH NOTES: ${JSON.stringify(w.research?{summary:w.research.summary,shift:w.research.shift||"",people:w.research.people,unconfirmed:QUESTIONS.filter(([k])=>w.research.fields?.[k]?.basis==="inferred").map(([k])=>k)}:null)}${matBlock(w,40000)}`;
+    try{const o=await sample.json(prompt,{modelTier:"default"});
+      const a=o.audience||{}; w.audience={...a,sizes:(a.sizes||[]).filter(s=>SIZES.includes(s)),geo:{center:a.geo?.center||"",radius:[25,50,100,250].includes(+a.geo?.radius)?+a.geo.radius:50,regions:a.geo?.regions||[]},signalTypes:(a.signalTypes||[]).map(s=>({type:s.type,why:s.why,on:true})),sources:{news:true,jobs:true,funding:true,site:true,custom:a.custom||[]},weights:a.weights||{need:35,ability:40,timing:25},climateAdj:0,active:true,target:8};
+      w.knowledge={optOut:"Not the right time? Reply 'no thanks' and I won't email again.",...(o.knowledge||{})}; w.gaps=o.gaps||[]; if(o.ghlLocationId)w.ghlLocationId=o.ghlLocationId;
+      w.step=2; try{await saveWiz("Draft");}catch(e){} draw();}
+    catch(e){dr.disabled=false;t.textContent=e?.code==="rate_limited"?"Claude is busy. Try again in a minute.":e?.code==="not_granted"?"Claude isn't allowed for this page in your view.":"Couldn't draft it. Try again.";}
+  };
+  const cr=$("wCreate"); if(cr)cr.onclick=async()=>{
+    if(denied())return;
+    readReview(); if(!w.audience.name||!w.audience.geo.center){t.textContent="The audience needs a name and a territory centre.";return;}
+    cr.disabled=true;t.textContent="Queuing…";
+    try{const id=await saveWiz("Queued");await db.collection("onboarding").doc(id).update({requestedAt:nowIso()});fireRunner(`Onboarding request from Signals HQ: create the desk for onboarding/${id} first.`);w.step=3;draw();}
+    catch(e){cr.disabled=false;t.textContent=saveErr(e);}
+  };
+  const dn=$("wDone"); if(dn)dn.onclick=()=>{wiz=null;draw();};
+}
+let mcpP=null; const getMcp=()=>mcpP||(mcpP=Promise.resolve(window.claude?.use?.("mcp")).catch(()=>null));
+async function fireRunner(text){const id=hq.settings?.runnerId; if(!id||!canWrite)return false; try{const mcp=await getMcp(); if(!mcp)return false; await mcp.callTool(CCR,"fire_trigger",{trigger_id:id,text},{cache:false}); return true;}catch(e){return false;}}
+$("healthBtn").onclick=async()=>{if(!db||denied())return;const b=$("healthBtn");b.disabled=true;
+  try{await db.collection("hq").doc("healthRequest").set({status:"Queued",requestedAt:nowIso(),requestedBy:me});const ok=await fireRunner("Health refresh requested from Signals HQ: refresh every desk's health first.");b.textContent=ok?"Refresh asked":"Queued for the next pass";}
+  catch(e){banner(saveErr(e),"err");} setTimeout(()=>{b.textContent="Refresh health";b.disabled=false;},5000);};
+
+/* ---------- learning ---------- */
+function drawLearn(){
+  const m=$("main"), list=Object.values(desks).filter(d=>d.health?.checkedAt);
+  const agg={};list.forEach(d=>(d.health.dismissTop||[]).forEach(x=>{const r=x.reason??x[0],n=+(x.count??x[1])||0;agg[r]=(agg[r]||0)+n;}));
+  const src={};list.forEach(d=>Object.entries(d.health.keptBySource||{}).forEach(([s,n])=>src[s]=(src[s]||0)+n));
+  const sigT={};list.forEach(d=>Object.entries(d.health.acceptedByType||{}).forEach(([s,n])=>sigT[s]=(sigT[s]||0)+n));
+  const bars=o=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,8),mx=Math.max(1,...e.map(x=>x[1]));return e.length?`<div class="panel" style="gap:6px">${e.map(([k,n])=>`<div class="qm" style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)"><span>${esc(k)}<b>${n}</b></span><i><em style="width:${n/mx*100}%"></em></i></div>`).join("")}</div>`:`<p class="muted" style="margin:0">Not enough decisions yet.</p>`;};
+  m.innerHTML=`<p class="muted" style="margin:0;max-width:80ch">Every accept and dismiss on every desk feeds back into its next sweep. This is the same feedback, rolled up, so Hyperweb can tune the playbook it sells to partners.</p>
+  <div class="grid">
+   <section class="sect"><header><div><h2>Signals people accept</h2><p>By signal type, all desks</p></div></header>${bars(sigT)}</section>
+   <section class="sect"><header><div><h2>Why signals get dismissed</h2><p>Reasons chosen on the desks</p></div></header>${bars(agg)}</section>
+   <section class="sect"><header><div><h2>Sources that find keepers</h2><p>Promote and Review signals by source tool</p></div></header>${bars(src)}</section>
+  </div>
+  ${list.length?`<div class="tablebox"><table style="min-width:600px"><thead><tr><th>Desk</th><th class="n">Decided</th><th class="n">Accepted</th><th class="n">Accept rate</th><th>Top dismiss reason</th></tr></thead><tbody>${list.map(d=>{const h=d.health;return `<tr><td class="name">${esc(d.name)}</td><td class="n">${h.decided||0}</td><td class="n">${h.accepted||0}</td><td class="n">${h.decided?Math.round((h.accepted||0)/h.decided*100)+"%":"–"}</td><td class="meta">${esc(((h.dismissTop||[])[0]?.reason)||"–")}</td></tr>`}).join("")}</tbody></table></div>`:""}`;
+}
+function drawCB(){
+  const m=$("main"), c=hq.crunchbase||{}, lim=+c.limit||200000, used=+c.used||0;
+  const list=Object.values(desks).filter(d=>!isGone(d)).sort((a,b)=>String(a.name).localeCompare(b.name));
+  const alloc=list.filter(d=>cbOf(d).licence!=="partner").reduce((t,d)=>t+(+cbOf(d).tokenBudget||0),0);
+  m.innerHTML=`<section class="sect"><header><div><h2>Crunchbase across desks</h2><p>Each desk picks its own Crunchbase signal types per audience. This is where Hyperweb sets who pays for the data and how much of the shared allowance each managed desk may use.</p></div></header>
+   <div class="tiles">
+    <div class="tile"><span>Shared allowance</span><b>${lim.toLocaleString("en-CA")}</b><small>data tokens a month on Hyperweb's account</small></div>
+    <div class="tile"><span>Used this month</span><b>${used.toLocaleString("en-CA")}</b><small>${c.checkedAt?"checked "+esc(dShort(c.checkedAt)):"not checked yet"}${c.resetsAt?", resets "+esc(dShort(c.resetsAt)):""}</small></div>
+    <div class="tile"><span>Allocated to desks</span><b>${alloc.toLocaleString("en-CA")}</b><small>${alloc>lim-used?"More than is left this month":"Within what is left"}</small></div>
+    <div class="tile"><span>Partner licences</span><b>${list.filter(d=>cbOf(d).licence==="partner").length}</b><small>their own accounts, no draw on ours</small></div></div>
+   <p class="lic">${esc(LIC_TEXT.hyperweb)}</p>
+   <p class="lic">${esc(LIC_TEXT.partner)}</p>
+   ${list.length?`<div class="tablebox"><table style="min-width:720px"><thead><tr><th>Desk</th><th>Licence</th><th>Sources</th><th>Tokens a month</th><th>Used</th><th></th></tr></thead><tbody>${list.map(d=>{const x=cbOf(d), pct=x.tokenBudget?Math.min(100,Math.round((+x.tokensMonth||0)/x.tokenBudget*100)):0;return `<tr data-cb="${esc(d._id)}"><td><span class="name">${esc(d.name)}</span><span class="dom">${esc(d.type||"")}</span></td>
+     <td><select class="sel" data-lic ${canWrite?"":"disabled"}><option value="hyperweb" ${(x.licence||"hyperweb")==="hyperweb"?"selected":""}>Hyperweb managed</option><option value="partner" ${x.licence==="partner"?"selected":""}>Partner's own</option></select></td>
+     <td class="meta" style="max-width:280px">${(x.sources||[]).length?x.sources.map(esc).join("<br>"):"None configured"}</td>
+     <td><input class="sel" type="number" min="0" step="1000" style="width:110px" data-tok value="${+x.tokenBudget||0}" ${canWrite?"":"disabled"}></td>
+     <td><div class="qm" style="min-width:110px"><span>${x.tokenBudget?"of "+(+x.tokenBudget).toLocaleString("en-CA"):"No budget"}<b>${(+x.tokensMonth||0).toLocaleString("en-CA")}</b></span><i><em style="width:${pct}%;${pct>=100?"background:var(--bad)":""}"></em></i></div></td>
+     <td><button class="btn sm" type="button" data-save ${canWrite?"":"disabled"}>Save</button> <span class="toast" data-t></span></td></tr>`;}).join("")}</tbody></table></div>`:""}
+   <p class="muted" style="margin:0;font-size:13px">The runner copies each desk's licence and budget into the desk, stops Crunchbase runs on a managed desk once it hits its budget, and refreshes these numbers with the health check.</p></section>`;
+  m.querySelectorAll("tr[data-cb]").forEach(r=>{const b=r.querySelector("[data-save]");b.onclick=async()=>{if(denied())return;const t=r.querySelector("[data-t]"),d=desks[r.dataset.cb],lic=r.querySelector("[data-lic]").value;
+    try{await db.collection("desks").doc(d._id).update({crunchbase:{...cbOf(d),licence:lic,tokenBudget:lic==="partner"?0:(+r.querySelector("[data-tok]").value||0),setAt:nowIso(),setBy:me}});t.textContent="Saved";}catch(e){t.textContent=saveErr(e);}};});
+}
+function drawSettings(){
+  const s=hq.settings||{}, r=hq.runner||{}, m=$("main");
+  m.innerHTML=`<section class="sect"><header><div><h2>Runner</h2><p>One scheduled task serves every desk: hourly on weekdays from 7:20am to 7:20pm, plus on demand from any desk or from here.</p></div></header>
+  <dl class="f" style="margin:0"><div class="fl">Last check-in<b style="color:var(--fg);font-weight:500">${r.lastRunAt?esc(new Date(r.lastRunAt).toLocaleString("en-CA")):"Not yet"}</b></div><div class="fl">Last result<b style="color:var(--fg);font-weight:500">${esc(r.lastResult||"–")}</b></div>
+  <div class="fl">Health last refreshed<b style="color:var(--fg);font-weight:500">${r.healthAt?esc(new Date(r.healthAt).toLocaleString("en-CA")):"Not yet"}</b></div><div class="fl">Desk page version<b style="color:var(--fg);font-weight:500">${esc(s.templateVersion||"–")}</b></div></dl>
+  <p class="muted" style="margin:0;font-size:13px">New desks are copies of the template desk at ${safeUrl(s.templateUrl)?`<a href="${esc(s.templateUrl)}" target="_blank" rel="noopener">the Hyperweb desk</a>`:"the Hyperweb desk"}. When the template's page changes, the runner brings every desk up to the same version, without touching their data.</p></section>`;
+}
+
+/* Crunchbase meter: read the live allowance (free call) and keep hq/crunchbase in step */
+async function syncCBMeter(){
+  try{
+    if(!canWrite)return; const mcp=await getMcp(); if(!mcp)return;
+    const r=await mcp.callTool("Crunchbase","cb_metering_get_state",{},{cache:false});
+    const ms=r?.payload?.meters||[], m=ms.find(x=>x.meter_id==="data_mcp_tokens")||ms[0]; if(!m||!(+m.limit))return;
+    const doc={used:+m.used||0,limit:+m.limit,available:+m.available||Math.max(0,m.limit-(m.used||0)),resetsAt:String(m.upcoming_meter_refresh||"").slice(0,10),checkedAt:nowIso(),source:"Crunchbase meter"};
+    const ref=db.collection("hq").doc("crunchbase"), cur=(await ref.get())?.data?.()||{};
+    if(cur.used===doc.used&&cur.limit===doc.limit&&cur.checkedAt&&Date.now()-new Date(cur.checkedAt)<10*60e3)return;
+    await ref.set({...cur,...doc});
+  }catch(e){}
+}
+
+/* boot */
+draw();
+(async()=>{
+  db=await window.claude?.use?.("db");
+  if(!db){banner("Open Signals HQ in claude.ai while signed in.");$("hqMeta").textContent="Not connected";return;}
+  /* fail closed: any error or a "no" leaves HQ read-only; null means "not told", so writes stay on and a refused write decides */
+  try{const u=await window.claude.use("user");if(u){const c=await u.can("data.write");canWrite=c!==false;try{me=await u.id();}catch(e){}}}catch(e){canWrite=false;}
+  if(!canWrite)banner(READ_ONLY);
+  getMcp();
+  syncCBMeter();
+  const busy=()=>!!document.activeElement?.closest?.(".sect textarea,.sect input,.sect select");
+  db.collection("desks").onSnapshot(s=>{desks={};s.docs.forEach(d=>desks[d.id]={_id:d.id,...d.data()});if(!busy())draw();},()=>banner("Couldn't load the desks. Reload to try again.","err"));
+  db.collection("onboarding").onSnapshot(s=>{onbs={};s.docs.forEach(d=>onbs[d.id]={_id:d.id,...d.data()});if(!busy())draw();},()=>{});
+  db.collection("hq").onSnapshot(s=>{hq={};s.docs.forEach(d=>hq[d.id]=d.data());if(!busy())draw();},()=>{});
+})();
+</script>
+
+</body></html>
