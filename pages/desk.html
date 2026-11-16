@@ -2,31 +2,25 @@
 <title>Hyperweb Signals Desk</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Layout: masthead with workspace + audience switch, a tab rail, then one working surface per tab; a side drawer for a lead. Signal strength reads as a 3-bar meter. */
 :root{
-  --bg:#f2f4f7; --surface:#ffffff; --sunk:#e6eaf0; --line:#d3d9e2; --fg:#141b26; --muted:#5a6475;
-  --accent:#1d4ed8; --accent-soft:#dde6fb; --accent-fg:#ffffff;
-  --signal:#c26a00; --signal-soft:#fbeacd;
+  --bg:#F2F6F9; --surface:#ffffff; --sunk:#E6EDF2; --line:rgba(3,10,20,.13); --fg:#030A14; --muted:#3D4955;
+  --accent:#0B6FB8; --accent-soft:#DCEBF6; --accent-fg:#ffffff; --cta:#00CFFC; --cta-fg:#030A14;
+  --signal:#B4531C; --signal-soft:#FBE6D9;
   --good:#17733a; --good-soft:#d9efe0; --warn:#946200; --warn-soft:#f6eac6; --bad:#b0321e; --bad-soft:#f7ddd7;
-  --shadow:0 14px 44px rgba(14,24,44,.18);
-  --f-display:"Familjen Grotesk","Avenir Next",system-ui,sans-serif;
-  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:0 14px 44px rgba(3,10,20,.16);
+  --f-display:"Archivo","Arial Black","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Figtree","Avenir Next","Segoe UI",system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
-  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
-  --signal:#f0a640; --signal-soft:#3a2a10;
-  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
-  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f141c; --surface:#161d28; --sunk:#1e2735; --line:#2c3746; --fg:#e3e9f2; --muted:#93a0b4;
-  --accent:#7aa2ff; --accent-soft:#1c2a4a; --accent-fg:#0b1220;
-  --signal:#f0a640; --signal-soft:#3a2a10;
-  --good:#6fd08a; --good-soft:#153222; --warn:#e3b54d; --warn-soft:#3a2f12; --bad:#f08a78; --bad-soft:#3d1c16;
-  --shadow:0 14px 44px rgba(0,0,0,.55); color-scheme:dark}
+:root:not([data-theme="light"]){
+  --bg:#030A14; --surface:#0A1A2E; --sunk:#10243C; --line:rgba(157,177,195,.18); --fg:#EEF5F9; --muted:#9DB1C3;
+  --accent:#00CFFC; --accent-soft:rgba(0,207,252,.13); --accent-fg:#030A14; --cta:#00CFFC; --cta-fg:#030A14;
+  --signal:#FF8A4C; --signal-soft:rgba(255,138,76,.14);
+  --good:#6fd08a; --good-soft:#12301f; --warn:#e3b54d; --warn-soft:#352b10; --bad:#f08a78; --bad-soft:#3a1a16;
+  --shadow:0 18px 50px rgba(0,0,0,.6); color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 56px}
 .wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -156,7 +150,7 @@ form.f,.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .cbtag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;background:#0a3d91;color:#fff;border-radius:4px;padding:2px 6px;white-space:nowrap;align-self:start}
 :root[data-theme="dark"] .cbtag{background:#7aa2ff;color:#0b1220}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cbtag{background:#7aa2ff;color:#0b1220}}
+@media all{:root:not([data-theme="light"]) .cbtag{background:#7aa2ff;color:#0b1220}}
 .lic{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;font-size:13px;margin:0}
 .cbsrc{border:1px dashed var(--accent);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .cbsrc>.full{grid-column:1/-1}
@@ -243,7 +237,7 @@ a.btn{text-decoration:none;display:inline-block}
 .atag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;white-space:nowrap;background:hsl(var(--h) 70% 92%);color:hsl(var(--h) 55% 30%)}
 .atag::before{content:"";width:7px;height:7px;border-radius:50%;background:hsl(var(--h) 60% 45%)}
 :root[data-theme="dark"] .atag{background:hsl(var(--h) 35% 20%);color:hsl(var(--h) 70% 78%)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .atag{background:hsl(var(--h) 35% 20%);color:hsl(var(--h) 70% 78%)}}
+@media all{:root:not([data-theme="light"]) .atag{background:hsl(var(--h) 35% 20%);color:hsl(var(--h) 70% 78%)}}
 .chip .atag{padding:0 6px;background:none}
 .fbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
 .fbar .sel{font-size:13px}
@@ -334,44 +328,132 @@ body.client [data-hx],body.client [data-team]{display:none!important}
 .pstaff .row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.pstaff label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .pstaff input,.pstaff select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit;min-width:0}
 .pmsg{font-size:13px;color:var(--muted);margin:0}.pmsg.err{color:var(--bad)}
+
+/* ===== Hyperweb brand + app shell (round 1 overhaul) ===== */
+body{font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--f-display)}
+h2{font-weight:800;font-size:19px;letter-spacing:-.005em}
+h3{font-weight:700}
+.eyebrow{font:700 11px/1 var(--f-body);letter-spacing:.2em;color:var(--accent)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.app{max-width:1440px;display:grid;grid-template-columns:236px minmax(0,1fr);gap:24px;align-items:start}
+.side{position:sticky;top:12px;display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 24px);overflow-y:auto;padding:4px 2px 12px}
+.side .who{display:flex;flex-direction:column;gap:6px;padding:4px 6px 0}
+.side h1{font:900 23px/1 var(--f-display);text-transform:uppercase;letter-spacing:-.012em;font-stretch:104%;overflow-wrap:anywhere}
+.side .meta{line-height:1.45}
+.tabs{flex-direction:column;gap:2px;border:0;overflow:visible}
+.tabs .navh{margin:12px 10px 4px;font:700 10.5px/1 var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.tabs .navh:first-child{margin-top:0}
+.tabs button{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border:0;border-radius:10px;color:var(--muted);font-weight:500;font-size:14.5px}
+.tabs button:hover{background:var(--sunk);color:var(--fg)}
+.tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--fg);font-weight:600;box-shadow:inset 3px 0 0 var(--accent)}
+.tabs button b{font:600 11px var(--f-body);background:var(--sunk);color:var(--fg);padding:2px 8px}
+.tabs button[aria-selected="true"] b{background:var(--accent);color:var(--accent-fg)}
+.tabs button[data-tab="plan"]::after{content:"";}
+
+.work{display:flex;flex-direction:column;gap:16px;min-width:0}
+.topbar{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.btn{border-radius:999px;padding:7px 15px;font-weight:600;transition:box-shadow .2s,border-color .2s}
+.btn.sm{padding:5px 12px}
+.btn.primary{background:var(--cta);border-color:var(--cta);color:var(--cta-fg)}
+.btn.primary:hover{box-shadow:0 0 24px 1px rgba(0,207,252,.4)}
+.sel,select,input,textarea{border-radius:10px}
+.sect{border-radius:16px;padding:20px;gap:16px}
+.pagehead{display:flex;flex-direction:column;gap:4px;padding:2px 2px 4px}
+.pagehead h2{font:900 clamp(24px,2.6vw,32px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.012em;font-stretch:104%}
+.pagehead p{margin:0;color:var(--muted);max-width:72ch}
+.savebar{position:sticky;bottom:0;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+/* plan */
+.planbadge{display:flex;flex-direction:column;align-items:stretch;text-align:left;margin-top:0;gap:6px;padding:14px;border-radius:14px;background:linear-gradient(160deg,var(--accent-soft),var(--surface) 60%);border:1px solid var(--line);font-size:13px}
+.planbadge .pname{font:800 15px/1.1 var(--f-display);text-transform:uppercase}
+.planbadge .planbar{width:100%}
+.planbadge .btn{align-self:flex-start}
+.planbadge[hidden]{display:none}
+.planpage{display:flex;flex-direction:column;gap:16px}
+.planpage .pdh{display:flex;justify-content:space-between;gap:12px}
+.planpage .pdh h2{font:900 clamp(24px,2.6vw,32px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.012em}
+.planpage .pdh .sub{margin:6px 0 0;color:var(--muted)}
+.planpage .pdb{display:flex;flex-direction:column;gap:16px}
+.planpage .pcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.planpage .pcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.planpage .pcard.rec{border-color:rgba(0,207,252,.5);background:linear-gradient(160deg,var(--accent-soft),var(--surface) 55%)}
+.planpage .pcard .big{font:800 34px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
+.planpage .pcard .big small{font:500 14px var(--f-body);color:var(--muted)}
+.planpage details,.planpage .pstaff{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+/* lead workspace */
+.drawer{background:var(--bg)}
+@media (min-width:900px){.drawer{left:0;width:auto;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}}
+.drawer>*{width:100%;max-width:1280px;margin-inline:auto}
+.drawer .dhead{position:sticky;top:-18px;z-index:2;background:var(--bg);padding:8px 0 12px;border-bottom:1px solid var(--line)}
+.drawer .dhead h2{font:900 clamp(26px,3vw,36px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.012em}
+.lw{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:20px;align-items:start}
+.lwmain,.lwside{display:flex;flex-direction:column;gap:16px;min-width:0}
+.lw section.panel,.lw .pbchoose{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.lw .pbchoose{border-color:rgba(0,207,252,.5);background:linear-gradient(160deg,var(--accent-soft),var(--surface) 55%)}
+.lwside .flow{flex-wrap:wrap}
+@media (max-width:1100px){.lw{grid-template-columns:minmax(0,1fr)}}
+/* mobile: sidebar becomes a scrolling strip */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr);gap:14px}
+  .side{position:static;max-height:none;overflow:visible;padding:0;gap:12px}
+  .tabs{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .tabs .navh{display:none}
+  .tabs button{flex:none}
+  .side .planbadge{display:none}
+}
 </style>
 
-<div class="wrap">
-  <header class="mast">
+<div class="wrap app">
+  <aside class="side" aria-label="Desk navigation">
     <div class="who">
       <span class="eyebrow" id="wsType">Signals Desk</span>
       <h1 id="wsName">Signals Desk</h1>
       <span class="meta" id="wsMeta">Loading the workspace…</span>
-      <div class="planbadge" id="planBadge" hidden></div>
     </div>
-    <div class="ctl">
-      <label class="meta" for="meSel">Working as <select class="sel" id="meSel"><option value="">Pick your name</option></select></label>
-      <label class="meta" for="audSel">Audience <select class="sel" id="audSel"><option value="">All audiences</option></select></label>
-      <button class="btn viewas" type="button" id="viewAs" title="Only Hyperweb editors see this switch">See client view</button>
-      <button class="btn" type="button" id="sweepBtn" title="Claude searches for new buying signals for the chosen audience now">Run a sweep now</button>
-    </div>
-  </header>
-  <div id="banner"></div>
-  <div id="planBanner"></div>
-  <nav class="tabs" role="tablist" aria-label="Desk sections">
-    <button role="tab" type="button" data-tab="today" aria-selected="false">Today <b id="cToday">0</b></button>
-    <button role="tab" type="button" data-tab="inbox" aria-selected="true">Signals <b id="cInbox">0</b></button>
-    <button role="tab" type="button" data-tab="leads" aria-selected="false">Leads <b id="cLeads">0</b></button>
-    <button role="tab" type="button" data-tab="audiences" aria-selected="false">Audiences</button>
-    <button role="tab" type="button" data-tab="market" aria-selected="false">Market watch</button>
-    <button role="tab" type="button" data-tab="tease" aria-selected="false">Client tease</button>
-    <button role="tab" type="button" data-tab="setup" aria-selected="false">Messaging and delivery</button>
-    <button role="tab" type="button" data-tab="runs" aria-selected="false">Runs</button>
-  </nav>
-  <main id="main" class="panel"></main>
+    <nav class="tabs" role="tablist" aria-label="Desk sections">
+      <p class="navh">Work</p>
+      <button role="tab" type="button" data-tab="today" aria-selected="false"><span>Today</span> <b id="cToday">0</b></button>
+      <button role="tab" type="button" data-tab="inbox" aria-selected="true"><span>Signals</span> <b id="cInbox">0</b></button>
+      <button role="tab" type="button" data-tab="leads" aria-selected="false"><span>Leads</span> <b id="cLeads">0</b></button>
+      <p class="navh">Targeting</p>
+      <button role="tab" type="button" data-tab="audiences" aria-selected="false"><span>Audiences</span></button>
+      <button role="tab" type="button" data-tab="market" aria-selected="false"><span>Market watch</span></button>
+      <p class="navh">Account</p>
+      <button role="tab" type="button" data-tab="plan" aria-selected="false"><span>Plan and billing</span></button>
+      <button role="tab" type="button" data-tab="team" aria-selected="false"><span>Team and playbooks</span></button>
+      <button role="tab" type="button" data-tab="setup" aria-selected="false"><span>Messaging</span></button>
+      <button role="tab" type="button" data-tab="delivery" aria-selected="false"><span>Delivery and schedule</span></button>
+      <p class="navh hq">Hyperweb only</p>
+      <button role="tab" type="button" data-tab="tease" aria-selected="false"><span>Client tease</span></button>
+      <button role="tab" type="button" data-tab="runs" aria-selected="false"><span>Runs</span></button>
+    </nav>
+    <div class="planbadge" id="planBadge" hidden></div>
+  </aside>
+  <section class="work">
+    <header class="topbar">
+      <div class="ctl">
+        <label class="meta" for="meSel">Working as <select class="sel" id="meSel"><option value="">Pick your name</option></select></label>
+        <label class="meta" for="audSel">Audience <select class="sel" id="audSel"><option value="">All audiences</option></select></label>
+      </div>
+      <div class="ctl">
+        <button class="btn ghost themebtn" type="button" id="themeBtn">Light mode</button>
+        <button class="btn viewas" type="button" id="viewAs" title="Only Hyperweb editors see this switch">See client view</button>
+        <button class="btn primary" type="button" id="sweepBtn" title="Claude searches for new buying signals for the chosen audience now">Run a sweep now</button>
+      </div>
+    </header>
+    <div id="banner"></div>
+    <div id="planBanner"></div>
+    <main id="main" class="panel"></main>
+  </section>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle"></aside>
 <div class="stage" id="stage" hidden role="dialog" aria-modal="true" aria-label="Client view"></div>
-<dialog class="plandlg" id="planDlg" aria-labelledby="pdTitle"></dialog>
 
 <script>
 const $=id=>document.getElementById(id);
+(function theme(){let t="dark";try{t=localStorage.getItem("sd-theme")||"dark";}catch(e){}const set=v=>{document.documentElement.dataset.theme=v;const b=$("themeBtn");if(b)b.textContent=v==="light"?"Dark mode":"Light mode";};set(t);
+  $("themeBtn").onclick=()=>{const v=document.documentElement.dataset.theme==="light"?"dark":"light";try{localStorage.setItem("sd-theme",v);}catch(e){}set(v);};})();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl=u=>/^https:\/\//i.test(u||"")?u:"";
 const nowIso=()=>new Date().toISOString();
@@ -432,7 +514,7 @@ const LOCK_SVG=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strok
 const KIND={news:"Their news",site:"Their website",industry:"Industry",market:"Market",data:"Data"};
 let moments=[];
 let db=null, canWrite=true, ws={}, auds={}, sigs=[], leads={}, runs=[], reqs=[], tab="inbox", audF="", sigF="New", leadF="open", curAud=null, curLead=null, audDraft=null, sigSort="best", leadSort="accepted", showRmAud=false, audRmAsk=null, loaded={ws:false};
-try{const v=JSON.parse(localStorage.getItem("sd-view")||"{}");if(v.tab)tab=v.tab;if(v.aud!=null)audF=v.aud;}catch(e){}
+try{const v=JSON.parse(localStorage.getItem("sd-view")||"{}");if(v.tab)tab=v.tab;if(!["today","inbox","leads","audiences","market","plan","team","setup","delivery","tease","runs"].includes(tab))tab="inbox";if(v.aud!=null)audF=v.aud;}catch(e){}
 function remember(){try{localStorage.setItem("sd-view",JSON.stringify({tab,aud:audF}))}catch(e){}}
 
 /* scoring */
@@ -451,7 +533,7 @@ function draw(){
   const nNew=sigs.filter(s=>(s.status||"New")==="New"&&s.triage!=="Dismiss"&&inAud(s)).length;
   $("cInbox").textContent=nNew; $("cLeads").textContent=Object.values(leads).filter(l=>!["Won","Lost","Parked"].includes(l.stage)&&inAud(l)).length;
   $("cToday").textContent=dueCount(); drawMe();
-  if(tab==="today")drawToday();else if(tab==="inbox")drawInbox();else if(tab==="leads")drawLeads();else if(tab==="audiences")drawAudiences();else if(tab==="setup")drawSetup();else if(tab==="market")drawMarket();else if(tab==="tease")drawTease();else drawRuns();
+  if(tab==="today")drawToday();else if(tab==="inbox")drawInbox();else if(tab==="leads")drawLeads();else if(tab==="audiences")drawAudiences();else if(tab==="setup"||tab==="delivery")drawSetup();else if(tab==="team")drawTeam();else if(tab==="plan")drawPlanPage();else if(tab==="market")drawMarket();else if(tab==="tease")drawTease();else drawRuns();
 }
 const inAud=x=>!audF||x.audienceId===audF;
 function drawHead(){
@@ -626,29 +708,35 @@ function drawLead(){
   const l=leads[curLead]; if(!l){closeDrawer();return;}
   const dv=l.delivery||{}, sc=qScore(l.prelim,auds[l.audienceId],l.climateAdj), enr=reqs.find(r=>r.kind==="enrich"&&r.leadId===l._id&&["Queued","Running"].includes(r.status));
   const d=$("drawer");
-  d.innerHTML=`<div class="dhead"><div>${multiAud()?audTag(l.audienceId):`<span class="eyebrow">${esc(audName(l.audienceId))}</span>`}<h2 id="dTitle">${esc(l.company)}</h2><span class="dom">${l.domain?`<a href="https://${esc(cleanDomain(l.domain))}" target="_blank" rel="noopener">${esc(cleanDomain(l.domain))}</a> · `:""}${esc([l.city,l.industry,l.size&&("Staff "+l.size)].filter(Boolean).join(" · "))}</span></div><button class="btn" type="button" id="dClose">Close</button></div>
+  d.innerHTML=`<div class="dhead"><div>${multiAud()?audTag(l.audienceId):`<span class="eyebrow">${esc(audName(l.audienceId))}</span>`}<h2 id="dTitle">${esc(l.company)}</h2><span class="dom">${l.domain?`<a href="https://${esc(cleanDomain(l.domain))}" target="_blank" rel="noopener">${esc(cleanDomain(l.domain))}</a> · `:""}${esc([l.city,l.industry,l.size&&("Staff "+l.size)].filter(Boolean).join(" · "))}</span></div><button class="btn" type="button" id="dClose">← Back to leads</button></div>
+  <div class="lw"><div class="lwmain">
   ${l.play?.id?"":pbChooser(l)}
+  ${pbSection(l)}
+  <section class="panel" style="gap:8px"><header class="ctl" style="justify-content:space-between"><h3>Outreach</h3><div class="ctl"><button class="btn sm" type="button" id="lWrite" ${canWrite?"":"disabled"}>${Object.keys(l.scripts||{}).length?"Rewrite with Claude":"Write with Claude"}</button><button class="btn sm primary" type="button" id="lSaveS" ${canWrite?"":"disabled"}>Save edits</button></div></header>
+   <p class="muted" style="margin:0;font-size:13px">Written in ${esc(ws.knowledge?.senderName||"the sender")}'s voice from the messaging pack, using the starters above. These messages feed the playbook steps above. Every email carries the sender ID, mailing address and an opt-out for CASL.</p>
+   ${inQuebec(l)?(quebecPolicy()==="bilingual"?`<p class="lic" style="margin:0"><b>Quebec lead:</b> drafts are written French first, with the English underneath. Have a French reader check them before anything is sent.</p>`:`<p class="err" style="margin:0"><b>Quebec lead.</b> This desk excludes Quebec, so don't send outreach. Change the Quebec setting under Messaging if this client can work in French.</p>`):""}
+   ${compMatch(l)?`<p class="err" style="margin:0"><b>${esc(compMatch(l).name)} is on the competitor list.</b> Don't prospect it.</p>`:""}
+   ${SCRIPT_KEYS.map(([k,lab,max])=>{const v=(l.scripts||{})[k]||"";return `<div class="script"><header><b>${lab}</b><span class="ctl">${max?`<span class="chars ${v.length>max?"over":""}" data-cc="${k}">${v.length}/${max}</span>`:""}<button class="btn sm ghost" type="button" data-copy="${k}">Copy</button></span></header><textarea id="s_${k}" data-sk="${k}" ${k==="emailSubject"||k==="connect"?'style="min-height:56px"':""} ${canWrite?"":"readonly"}>${esc(v)}</textarea></div>`;}).join("")}
+   <span class="toast" id="lST"></span></section>
+  </div><div class="lwside">
+  <section class="panel lwstage" style="gap:10px"><h3>Stage</h3>
   <div class="flow">${STAGES.map(s=>`<span class="${s===l.stage?"on":""}">${s}</span>`).join("")}</div>
   <div class="f"><label>Stage<select id="lStage" ${canWrite?"":"disabled"}>${STAGES.map(s=>`<option ${s===l.stage?"selected":""}>${s}</option>`).join("")}</select></label>
    <label>Fit<input readonly value="${sc!=null?sc+" · "+esc(qTier(l.prelim)):"Not scored"}"></label></div>
-  ${pbSection(l)}
+  </section>
   <section class="panel" style="gap:8px"><h3>Why now ${(l.signals||[]).some(isCB)?'<span class="cbtag">Crunchbase</span>':""}</h3><p class="why" style="margin:0">${esc(l.whyNow)}</p>
    ${(l.signals||[]).map(s=>`<div class="sigline"><span class="stype">${esc(s.type)}</span><span>${esc(s.detail)}</span><small>${esc(dShort(s.date))}${s.source?" · "+(safeUrl(s.url)?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)}</a>`:esc(s.source)):""}</small></div>`).join("")}</section>
   <section class="panel" style="gap:8px"><h3>Who to talk to</h3>
    ${(l.contacts||[]).length?`<div class="contacts">${l.contacts.map(c=>`<div class="person"><span class="av">${esc((c.name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase())}</span><div><b>${esc(c.name)}</b><small>${esc(c.title||"")}</small><small>${[c.email&&(esc(c.email)+" "+emailBadge(c)),safeUrl(c.linkedin)?`<a href="${esc(c.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`:"",c.phone&&esc(c.phone)].filter(Boolean).join(" · ")}</small>${c.source?`<small>${esc(c.source)}</small>`:""}</div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">Start with ${esc(l.firstContact||"the owner or general manager")}. ${l.warmPath?"Warm path: "+esc(l.warmPath):""}</p>`}
    <div class="ctl">${enr?`<span class="pill p-warn">Finding contacts (${esc(enr.status)})</span>`:`<button class="btn sm" type="button" id="lEnrich" ${canWrite?"":"disabled"}>Find contacts</button>`}<span class="toast" id="lEnT"></span></div></section>
   ${(l.teasers||[]).length||l.insight?`<section class="panel" style="gap:8px"><h3>Conversation starters</h3><div class="teasers" style="margin:0">${l.insight?`<div class="tz"><span class="k">Give first</span>${esc(l.insight)}</div>`:""}${(l.teasers||[]).map(t=>`<div class="tz"><span class="k">${esc(KIND[t.kind]||t.kind)}</span>${esc(t.hook)}<small>${t.source?(safeUrl(t.url)?`<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.source)}</a>`:esc(t.source)):""}</small></div>`).join("")}</div></section>`:""}
-  <section class="panel" style="gap:8px"><header class="ctl" style="justify-content:space-between"><h3>Outreach</h3><div class="ctl"><button class="btn sm" type="button" id="lWrite" ${canWrite?"":"disabled"}>${Object.keys(l.scripts||{}).length?"Rewrite with Claude":"Write with Claude"}</button><button class="btn sm primary" type="button" id="lSaveS" ${canWrite?"":"disabled"}>Save edits</button></div></header>
-   <p class="muted" style="margin:0;font-size:13px">Written in ${esc(ws.knowledge?.senderName||"the sender")}'s voice from the messaging pack, using the starters above. These messages feed the playbook steps above. Every email carries the sender ID, mailing address and an opt-out for CASL.</p>
-   ${inQuebec(l)?(quebecPolicy()==="bilingual"?`<p class="lic" style="margin:0"><b>Quebec lead:</b> drafts are written French first, with the English underneath. Have a French reader check them before anything is sent.</p>`:`<p class="err" style="margin:0"><b>Quebec lead.</b> This desk excludes Quebec, so don't send outreach. Change the Quebec setting under Messaging and delivery if this client can work in French.</p>`):""}
-   ${compMatch(l)?`<p class="err" style="margin:0"><b>${esc(compMatch(l).name)} is on the competitor list.</b> Don't prospect it.</p>`:""}
-   ${SCRIPT_KEYS.map(([k,lab,max])=>{const v=(l.scripts||{})[k]||"";return `<div class="script"><header><b>${lab}</b><span class="ctl">${max?`<span class="chars ${v.length>max?"over":""}" data-cc="${k}">${v.length}/${max}</span>`:""}<button class="btn sm ghost" type="button" data-copy="${k}">Copy</button></span></header><textarea id="s_${k}" data-sk="${k}" ${k==="emailSubject"||k==="connect"?'style="min-height:56px"':""} ${canWrite?"":"readonly"}>${esc(v)}</textarea></div>`;}).join("")}
-   <span class="toast" id="lST"></span></section>
   <section class="panel" style="gap:8px"><h3>Delivery</h3>
-   <p class="${dv.status==="Delivered"?"ok":dv.status==="Failed"?"err":"note"}">${dv.status==="Delivered"?`In ${esc(dv.target||"the CRM")} since ${esc(dShort(dv.at))}${dv.contactId?" · contact "+esc(dv.contactId):""}${dv.oppId?" · opportunity "+esc(dv.oppId):""}.`:dv.status==="Failed"?`Delivery failed: ${esc(dv.note||"see the runs tab")}`:dv.status==="Queued"?"Queued for delivery to Go High Level on the next runner pass.":ws.ghlLocationId?"Not delivered yet.":"No CRM is set up for this desk. Add a Go High Level location under Messaging and delivery."}</p>
+   <p class="${dv.status==="Delivered"?"ok":dv.status==="Failed"?"err":"note"}">${dv.status==="Delivered"?`In ${esc(dv.target||"the CRM")} since ${esc(dShort(dv.at))}${dv.contactId?" · contact "+esc(dv.contactId):""}${dv.oppId?" · opportunity "+esc(dv.oppId):""}.`:dv.status==="Failed"?`Delivery failed: ${esc(dv.note||"see the runs tab")}`:dv.status==="Queued"?"Queued for delivery to Go High Level on the next runner pass.":ws.ghlLocationId?"Not delivered yet.":"No CRM is set up for this desk. Add a Go High Level location under Delivery and schedule."}</p>
    ${ws.ghlLocationId&&dv.status!=="Delivered"?`<div class="ctl"><button class="btn sm" type="button" id="lDeliver" ${canWrite?"":"disabled"}>Deliver now</button></div>`:""}</section>
-  <div class="f"><label class="full">Notes<textarea id="lNotes" ${canWrite?"":"readonly"}>${esc(l.notes||"")}</textarea></label></div>
-  <div class="ctl"><button class="btn" type="button" id="lSaveN" ${canWrite?"":"disabled"}>Save notes</button><span class="toast" id="lNT"></span></div>`;
+  <section class="panel" style="gap:8px"><h3>Notes</h3>
+  <div class="f"><label class="full"><span class="sr">Notes</span><textarea id="lNotes" ${canWrite?"":"readonly"}>${esc(l.notes||"")}</textarea></label></div>
+  <div class="ctl"><button class="btn" type="button" id="lSaveN" ${canWrite?"":"disabled"}>Save notes</button><span class="toast" id="lNT"></span></div>
+  </section></div></div>`;
   $("dClose").onclick=closeDrawer;
   const upd=async(patch,el)=>{try{await db.collection("leads").doc(l._id).update({...patch,updatedAt:nowIso()});if(el)el.textContent="Saved";}catch(e){if(el)el.textContent=saveErr(e);}};
   $("lStage").onchange=e=>{const s=e.target.value;upd({stage:s,history:[...(l.history||[]),{s,at:nowIso()}]});};
@@ -946,7 +1034,7 @@ function redrawSetupTeam(){const sec=$("pForm");if(!sec)return;sec.outerHTML=tea
 /* ---------- Working as ---------- */
 function drawMe(){
   const sel=$("meSel"); if(!sel)return; const n=meName(), tm=team();
-  sel.innerHTML=`<option value="">Pick your name</option>${tm.map(t=>`<option ${t.name===n?"selected":""}>${esc(t.name)}</option>`).join("")}${n&&!tm.some(t=>t.name===n)?`<option selected>${esc(n)}</option>`:""}<option value="__add">Not listed, add me in Setup</option>`;
+  sel.innerHTML=`<option value="">Pick your name</option>${tm.map(t=>`<option ${t.name===n?"selected":""}>${esc(t.name)}</option>`).join("")}${n&&!tm.some(t=>t.name===n)?`<option selected>${esc(n)}</option>`:""}<option value="__add">Not listed, add me in Team and playbooks</option>`;
 }
 
 /* ---------- Audiences ---------- */
@@ -1155,10 +1243,33 @@ STAFF RANGE ALREADY SET: ${size||"none"}`;
 }
 
 /* ---------- Messaging and delivery ---------- */
+function drawTeam(){
+  $("main").innerHTML=`<div class="pagehead"><h2>Team and playbooks</h2><p>Add everyone who works this desk, then pick your own name under Working as so every tick is logged against you.</p></div>`+teamSection();
+  wireTeam();
+}
 function drawSetup(){
-  const k=ws.knowledge||{}, m=$("main");
-  m.innerHTML=`<form id="sForm" class="panel">
-  <section class="sect"><header><div><h2>Messaging pack</h2><p>Everything Claude needs to write outreach in this company's voice. Conversation starters and every script on a lead are written from this.</p></div></header>
+  const k=ws.knowledge||{}, m=$("main"), isDel=tab==="delivery";
+  m.innerHTML=`<div class="pagehead"><h2>${isDel?"Delivery and schedule":"Messaging"}</h2><p>${isDel?"Where accepted leads go, when the desk sweeps, and the data budgets behind it.":"How outreach sounds, and who this desk never prospects."}</p></div><form id="sForm" class="panel">
+  ${isDel?`<section class="sect"><header><div><h2>Delivery and schedule</h2><p>Where accepted leads go and when the desk sweeps. Hyperweb sets these up for managed workspaces.</p></div></header>
+   <div class="f">
+    <label>Workspace name<input id="w_name" value="${esc(ws.name)}"></label>
+    <label>Workspace type<select id="w_type">${["Internal","Agency partner","Client"].map(x=>`<option ${x===ws.type?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Status<select id="w_status">${["Pilot","Active","Paused"].map(x=>`<option ${x===ws.status?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Sweep day<select id="w_sweepDay">${["Monday","Tuesday","Wednesday","Thursday","Friday"].map(x=>`<option ${x===(ws.sweepDay||"Monday")?"selected":""}>${x}</option>`).join("")}</select></label>
+    <label>Go High Level location ID <small>leads go into this sub-account</small><input id="w_ghlLocationId" value="${esc(ws.ghlLocationId)}"></label>
+    <label>GHL pipeline ID <small>optional, creates an opportunity</small><input id="w_ghlPipelineId" value="${esc(ws.ghlPipelineId)}"></label>
+    <label>GHL stage ID<input id="w_ghlStageId" value="${esc(ws.ghlStageId)}"></label>
+    <label>Tags on every lead <small>comma separated</small><input id="w_ghlTags" value="${esc((ws.ghlTags||["signals-desk"]).join(", "))}"></label>
+    <label>Weekly digest to <small>emails, one per line</small><textarea id="w_digest" style="min-height:56px">${esc((ws.digestTo||[]).join("\n"))}</textarea></label>
+    <label>Monthly Seamless.AI credit budget<input type="number" id="w_creditBudget" min="0" value="${+ws.creditBudget||0}"></label>
+    <fieldset class="full"><legend>Crunchbase licence</legend>
+     <label><input type="radio" name="w_lic" value="hyperweb" ${(ws.crunchbase?.licence||"hyperweb")==="hyperweb"?"checked":""}> Hyperweb's Crunchbase account (managed)</label>
+     <label><input type="radio" name="w_lic" value="partner" ${ws.crunchbase?.licence==="partner"?"checked":""}> Partner's own Crunchbase connection</label>
+     <p class="lic" style="flex-basis:100%">${esc(LIC[ws.crunchbase?.licence||"hyperweb"])}</p></fieldset>
+    <label>Crunchbase data tokens a month for this desk <small>Hyperweb's account is shared by every managed desk</small><input type="number" id="w_cbBudget" min="0" step="1000" value="${+ws.crunchbase?.tokenBudget||0}"></label>
+    <label>Partner's Crunchbase account <small>who connected it, if partner licence</small><input id="w_cbOwner" value="${esc(ws.crunchbase?.connectedBy||"")}"></label>
+    <fieldset class="full"><legend>On accept</legend><label><input type="checkbox" id="w_enrichOnAccept" ${ws.enrichOnAccept?"checked":""}> Look up contacts by default (spends credits)</label></fieldset>
+   </div></section>`:`<section class="sect"><header><div><h2>Messaging pack</h2><p>Everything Claude needs to write outreach in this company's voice. Conversation starters and every script on a lead are written from this.</p></div></header>
    <div class="f">
     <label>Company name<input id="k_companyName" value="${esc(k.companyName||ws.name)}"></label>
     <label>Website<input id="k_website" value="${esc(k.website)}" placeholder="https://"></label>
@@ -1180,36 +1291,19 @@ function drawSetup(){
     <label>Quebec<select id="k_quebec"><option value="exclude" ${quebecPolicy()==="exclude"?"selected":""}>Exclude Quebec from sweeps (default)</option><option value="bilingual" ${quebecPolicy()==="bilingual"?"selected":""}>Include Quebec, outreach French first</option></select></label>
     <p class="muted" style="margin:0;font-size:13px;align-self:end">Quebec expects commercial messages in French and has its own privacy law. Only include it when this client has someone who reads French and can handle the follow-up. Check the rules with a lawyer before turning it on.</p>
    </div></section>
-  <section class="sect"><header><div><h2>Delivery and schedule</h2><p>Where accepted leads go and when the desk sweeps. Hyperweb sets these up for managed workspaces.</p></div></header>
-   <div class="f">
-    <label>Workspace name<input id="w_name" value="${esc(ws.name)}"></label>
-    <label>Workspace type<select id="w_type">${["Internal","Agency partner","Client"].map(x=>`<option ${x===ws.type?"selected":""}>${x}</option>`).join("")}</select></label>
-    <label>Status<select id="w_status">${["Pilot","Active","Paused"].map(x=>`<option ${x===ws.status?"selected":""}>${x}</option>`).join("")}</select></label>
-    <label>Sweep day<select id="w_sweepDay">${["Monday","Tuesday","Wednesday","Thursday","Friday"].map(x=>`<option ${x===(ws.sweepDay||"Monday")?"selected":""}>${x}</option>`).join("")}</select></label>
-    <label>Go High Level location ID <small>leads go into this sub-account</small><input id="w_ghlLocationId" value="${esc(ws.ghlLocationId)}"></label>
-    <label>GHL pipeline ID <small>optional, creates an opportunity</small><input id="w_ghlPipelineId" value="${esc(ws.ghlPipelineId)}"></label>
-    <label>GHL stage ID<input id="w_ghlStageId" value="${esc(ws.ghlStageId)}"></label>
-    <label>Tags on every lead <small>comma separated</small><input id="w_ghlTags" value="${esc((ws.ghlTags||["signals-desk"]).join(", "))}"></label>
-    <label>Weekly digest to <small>emails, one per line</small><textarea id="w_digest" style="min-height:56px">${esc((ws.digestTo||[]).join("\n"))}</textarea></label>
-    <label>Monthly Seamless.AI credit budget<input type="number" id="w_creditBudget" min="0" value="${+ws.creditBudget||0}"></label>
-    <fieldset class="full"><legend>Crunchbase licence</legend>
-     <label><input type="radio" name="w_lic" value="hyperweb" ${(ws.crunchbase?.licence||"hyperweb")==="hyperweb"?"checked":""}> Hyperweb's Crunchbase account (managed)</label>
-     <label><input type="radio" name="w_lic" value="partner" ${ws.crunchbase?.licence==="partner"?"checked":""}> Partner's own Crunchbase connection</label>
-     <p class="lic" style="flex-basis:100%">${esc(LIC[ws.crunchbase?.licence||"hyperweb"])}</p></fieldset>
-    <label>Crunchbase data tokens a month for this desk <small>Hyperweb's account is shared by every managed desk</small><input type="number" id="w_cbBudget" min="0" step="1000" value="${+ws.crunchbase?.tokenBudget||0}"></label>
-    <label>Partner's Crunchbase account <small>who connected it, if partner licence</small><input id="w_cbOwner" value="${esc(ws.crunchbase?.connectedBy||"")}"></label>
-    <fieldset class="full"><legend>On accept</legend><label><input type="checkbox" id="w_enrichOnAccept" ${ws.enrichOnAccept?"checked":""}> Look up contacts by default (spends credits)</label></fieldset>
-   </div></section>
-  <div class="ctl"><button class="btn primary" type="submit" ${canWrite?"":"disabled"}>Save</button><span class="toast" id="sT"></span></div></form>${teamSection()}`;
-  wireTeam();
+  `}
+  <div class="ctl savebar"><button class="btn primary" type="submit" ${canWrite?"":"disabled"}>Save</button><span class="toast" id="sT"></span></div></form>`;
   $("sForm").onsubmit=async e=>{e.preventDefault();
-    const kn={...(ws.knowledge||{})};["companyName","website","offer","whoWeHelp","different","voice","senderName","senderRole","bookingLink","mailingAddress","optOut","quebec"].forEach(f=>kn[f]=$("k_"+f).value.trim());kn.proof=lines($("k_proof").value);kn.avoid=lines($("k_avoid").value);
-    const rivals=parseRivals($("g_rivals").value);
-    const patch={knowledge:kn,competitors:rivals,name:$("w_name").value.trim(),type:$("w_type").value,status:$("w_status").value,sweepDay:$("w_sweepDay").value,ghlLocationId:$("w_ghlLocationId").value.trim(),ghlPipelineId:$("w_ghlPipelineId").value.trim(),ghlStageId:$("w_ghlStageId").value.trim(),
-      ghlTags:$("w_ghlTags").value.split(",").map(s=>s.trim()).filter(Boolean),digestTo:lines($("w_digest").value),creditBudget:+$("w_creditBudget").value||0,enrichOnAccept:$("w_enrichOnAccept").checked,
-      crunchbase:{...(ws.crunchbase||{}),licence:(document.querySelector("input[name=w_lic]:checked")||{}).value||"hyperweb",tokenBudget:+$("w_cbBudget").value||0,connectedBy:$("w_cbOwner").value.trim()},updatedAt:nowIso()};
+    const has=id=>!!$(id), v=id=>$(id).value.trim();
+    const kn={...(ws.knowledge||{})};["companyName","website","offer","whoWeHelp","different","voice","senderName","senderRole","bookingLink","mailingAddress","optOut","quebec"].forEach(f=>{if(has("k_"+f))kn[f]=v("k_"+f);});
+    if(has("k_proof"))kn.proof=lines($("k_proof").value); if(has("k_avoid"))kn.avoid=lines($("k_avoid").value);
+    const patch={knowledge:kn,updatedAt:nowIso()}; let rivals=null;
+    if(has("g_rivals")){rivals=parseRivals($("g_rivals").value);patch.competitors=rivals;}
+    if(has("w_name"))Object.assign(patch,{name:v("w_name"),type:$("w_type").value,status:$("w_status").value,sweepDay:$("w_sweepDay").value,ghlLocationId:v("w_ghlLocationId"),ghlPipelineId:v("w_ghlPipelineId"),ghlStageId:v("w_ghlStageId"),
+      ghlTags:$("w_ghlTags").value.split(",").map(x=>x.trim()).filter(Boolean),digestTo:lines($("w_digest").value),creditBudget:+$("w_creditBudget").value||0,enrichOnAccept:$("w_enrichOnAccept").checked,
+      crunchbase:{...(ws.crunchbase||{}),licence:(document.querySelector("input[name=w_lic]:checked")||{}).value||"hyperweb",tokenBudget:+$("w_cbBudget").value||0,connectedBy:v("w_cbOwner")}});
     try{if(loaded.wsExists)await db.collection("workspace").doc("profile").update(patch);else await db.collection("workspace").doc("profile").set({...patch,createdAt:nowIso()});
-      const n=await syncGuard(rivals,kn.quebec==="bilingual"?"bilingual":"exclude");
+      const n=rivals?await syncGuard(rivals,kn.quebec==="bilingual"?"bilingual":"exclude"):0;
       $("sT").textContent=n?`Saved. ${n} audience${n===1?"":"s"} updated so sweeps skip these.`:"Saved";}catch(err){$("sT").textContent=saveErr(err);}};
 }
 /* keep every audience's Not a fit list in step with the competitor list and the Quebec rule */
@@ -1532,13 +1626,13 @@ cvObs.observe(document.body,{subtree:true,childList:true,characterData:true,attr
 $("viewAs").onclick=()=>{asClient=!asClient;try{localStorage.setItem("sd-asclient",asClient?"1":"0");}catch(e){}
   document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();if(curLead&&!$("drawer").hidden)drawLead();cvQueue();drawPlan();};
 
-$("meSel").onchange=e=>{const v=e.target.value;if(v==="__add"){tab="setup";remember();draw();return;}try{localStorage.setItem("sd-me",v);}catch(x){}draw();if(curLead&&!$("drawer").hidden)drawLead();};
+$("meSel").onchange=e=>{const v=e.target.value;if(v==="__add"){tab="team";remember();draw();return;}try{localStorage.setItem("sd-me",v);}catch(x){}draw();if(curLead&&!$("drawer").hidden)drawLead();};
 /* ---------- plan, lead balance, top-ups and upgrades ---------- */
 let plan=null, planCat=null, planHist=null, planPend=null, planShowHist=false;
 const PCFG=window.__SHQ||{}, PBASE=`/api/s/${encodeURIComponent(PCFG.space||"")}`;
 const $$money=n=>"$"+Number(n||0).toLocaleString("en-CA",{maximumFractionDigits:2});
 async function papi(m,u,b){const r=await fetch(PBASE+u,{method:m,credentials:"same-origin",headers:b?{"content-type":"application/json"}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.message||"Something went wrong"),{code:j.code});return j;}
-async function loadPlan(){try{const j=await papi("GET","/plan");plan=j.status;planCat=j.catalog;}catch(e){plan=null;}drawPlan();if($("planDlg").open)drawPlanDlg();}
+async function loadPlan(){try{const j=await papi("GET","/plan");plan=j.status;planCat=j.catalog;}catch(e){plan=null;}planLoaded=true;drawPlan();if($("planDlg"))drawPlanDlg(planReason);}
 const pDate=d=>d?new Date(d+"T12:00:00").toLocaleDateString("en-CA",{month:"short",day:"numeric"}):"";
 const pTime=x=>new Date(x).toLocaleString("en-CA",{timeZone:"America/Toronto",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
 function drawPlan(){
@@ -1556,8 +1650,10 @@ function drawPlan(){
   bn.querySelector("[data-pd]")?.addEventListener("click",()=>openPlanDlg());
   bn.querySelector("[data-portal]")?.addEventListener("click",planPortal);
 }
-function openPlanDlg(reason){planPend=null;drawPlanDlg(reason);const d=$("planDlg");if(!d.open)d.showModal();if(planShowHist)loadHist();}
-async function loadHist(){try{planHist=await papi("GET","/plan/history");}catch(e){planHist={ledger:[],purchases:[],err:e.message};}if($("planDlg").open)drawPlanDlg();}
+let planReason=null, planLoaded=false;
+function openPlanDlg(reason){planPend=null;planReason=reason||null;if(curLead)closeDrawer();tab="plan";remember();draw();if(planShowHist)loadHist();window.scrollTo({top:0});}
+function drawPlanPage(){$("main").innerHTML=`<div class="planpage" id="planDlg" aria-labelledby="pdTitle"></div>`;if(!planLoaded){$("planDlg").innerHTML=`<p class="pmsg">Loading your plan…</p>`;return;}drawPlanDlg(planReason);}
+async function loadHist(){try{planHist=await papi("GET","/plan/history");}catch(e){planHist={ledger:[],purchases:[],err:e.message};}if($("planDlg"))drawPlanDlg(planReason);}
 const KIND_TXT={allocation:"Monthly leads added",rollover:"Rolled over",expiry:"Expired",topup:"Top-up",upgrade:"Upgrade",accept:"Accepted",replacement:"Replacement",adjustment:"Adjustment"};
 function histHtml(){
   if(!planHist)return `<p class="pmsg">Loading…</p>`;
@@ -1568,7 +1664,8 @@ function drawPlanDlg(reason){
   const d=$("planDlg"), staff=TEAM&&!isClientView();
   if(!plan){
     const cat=planCat||{plans:[]};
-    d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">Choose a plan</h2><p class="sub">Every plan includes a set number of qualified leads a month. Signals are always free.</p></div><button class="btn sm ghost" type="button" data-x aria-label="Close">Close</button></div>
+    if(!cat.plans.length){d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">Plan and billing</h2><p class="sub">${TEAM&&!isClientView()?"No plan on this desk yet, so leads aren't metered.":"Your plan details aren't available right now. Reload the page, or ask Hyperweb."}</p></div></div><div class="pdb">${staff?staffHtml():""}<p class="pmsg" id="pdMsg"></p></div>`;wirePlanDlg();return;}
+    d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">Choose a plan</h2><p class="sub">Every plan includes a set number of qualified leads a month. Signals are always free.</p></div></div>
     <div class="pdb"><div class="pcards">${cat.plans.map(p=>`<div class="pcard ${p.id==="growth"?"rec":""}"><h3>${esc(p.name)}${p.id==="growth"?'<span class="rtag">Recommended</span>':""}</h3><div class="big">${p.leads} <small>leads a month</small></div><p>${$$money(p.price)} a month, plus a one-time ${$$money(1500)} setup</p>
       ${cat.stripe&&canWrite?`<button class="btn ${p.id==="growth"?"primary":""}" type="button" data-sub="${p.id}">Start ${esc(p.name)}</button>`:""}</div>`).join("")}</div>
     ${cat.stripe?"":`<p class="pmsg">Card payments aren't switched on yet. Hyperweb sets up your plan.</p>`}
@@ -1578,9 +1675,9 @@ function drawPlanDlg(reason){
   const nx=plan.next, blocks=planCat?.topupBlocks||[5,10], tp=plan.topupPrice;
   const spent=plan.monthlyPrice+plan.topupSpendThisCycle, got=plan.monthlyLeads+plan.topupLeadsThisCycle;
   const nudge=nx&&(plan.topupsThisCycle>0||plan.toppedUpLastCycle)?`<p class="pcompare"><b>${plan.topupsThisCycle>0?`So far this month: ${$$money(spent)} for ${got} leads.`:"You topped up last month too."}</b> ${esc(nx.name)} is ${$$money(nx.price)} for ${nx.leads} leads, every month.</p>`:"";
-  const head=reason==="out"||plan.out?`You're out of leads this month`:`Get more leads`;
+  const head=reason==="out"||plan.out?`You're out of leads this month`:`Your plan`;
   const conf=planPend?`<div class="pconfirm"><span>${esc(planPend.label)}</span><span class="row" style="display:flex;gap:8px"><button class="btn primary" type="button" data-go>${planCat?.stripe?"Continue to payment":"Confirm"}</button><button class="btn" type="button" data-back>Back</button></span></div>`:"";
-  d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">${head}</h2><p class="sub">${esc(plan.name)} plan · ${plan.left} of ${plan.monthlyLeads} left · renews ${esc(pDate(plan.renews))}${plan.balance.rollover>0?` · ${plan.balance.rollover} rolled over`:""}${plan.balance.topup>0?` · ${plan.balance.topup} from top-ups`:""}</p></div><button class="btn sm ghost" type="button" data-x aria-label="Close">Close</button></div>
+  d.innerHTML=`<div class="pdh"><div><h2 id="pdTitle">${head}</h2><p class="sub">${esc(plan.name)} plan · ${plan.left} of ${plan.monthlyLeads} left · renews ${esc(pDate(plan.renews))}${plan.balance.rollover>0?` · ${plan.balance.rollover} rolled over`:""}${plan.balance.topup>0?` · ${plan.balance.topup} from top-ups`:""}</p></div></div>
   <div class="pdb">
    ${canWrite?`${conf}<div class="pcards">
     ${nx?`<div class="pcard rec"><h3>Upgrade to ${esc(nx.name)}<span class="rtag">Best value</span></h3><div class="big">${nx.leads} <small>leads a month</small></div>
@@ -1610,7 +1707,7 @@ function staffHtml(){
 }
 function wirePlanDlg(){
   const d=$("planDlg"), msg=t=>{const m=$("pdMsg");if(m){m.textContent=t||"";m.className="pmsg"+(t&&/couldn|n't|error|refused|failed/i.test(t)?" err":"");}};
-  d.querySelector("[data-x]").onclick=()=>{d.close();planShowHist=false;};
+  
   const run=async(fn,okMsg)=>{msg("Working…");try{const j=await fn();if(j.url){location.href=j.url;return;}if(j.status!==undefined){plan=j.status;}msg(j.message||okMsg||"Done.");planPend=null;drawPlan();drawPlanDlg();msg(j.message||okMsg||"Done.");if(planShowHist)loadHist();}catch(e){msg(e.message);}};
   d.querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>run(()=>papi("POST","/plan/subscribe",{plan:b.dataset.sub,setup:$("psSetup")?.value||"full"})));
   d.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const nx=plan.next;planPend={label:`Upgrade to ${nx.name}: pay ${$$money(nx.upgradeCost)} today and get ${nx.extraLeadsNow} more leads now. From ${pDate(plan.renews)} you pay ${$$money(nx.price)} a month.`,go:()=>papi("POST","/plan/upgrade",{to:nx.id}),ok:`You're on ${nx.name}.`};drawPlanDlg();});
@@ -1639,8 +1736,8 @@ drawHead();draw();
   try{const u=await window.claude.use("user");const c=await u?.can?.("data.write");if(c===false)canWrite=false;TEAM=!!(await u?.canEdit?.());}catch(e){}
   if(TEAM){document.querySelectorAll("[data-hx]").forEach(el=>el.removeAttribute("data-hx"));drawHead();draw();}drawPlan();cvQueue();
   getMcp();
-  const redraw=()=>{drawHead();if($("drawer").hidden||!curLead){if(!(tab==="audiences"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#aForm"))&&!(tab==="setup"&&document.activeElement?.closest?.("#sForm,#pForm"))&&!(tab==="tease"&&document.activeElement?.closest?.("#tForm,.trow")))draw();}else{drawLead();}if(!$("stage").hidden&&!document.activeElement?.closest?.("#stage a"))openClientView();};
-  db.collection("workspace").onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==="profile");loaded.wsExists=!!d;ws=d?d.data():{};drawHead();if(tab==="setup"?!document.activeElement?.closest?.("#sForm,#pForm"):tab==="tease"?!document.activeElement?.closest?.("#tForm,.trow"):true)draw();},()=>banner("Couldn't load the workspace. Reload the page to try again.","err"));
+  const redraw=()=>{drawHead();if($("drawer").hidden||!curLead){if(!(tab==="audiences"&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#aForm"))&&!(["setup","delivery","team"].includes(tab)&&document.activeElement?.closest?.("#sForm,#pForm"))&&!(tab==="tease"&&document.activeElement?.closest?.("#tForm,.trow")))draw();}else{drawLead();}if(!$("stage").hidden&&!document.activeElement?.closest?.("#stage a"))openClientView();};
+  db.collection("workspace").onSnapshot(snap=>{const d=snap.docs.find(x=>x.id==="profile");loaded.wsExists=!!d;ws=d?d.data():{};drawHead();if(["setup","delivery","team"].includes(tab)?!document.activeElement?.closest?.("#sForm,#pForm"):tab==="tease"?!document.activeElement?.closest?.("#tForm,.trow"):true)draw();},()=>banner("Couldn't load the workspace. Reload the page to try again.","err"));
   db.collection("audiences").onSnapshot(snap=>{auds={};snap.docs.forEach(s=>auds[s.id]={_id:s.id,...s.data()});redraw();},()=>{});
   db.collection("moments").onSnapshot(snap=>{moments=snap.docs.map(x=>({_id:x.id,...x.data()}));redraw();},()=>{});
   db.collection("signals").onSnapshot(snap=>{sigs=snap.docs.map(s=>({_id:s.id,...s.data()}));redraw();},()=>{});
